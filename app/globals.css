@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand Palette */
+  --color-vermilion: #C0392B;
+  --color-cedar: #2D4A3E;
+  --color-frozen: #F5F2EB;
+  --color-citrine: #E8D44D;
+  --color-midnight: #0D1B2A;
+  --color-infrared: #FF4D6D;
+
+  /* Typography */
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+}
+
+:root {
+  --background: #0D1B2A;
+  --foreground: #F5F2EB;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #0D1B2A;
+  color: #F5F2EB;
+  font-family: "Inter", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.label {
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.transmission-popup {
+  animation: slideUp 0.4s ease-out forwards;
+}
+
+.timed-clue {
+  animation: fadeout 0s 4s forwards;
+}
+
+@keyframes fadeout {
+  to { display: none; opacity: 0; }
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #0D1B2A; }
+::-webkit-scrollbar-thumb { background: #2D4A3E; }
+::-webkit-scrollbar-thumb:hover { background: #C0392B; }
+
+::selection { background: #C0392B; color: #F5F2EB; }
+
+img { max-width: 100%; height: auto; }

@@ -1,0 +1,9 @@
+Audio files required before deployment:
+
+- drone.mp3: Low ambient drone, approximately 40Hz fundamental, with Morse code embedded at 0.5% volume
+  Morse message: HERAI IS NOT A PLACE
+  Use Audacity to compose. Export at 192kbps.
+
+- transmission_00.wav: Wind and static WAV file with DeepSound steganography payload embedded.
+  See /private/SPOILERS.md for full payload text.
+  Store the DeepSound project file in /private/deepsound-project/

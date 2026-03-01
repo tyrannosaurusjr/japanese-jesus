@@ -1,0 +1,9 @@
+Place Aomori landscape photography here before deployment.
+
+Required files:
+- hero.jpg (full-bleed, 2400px wide minimum, Mt. Iwaki / rice paddy landscape)
+- shingo-village.jpg (Shingo Village, rice paddies, mountain background)
+- tomb.jpg (Christ Tomb mound, wooden cross marker)
+- gate-aerial.jpg (aerial photograph for /the-gate ARG page — terrain subtly altered)
+
+Run scripts/embed-steg.sh after placing hero source in /private/steg-source.jpg

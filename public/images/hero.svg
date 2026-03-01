@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#0D1B2A"/>
+  <rect y="600" width="1920" height="480" fill="#2D4A3E" opacity="0.3"/>
+  <!-- Mountain silhouette -->
+  <polygon points="960,200 1400,700 520,700" fill="#1a2e3d" opacity="0.6"/>
+  <polygon points="1200,300 1600,700 800,700" fill="#152535" opacity="0.4"/>
+  <!-- Rice paddy horizontal lines -->
+  <line x1="0" y1="750" x2="1920" y2="750" stroke="#2D4A3E" stroke-width="1" opacity="0.4"/>
+  <line x1="0" y1="800" x2="1920" y2="800" stroke="#2D4A3E" stroke-width="1" opacity="0.3"/>
+  <line x1="0" y1="850" x2="1920" y2="850" stroke="#2D4A3E" stroke-width="1" opacity="0.2"/>
+  <!-- Stars -->
+  <circle cx="200" cy="100" r="1" fill="#F5F2EB" opacity="0.6"/>
+  <circle cx="400" cy="80" r="1.5" fill="#F5F2EB" opacity="0.4"/>
+  <circle cx="800" cy="120" r="1" fill="#F5F2EB" opacity="0.5"/>
+  <circle cx="1200" cy="60" r="1" fill="#F5F2EB" opacity="0.7"/>
+  <circle cx="1600" cy="90" r="2" fill="#F5F2EB" opacity="0.3"/>
+  <circle cx="1800" cy="150" r="1" fill="#F5F2EB" opacity="0.5"/>
+  <circle cx="600" cy="200" r="1" fill="#F5F2EB" opacity="0.4"/>
+  <circle cx="1400" cy="180" r="1.5" fill="#F5F2EB" opacity="0.6"/>
+</svg>

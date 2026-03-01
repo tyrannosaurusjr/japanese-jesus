@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080">
+  <rect width="1920" height="1080" fill="#0a1018"/>
+  <!-- Terrain — subtly wrong. River runs wrong direction. -->
+  <path d="M 0,400 Q 400,300 800,500 Q 1200,700 1600,400 Q 1800,300 1920,350" stroke="#2D4A3E" stroke-width="2" fill="none" opacity="0.4"/>
+  <!-- Fields -->
+  <rect x="100" y="200" width="300" height="200" fill="#1a2e1a" opacity="0.3"/>
+  <rect x="500" y="300" width="200" height="150" fill="#1a2e1a" opacity="0.25"/>
+  <rect x="900" y="150" width="400" height="250" fill="#1a2e1a" opacity="0.3"/>
+  <!-- River — runs wrong direction (should flow east, runs west-southwest here) -->
+  <path d="M 1920,600 Q 1500,500 1000,650 Q 600,780 200,600 Q 100,550 0,580" stroke="#0D1B2A" stroke-width="20" fill="none" opacity="0.8"/>
+  <path d="M 1920,600 Q 1500,500 1000,650 Q 600,780 200,600 Q 100,550 0,580" stroke="#1a2e3d" stroke-width="14" fill="none" opacity="0.6"/>
+  <!-- Pixel cipher hints — brand colors at specific pixel positions -->
+  <!-- (1,1): #C0392B = A -->
+  <rect x="1" y="1" width="1" height="1" fill="#C0392B"/>
+  <!-- (24,1): #0D1B2A = X -->
+  <rect x="24" y="1" width="1" height="1" fill="#0D1B2A"/>
+  <!-- (9,1): #E8D44D = I -->
+  <rect x="9" y="1" width="1" height="1" fill="#E8D44D"/>
+  <!-- (19,1): #FF4D6D = S -->
+  <rect x="19" y="1" width="1" height="1" fill="#FF4D6D"/>
+</svg>

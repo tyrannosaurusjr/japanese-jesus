@@ -1,10 +1,5 @@
 {
   "framework": "nextjs",
-  "functions": {
-    "app/axis/page.tsx": {
-      "runtime": "edge"
-    }
-  },
   "headers": [
     {
       "source": "/the-gate",

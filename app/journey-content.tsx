@@ -38,6 +38,52 @@ export function JourneyContent() {
       </section>
 
       <section className="px-6 md:px-10 pb-20">
+        <div className="max-w-5xl mx-auto static-panel border border-[#C0392B]/50 bg-[#0D1B2A] p-8 md:p-10">
+          <p className="label text-[#E8D44D] mb-4">Priority Stay</p>
+          <h2
+            className="text-3xl md:text-4xl text-[#F5F2EB] mb-4 leading-tight"
+            style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
+          >
+            Stay inside Shingo: Onsenkan (温泉館)
+          </h2>
+          <p
+            className="text-[#F5F2EB]/72 text-base leading-relaxed mb-4"
+            style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+          >
+            This is the strongest on-site stay option in the current journey stack: an onsen in
+            Shingo listed with overnight pricing on the municipal page, roughly a 9-minute drive
+            from the Christ grave area.
+          </p>
+          <p
+            className="text-[#F5F2EB]/55 text-sm leading-relaxed mb-6"
+            style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+          >
+            Booking visibility appears inconsistent across platforms. Some map listings read as
+            day-use only, so use the official village page as source of truth and confirm overnight
+            availability directly before travel.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <a
+              href="https://www.vill.shingo.aomori.jp/sight/onsensyukuhaku/onsenkan/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="label inline-block border border-[#C0392B]/60 text-[#C0392B] px-6 py-3 hover:bg-[#C0392B] hover:text-[#F5F2EB] transition-all duration-300"
+            >
+              Official Onsenkan Page ↗
+            </a>
+            <a
+              href="https://maps.app.goo.gl/Uwh16Yadjo7DYvCr8"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="label inline-block border border-[#2D4A3E] text-[#F5F2EB]/70 px-6 py-3 hover:border-[#E8D44D] hover:text-[#E8D44D] transition-all duration-300"
+            >
+              Google Maps Pin ↗
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section className="px-6 md:px-10 pb-20">
         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-px bg-[#2D4A3E]/20">
           {[
             [
@@ -87,7 +133,7 @@ export function JourneyContent() {
       <section className="px-6 md:px-10 pb-24">
         <div className="max-w-4xl mx-auto">
           <p className="label text-[#F5F2EB]/40 mb-6">Journey Sources</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[#2D4A3E]/20">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-px bg-[#2D4A3E]/20">
             <a
               href="https://www.aomori-airport.co.jp/en"
               target="_blank"
@@ -131,6 +177,34 @@ export function JourneyContent() {
               >
                 Amazing AOMORI gives the official tourism-facing entry point for the Christ Park
                 area and broader visitor context.
+              </p>
+            </a>
+            <a
+              href="https://www.vill.shingo.aomori.jp/sight/onsensyukuhaku/onsenkan/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-[#0D1B2A] border border-[#2D4A3E]/30 p-6 hover:border-[#C0392B]/60 transition-colors duration-300"
+            >
+              <p className="label text-[#E8D44D] mb-2">Stay In Shingo</p>
+              <p
+                className="text-[#F5F2EB]/62 text-sm leading-relaxed"
+                style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+              >
+                Shingo municipal Onsenkan listing with overnight stay details and pricing.
+              </p>
+            </a>
+            <a
+              href="https://maps.app.goo.gl/Uwh16Yadjo7DYvCr8"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-[#0D1B2A] border border-[#2D4A3E]/30 p-6 hover:border-[#C0392B]/60 transition-colors duration-300"
+            >
+              <p className="label text-[#E8D44D] mb-2">Map Pin</p>
+              <p
+                className="text-[#F5F2EB]/62 text-sm leading-relaxed"
+                style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+              >
+                Direct Google Maps location for Onsenkan in Shingo.
               </p>
             </a>
           </div>

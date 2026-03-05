@@ -33,6 +33,35 @@ body {
   font-family: "Inter", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  position: relative;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+body::before {
+  opacity: 0.07;
+  background-image:
+    linear-gradient(rgba(245, 242, 235, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 77, 109, 0.02) 1px, transparent 1px);
+  background-size: 100% 3px, 7px 100%;
+  mix-blend-mode: screen;
+  animation: staticDrift 16s linear infinite;
+}
+
+body::after {
+  opacity: 0.12;
+  background:
+    radial-gradient(circle at 18% 24%, rgba(232, 212, 77, 0.06), transparent 18%),
+    radial-gradient(circle at 72% 32%, rgba(255, 77, 109, 0.05), transparent 22%),
+    radial-gradient(circle at 50% 80%, rgba(45, 74, 62, 0.08), transparent 28%);
+  animation: staticPulse 11s ease-in-out infinite;
 }
 
 h1, h2, h3, h4 {
@@ -54,12 +83,40 @@ h1, h2, h3, h4 {
   to { transform: translateY(0); opacity: 1; }
 }
 
+@keyframes staticDrift {
+  0% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -8px, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+@keyframes staticPulse {
+  0% { opacity: 0.08; }
+  50% { opacity: 0.14; }
+  100% { opacity: 0.08; }
+}
+
 .transmission-popup {
   animation: slideUp 0.4s ease-out forwards;
 }
 
 .timed-clue {
   animation: fadeout 0s 4s forwards;
+}
+
+.static-panel {
+  position: relative;
+  overflow: hidden;
+}
+
+.static-panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(245, 242, 235, 0.06), transparent 16%),
+    linear-gradient(180deg, transparent, rgba(255, 77, 109, 0.025), transparent);
+  mix-blend-mode: screen;
 }
 
 @keyframes fadeout {

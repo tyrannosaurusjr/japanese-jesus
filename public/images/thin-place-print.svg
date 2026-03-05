@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="5000" height="7000" viewBox="0 0 5000 7000" role="img" aria-labelledby="title desc">
+  <title id="title">Thin Place Print: The Shingo Conduit</title>
+  <desc id="desc">Poster artwork for the Thin Place Print product, focused on the Shingo conduit and the threshold myth.</desc>
+
+  <defs>
+    <linearGradient id="nightFade" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#08111A" stop-opacity="0.1" />
+      <stop offset="45%" stop-color="#0D1B2A" stop-opacity="0.28" />
+      <stop offset="100%" stop-color="#08111A" stop-opacity="0.94" />
+    </linearGradient>
+
+    <linearGradient id="panel" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0B1723" />
+      <stop offset="100%" stop-color="#09121B" />
+    </linearGradient>
+
+    <radialGradient id="aurora" cx="52%" cy="24%" r="58%">
+      <stop offset="0%" stop-color="#FF4D6D" stop-opacity="0.12" />
+      <stop offset="25%" stop-color="#46C7C7" stop-opacity="0.13" />
+      <stop offset="48%" stop-color="#E8D44D" stop-opacity="0.08" />
+      <stop offset="100%" stop-color="#0D1B2A" stop-opacity="0" />
+    </radialGradient>
+
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.82" numOctaves="2" stitchTiles="stitch" />
+      <feColorMatrix
+        type="matrix"
+        values="1 0 0 0 0
+                0 1 0 0 0
+                0 0 1 0 0
+                0 0 0 0.05 0" />
+    </filter>
+
+    <pattern id="grid" width="180" height="180" patternUnits="userSpaceOnUse">
+      <path d="M 180 0 L 0 0 0 180" fill="none" stroke="#2D4A3E" stroke-width="1" stroke-opacity="0.16" />
+    </pattern>
+
+    <clipPath id="heroCrop">
+      <rect x="0" y="0" width="5000" height="3650" />
+    </clipPath>
+  </defs>
+
+  <rect width="5000" height="7000" fill="#0D1B2A" />
+
+  <g clip-path="url(#heroCrop)">
+    <image href="shingo-village-photo.jpg" x="0" y="-40" width="5000" height="3740" preserveAspectRatio="xMidYMid slice" />
+    <rect x="0" y="0" width="5000" height="3650" fill="url(#nightFade)" />
+    <rect x="0" y="0" width="5000" height="3650" fill="url(#aurora)" />
+
+    <g transform="translate(2500 1940)">
+      <circle r="920" fill="none" stroke="#F5F2EB" stroke-opacity="0.12" stroke-width="7" />
+      <circle r="745" fill="none" stroke="#2D4A3E" stroke-opacity="0.95" stroke-width="4" stroke-dasharray="12 22" />
+      <circle r="560" fill="none" stroke="#C0392B" stroke-opacity="0.44" stroke-width="10" />
+      <circle r="370" fill="none" stroke="#E8D44D" stroke-opacity="0.28" stroke-width="5" stroke-dasharray="10 24" />
+
+      <path d="M 785 -452 A 900 900 0 1 1 598 -671" fill="none" stroke="#C0392B" stroke-width="24" stroke-linecap="round" />
+      <image href="sigil-handdrawn.png" x="-520" y="-520" width="1040" height="1040" opacity="0.3" />
+
+      <path d="M -980 0 C -580 -220 580 -220 980 0" fill="none" stroke="#46C7C7" stroke-opacity="0.2" stroke-width="8" />
+      <path d="M -980 120 C -520 -60 520 -60 980 120" fill="none" stroke="#FF4D6D" stroke-opacity="0.16" stroke-width="6" />
+      <path d="M -980 -120 C -520 -300 520 -300 980 -120" fill="none" stroke="#E8D44D" stroke-opacity="0.12" stroke-width="5" />
+    </g>
+  </g>
+
+  <rect x="0" y="3380" width="5000" height="3620" fill="url(#panel)" />
+  <rect x="0" y="3380" width="5000" height="3620" fill="url(#grid)" />
+  <rect x="0" y="3380" width="5000" height="3620" filter="url(#grain)" opacity="0.65" />
+
+  <rect x="240" y="240" width="4520" height="6520" fill="none" stroke="#2D4A3E" stroke-width="4" />
+  <rect x="320" y="320" width="4360" height="6360" fill="none" stroke="#C0392B" stroke-width="2" stroke-opacity="0.4" />
+
+  <text x="430" y="560" fill="#E8D44D" font-family="Helvetica, Arial, sans-serif" font-size="66" letter-spacing="22">THIN PLACE PRINT</text>
+  <text x="430" y="700" fill="#F5F2EB" font-family="Georgia, Times New Roman, serif" font-size="208" font-weight="700">The Shingo Conduit</text>
+  <text x="430" y="850" fill="#F5F2EB" fill-opacity="0.64" font-family="Helvetica, Arial, sans-serif" font-size="58" letter-spacing="8">
+    The seam in the world where embodied memory steps back into cosmic intelligence.
+  </text>
+
+  <line x1="430" y1="3880" x2="4570" y2="3880" stroke="#2D4A3E" stroke-width="4" />
+
+  <text x="430" y="4050" fill="#E8D44D" font-family="Helvetica, Arial, sans-serif" font-size="56" letter-spacing="18">THE FOUR EPOCHS</text>
+
+  <text x="430" y="4230" fill="#F5F2EB" font-family="Georgia, Times New Roman, serif" font-size="82" font-weight="700">01  THE WANDERING SPIRIT</text>
+  <text x="430" y="4310" fill="#F5F2EB" fill-opacity="0.56" font-family="Helvetica, Arial, sans-serif" font-size="44" letter-spacing="5">PURE PERCEPTION / NO BODY / NO HISTORY / THE THIN PLACES BEFORE NAMES</text>
+
+  <text x="430" y="4510" fill="#F5F2EB" font-family="Georgia, Times New Roman, serif" font-size="82" font-weight="700">02  INCARNATION AND BURDEN</text>
+  <text x="430" y="4590" fill="#F5F2EB" fill-opacity="0.56" font-family="Helvetica, Arial, sans-serif" font-size="44" letter-spacing="5">FLESH / LIMITATION / EXPECTATION / THE HUMAN STORY TIGHTENS</text>
+
+  <text x="430" y="4790" fill="#F5F2EB" font-family="Georgia, Times New Roman, serif" font-size="82" font-weight="700">03  THE LONG WALK EAST</text>
+  <text x="430" y="4870" fill="#F5F2EB" fill-opacity="0.56" font-family="Helvetica, Arial, sans-serif" font-size="44" letter-spacing="5">CENTRAL ASIA / SIBERIA / COLD THRESHOLDS / SHINGO AS THE SEAM</text>
+
+  <text x="430" y="5070" fill="#F5F2EB" font-family="Georgia, Times New Roman, serif" font-size="82" font-weight="700">04  THE CONDUIT UNSEALS</text>
+  <text x="430" y="5150" fill="#F5F2EB" fill-opacity="0.56" font-family="Helvetica, Arial, sans-serif" font-size="44" letter-spacing="5">MEMORY RETAINED / COSMIC ASCENT / HUMANITY MOVES TOWARD THE SAME DOOR</text>
+
+  <g transform="translate(3260 4190)">
+    <text x="0" y="0" fill="#E8D44D" font-family="Helvetica, Arial, sans-serif" font-size="52" letter-spacing="16">PRIMARY NODE</text>
+    <text x="0" y="140" fill="#F5F2EB" font-family="Georgia, Times New Roman, serif" font-size="118" font-weight="700">SHINGO</text>
+    <text x="0" y="240" fill="#C0392B" font-family="Helvetica, Arial, sans-serif" font-size="78" letter-spacing="9">40.6542 N</text>
+    <text x="0" y="320" fill="#F5F2EB" fill-opacity="0.62" font-family="Helvetica, Arial, sans-serif" font-size="60" letter-spacing="8">141.1389 E</text>
+
+    <path d="M 0 470 C 260 350 560 350 860 470" fill="none" stroke="#C0392B" stroke-opacity="0.52" stroke-width="8" />
+    <path d="M 0 610 C 260 490 560 490 860 610" fill="none" stroke="#46C7C7" stroke-opacity="0.18" stroke-width="6" />
+    <path d="M 0 750 C 260 630 560 630 860 750" fill="none" stroke="#E8D44D" stroke-opacity="0.18" stroke-width="5" />
+
+    <circle cx="0" cy="470" r="11" fill="#E8D44D" />
+    <circle cx="860" cy="470" r="11" fill="#E8D44D" />
+    <circle cx="0" cy="610" r="11" fill="#E8D44D" />
+    <circle cx="860" cy="610" r="11" fill="#E8D44D" />
+    <circle cx="0" cy="750" r="11" fill="#E8D44D" />
+    <circle cx="860" cy="750" r="11" fill="#E8D44D" />
+  </g>
+
+  <line x1="430" y1="5500" x2="4570" y2="5500" stroke="#2D4A3E" stroke-width="3" />
+
+  <text x="430" y="5730" fill="#C0392B" font-family="Georgia, Times New Roman, serif" font-size="108" font-weight="700">NOT SALVATION. NOT PROPHECY. BUT ENCOUNTER.</text>
+  <text x="430" y="5870" fill="#F5F2EB" fill-opacity="0.62" font-family="Helvetica, Arial, sans-serif" font-size="52" letter-spacing="6">
+    WHERE THE WORLD THINS, THE WANDERER REMAINS. THE CONDUIT SLEEPS UNTIL PERCEPTION CATCHES UP.
+  </text>
+
+  <image href="sigil-handdrawn.png" x="3680" y="5670" width="620" height="620" opacity="0.18" />
+
+  <line x1="430" y1="6240" x2="4570" y2="6240" stroke="#2D4A3E" stroke-width="3" />
+  <text x="430" y="6440" fill="#E8D44D" font-family="Helvetica, Arial, sans-serif" font-size="44" letter-spacing="16">JAPANESE JESUS</text>
+  <text x="4570" y="6440" text-anchor="end" fill="#F5F2EB" fill-opacity="0.4" font-family="Helvetica, Arial, sans-serif" font-size="44" letter-spacing="12">50 X 70 CM / MATTE POSTER</text>
+</svg>

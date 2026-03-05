@@ -4,12 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "export:printful-poster": "node scripts/export-printful-poster.mjs",
+    "check:printful-poster": "node scripts/check-printful-poster.mjs",
+    "create:printful-merch": "node scripts/create-printful-merch.mjs",
+    "find:printful-variants": "node scripts/find-printful-variants.mjs"
   },
   "dependencies": {
-    "@next/font": "^14.2.15",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"

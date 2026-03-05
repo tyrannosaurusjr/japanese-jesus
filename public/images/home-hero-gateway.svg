@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1100" width="1600" height="1100" role="img" aria-label="Gateway monument in an open field beneath a cosmic sky with signal traces">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#06080d" />
+      <stop offset="52%" stop-color="#151a22" />
+      <stop offset="100%" stop-color="#c8c2b6" />
+    </linearGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d7d0c5" />
+      <stop offset="100%" stop-color="#f2ede4" />
+    </linearGradient>
+    <linearGradient id="monolith" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6c6760" />
+      <stop offset="55%" stop-color="#4c4741" />
+      <stop offset="100%" stop-color="#2a2724" />
+    </linearGradient>
+    <linearGradient id="signalA" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ff4d6d" />
+      <stop offset="100%" stop-color="#e8d44d" />
+    </linearGradient>
+    <linearGradient id="signalB" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#4fd8ff" />
+      <stop offset="100%" stop-color="#8fffb6" />
+    </linearGradient>
+    <radialGradient id="haloGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff6b0" stop-opacity="0.95" />
+      <stop offset="35%" stop-color="#fff6b0" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#fff6b0" stop-opacity="0" />
+    </radialGradient>
+    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="12" />
+    </filter>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" />
+      <feColorMatrix type="saturate" values="0" />
+      <feComponentTransfer>
+        <feFuncA type="table" tableValues="0 0 0 0.025 0.05" />
+      </feComponentTransfer>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="1100" fill="url(#sky)" />
+
+  <g opacity="0.8">
+    <path d="M0 430 C 190 340, 360 350, 520 430 S 840 560, 1020 470 S 1320 330, 1600 430" fill="#11161b" />
+    <path d="M0 470 C 220 390, 450 410, 650 510 S 1080 610, 1320 500 S 1490 430, 1600 470" fill="#1a2229" opacity="0.85" />
+  </g>
+
+  <g opacity="0.92">
+    <path d="M0 640 L 1600 640 L 1600 1100 L 0 1100 Z" fill="url(#ground)" />
+    <path d="M0 680 C 230 635, 470 660, 690 705 S 1120 760, 1600 690 L 1600 1100 L 0 1100 Z" fill="#efe9df" />
+  </g>
+
+  <g opacity="0.3" stroke="#1b2026" stroke-width="3" fill="none">
+    <path d="M80 770 L 680 700 L 760 1100" />
+    <path d="M1520 790 L 915 705 L 850 1100" />
+    <path d="M610 720 L 720 1100" />
+    <path d="M990 710 L 900 1100" />
+  </g>
+
+  <g opacity="0.9">
+    <path d="M820 205 C 865 160, 945 162, 985 218 C 1024 274, 1015 349, 957 386 C 902 423, 835 400, 810 343 C 786 290, 791 238, 820 205 Z" fill="none" stroke="#0d0f12" stroke-width="22" stroke-linecap="round" />
+    <circle cx="900" cy="275" r="115" fill="url(#haloGlow)" filter="url(#softGlow)" />
+    <path d="M826 191 C 872 148, 943 150, 976 201" fill="none" stroke="#111318" stroke-width="16" stroke-linecap="round" />
+    <path d="M885 242 L 940 284" fill="none" stroke="#0d0f12" stroke-width="18" stroke-linecap="round" />
+    <path d="M898 286 L 898 430" fill="none" stroke="#0d0f12" stroke-width="18" stroke-linecap="round" />
+  </g>
+
+  <g opacity="0.4">
+    <path d="M782 168 L 740 135" stroke="url(#signalB)" stroke-width="4" />
+    <path d="M1025 220 L 1070 195" stroke="url(#signalA)" stroke-width="4" />
+    <path d="M750 260 L 700 258" stroke="url(#signalB)" stroke-width="4" />
+    <path d="M1022 304 L 1080 330" stroke="url(#signalA)" stroke-width="4" />
+    <path d="M920 138 L 930 88" stroke="url(#signalA)" stroke-width="4" />
+    <path d="M862 404 L 842 445" stroke="url(#signalB)" stroke-width="4" />
+  </g>
+
+  <g opacity="0.72">
+    <path d="M310 520 L 356 660 L 304 668 L 262 520 Z" fill="url(#monolith)" />
+    <path d="M400 545 L 438 655 L 392 661 L 356 548 Z" fill="url(#monolith)" />
+    <path d="M485 565 L 518 650 L 478 654 L 448 568 Z" fill="url(#monolith)" />
+    <path d="M565 580 L 591 645 L 558 648 L 535 583 Z" fill="url(#monolith)" />
+  </g>
+
+  <g transform="translate(520 405)">
+    <path d="M110 310 L 265 0 L 470 0 L 625 310 L 520 310 L 416 103 L 319 103 L 214 310 Z" fill="url(#monolith)" stroke="#1f1d1a" stroke-width="8" />
+    <path d="M253 55 L 365 55 L 335 310 L 205 310 Z" fill="#655f58" opacity="0.4" />
+    <path d="M415 55 L 470 0 L 625 310 L 520 310 Z" fill="#3a3530" opacity="0.5" />
+
+    <path d="M316 102 L 356 102 L 320 310 L 273 310 Z" fill="#05070a" opacity="0.7" />
+    <path d="M359 102 L 404 102 L 409 310 L 314 310 Z" fill="#f0ece3" opacity="0.95" />
+
+    <path d="M260 310 C 292 255, 318 188, 333 103" fill="none" stroke="url(#signalA)" stroke-width="6" stroke-linecap="round" />
+    <path d="M392 310 C 392 255, 391 188, 382 103" fill="none" stroke="url(#signalB)" stroke-width="6" stroke-linecap="round" />
+    <path d="M345 310 C 340 240, 341 171, 347 103" fill="none" stroke="#ffe9a9" stroke-width="3" stroke-linecap="round" opacity="0.75" />
+  </g>
+
+  <g opacity="0.58" fill="none">
+    <path d="M720 715 C 760 736, 820 765, 872 805 C 916 840, 962 904, 1015 1028" stroke="url(#signalA)" stroke-width="6" stroke-linecap="round" />
+    <path d="M785 710 C 820 742, 860 782, 904 834 C 952 892, 998 954, 1068 1090" stroke="url(#signalB)" stroke-width="6" stroke-linecap="round" />
+    <path d="M858 706 C 904 740, 959 796, 1030 910 C 1060 960, 1100 1030, 1130 1100" stroke="#f6efc0" stroke-width="3" stroke-linecap="round" />
+  </g>
+
+  <g opacity="0.18">
+    <ellipse cx="280" cy="320" rx="220" ry="95" fill="#09111a" />
+    <ellipse cx="1330" cy="370" rx="250" ry="105" fill="#10151d" />
+    <path d="M118 280 C 190 180, 310 150, 420 182" stroke="url(#signalA)" stroke-width="10" fill="none" />
+    <path d="M1160 450 C 1260 320, 1390 285, 1530 318" stroke="url(#signalB)" stroke-width="10" fill="none" />
+  </g>
+
+  <rect width="1600" height="1100" fill="#ffffff" filter="url(#grain)" opacity="0.35" />
+</svg>

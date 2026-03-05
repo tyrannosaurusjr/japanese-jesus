@@ -2,12 +2,20 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { TransmissionPopup } from "@/components/TransmissionPopup";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://japanesejesus.com";
+
 export const metadata: Metadata = {
-  title: "Japanese Jesus — Shingo Village, Aomori",
-  description: "He did not die here. Shingo Village, Aomori. The other end of the story.",
+  metadataBase: new URL(siteUrl),
+  title: "Japanese Jesus — The Shingo Conduit",
+  description: "Shingo is the seam. Japanese Jesus is the one who crossed it first.",
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
-    title: "Japanese Jesus — Shingo Village, Aomori",
-    description: "He did not die here. Shingo Village, Aomori. The other end of the story.",
+    title: "Japanese Jesus — The Shingo Conduit",
+    description: "Shingo is the seam. Japanese Jesus is the one who crossed it first.",
+    url: siteUrl,
+    siteName: "Japanese Jesus",
     type: "website",
   },
 };
@@ -23,14 +31,6 @@ export default function RootLayout({
  周波数: 7.83 Hz — すべての門は開いている
 
       */}
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@900&family=Inter:wght@300;400;500;600&display=swap"
-          rel="stylesheet"
-        />
-      </head>
       <body className="antialiased">
         {children}
         <TransmissionPopup />

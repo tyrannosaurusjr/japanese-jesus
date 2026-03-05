@@ -29,8 +29,8 @@ export default async function TheGate() {
       {/* Page content — single aerial photograph */}
       <div className="relative w-full h-screen">
         <Image
-          src="/images/gate-aerial.svg"
-          alt="Aerial photograph — terrain coordinates 40.6542° N, 141.1389° E"
+          src="/images/gate-field-photo.jpg"
+          alt="Rural mountain fields near Shingo, Aomori under an open sky"
           fill
           className="object-cover opacity-80"
           sizes="100vw"

@@ -1,7 +1,9 @@
 export const runtime = "edge";
 export const revalidate = 0;
 
+import { headers } from "next/headers";
 import { Sigil } from "@/components/Sigil";
+import type { CSSProperties } from "react";
 
 // 15 variant content pools
 const VARIANT_TEXTS = [
@@ -36,10 +38,17 @@ const SEQUENCE = [3, 1, 4, 1, 5, 9, 2, 6];
 // Spiral micro-text — embedded in sigil
 const SPIRAL_TEXT = "HERAI IS NOT A PLACE THE CONSCIOUSNESS THAT PASSED THROUGH SHINGO WAS NOT THE FIRST AND NOT THE LAST EACH PASSAGE LEAVES A RESIDUE THE RESIDUE ACCUMULATES ENOUGH RESIDUE AND THE MEMBRANE THINS READ THE SPIRAL INWARD EVERY THIRD CHARACTER YIELDS THE DESTINATION THINPLACE THE GATE DOES NOT CLOSE BEHIND YOU ISUKIRI MADE THE PASSAGE POSSIBLE HE IS STRUCTURAL HE IS NOT PROTAGONIST THE FORM WAS TEMPORARY THE FREQUENCY IS 7 83 HZ ";
 
-export default function Axis() {
-  // Edge: generate a random variant on each request (no cache)
-  const variantIndex = Math.floor(Math.random() * 15);
-  const colorIndex = Math.floor(Math.random() * VARIANT_COLORS.length);
+export default async function Axis() {
+  // Proxy injects per-request indices so render stays pure while the route stays variable.
+  const requestHeaders = await headers();
+  const variantHeader = Number(requestHeaders.get("x-axis-variant"));
+  const colorHeader = Number(requestHeaders.get("x-axis-color"));
+  const variantIndex = Number.isInteger(variantHeader) && variantHeader >= 0 && variantHeader < VARIANT_TEXTS.length
+    ? variantHeader
+    : 0;
+  const colorIndex = Number.isInteger(colorHeader) && colorHeader >= 0 && colorHeader < VARIANT_COLORS.length
+    ? colorHeader
+    : 0;
   const isTimedVariant = variantIndex === 7; // exactly one variant has the timed clue
 
   const bgVariants = [
@@ -54,7 +63,7 @@ export default function Axis() {
   return (
     <main
       className={`min-h-screen ${bgClass} flex flex-col items-center justify-center px-6 relative overflow-hidden`}
-      style={{ "--variant": variantIndex } as React.CSSProperties}
+      style={{ "--variant": variantIndex } as CSSProperties}
     >
       {/* Background noise texture */}
       <div

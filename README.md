@@ -1,36 +1,124 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Japanese Jesus
 
-## Getting Started
+Marketing site and ARG for the legend of Jesus traveling to Shingo Village, Aomori after the crucifixion.
 
-First, run the development server:
+The site is built as a Next.js App Router project. On the surface it is an editorial experience with travel and product pages. Underneath, it includes a noindex puzzle path routed through hidden pages.
+
+## Stack
+
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS v4
+- ESLint
+- Vercel deployment target
+
+## Scripts
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run lint
+npm run export:printful-poster
+npm run check:printful-poster
+npm run build
+npm run start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Local development runs at [http://localhost:3000](http://localhost:3000).
+Production builds use Webpack mode (`next build --webpack`) for stability.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `app/` App Router pages, layout, globals, and API routes
+- `components/` Shared UI components such as navigation, sigil rendering, audio controls, and signup forms
+- `public/` Static assets served by Next.js
+- `scripts/` Utility scripts used during asset preparation
+- `proxy.ts` Request-time header and cache handling for ARG routes
 
-## Learn More
+## Routes
 
-To learn more about Next.js, take a look at the following resources:
+Public routes:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `/`
+- `/canon`
+- `/conduit`
+- `/journey`
+- `/relics`
+- `/signal`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Legacy redirects (permanent):
 
-## Deploy on Vercel
+- `/the-legend` → `/canon`
+- `/shingo-today` → `/conduit`
+- `/get-there` → `/journey`
+- `/objects` → `/relics`
+- `/walk` → `/journey`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Hidden routes (served with `noindex` and disabled caching):
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `/the-gate`
+- `/axis`
+- `/thin-place`
+
+## Notable Implementation Details
+
+- `app/api/transmissions/route.ts` accepts email signups and forwards them to Resend if `RESEND_API_KEY` and `RESEND_AUDIENCE_ID` are set.
+- `proxy.ts` injects per-request headers for `/axis` so the page can vary on each request without using impure render-time randomness.
+- The shared `Sigil` component renders the broken-circle symbol used throughout the site and supports the spiral-text ARG variant.
+
+## Environment
+
+Optional environment variables for transmission signup:
+
+- `RESEND_API_KEY`
+- `RESEND_AUDIENCE_ID`
+
+Without these, the signup flow still returns success to avoid breaking the front-end UX, but no contact is stored.
+
+Optional environment variables for direct product links on `/objects`:
+
+- `NEXT_PUBLIC_PRINTFUL_CARRIER_CAP_URL`
+- `NEXT_PUBLIC_PRINTFUL_GATE_TEE_URL`
+- `NEXT_PUBLIC_PRINTFUL_HERAI_HOODIE_URL`
+- `NEXT_PUBLIC_PRINTFUL_THIN_PLACE_PRINT_URL`
+- `NEXT_PUBLIC_PRINTFUL_FREQUENCY_PATCH_URL`
+
+When these are set, the corresponding object card links out directly to the configured Printful product page. If omitted, the UI shows that the Printful link is still pending.
+
+Optional environment variables for API-based Printful catalog creation:
+
+- `PRINTFUL_API_TOKEN`
+- `PRINTFUL_VARIANT_ID_CARRIER_CAP`
+- `PRINTFUL_FILE_URL_CARRIER_CAP`
+- `PRINTFUL_VARIANT_ID_GATE_TEE`
+- `PRINTFUL_FILE_URL_GATE_TEE`
+- `PRINTFUL_VARIANT_ID_HERAI_HOODIE`
+- `PRINTFUL_FILE_URL_HERAI_HOODIE`
+- `PRINTFUL_VARIANT_ID_THIN_PLACE_PRINT`
+- `PRINTFUL_FILE_URL_THIN_PLACE_PRINT`
+- `PRINTFUL_PRICE_USD_THIN_PLACE_PRINT`
+- `PRINTFUL_POSTER_ASSET_PATH`
+
+These are used by `POST /api/printful/catalog` with a JSON body like `{ "id": "carrier-cap" }` to create configured Printful products for the ready catalog items.
+
+Poster-specific route notes for `POST /api/printful/japanese-jesus-poster`:
+
+- `PRINTFUL_VARIANT_ID_THIN_PLACE_PRINT` must be the real 50×70 cm poster variant, not the sample `10760` doc variant.
+- `PRINTFUL_PRICE_USD_THIN_PLACE_PRINT` overrides the poster retail price in USD; otherwise the route uses the catalog price.
+- `PRINTFUL_POSTER_SOURCE_PATH` is the raw local art used to generate the Printful-ready export.
+- `PRINTFUL_POSTER_ASSET_PATH` is the generated local PNG used by the poster route; it must be 5:7 and at least `2953x4134` to meet the 50×70 cm target at 150 DPI.
+- `PRINTFUL_POSTER_PROOF_PATH` is a smaller preview image generated from the same crop so you can inspect composition quickly.
+- Copy [.env.local.example](/Users/mkultraman/Desktop/Japanese%20Jesus/.env.local.example) to `.env.local`, then run `npm run export:printful-poster` to generate both the full export and proof image, and `npm run check:printful-poster` before calling the poster API route.
+
+## Assets
+
+Several committed visuals are placeholder SVGs. The intended production experience also references audio and image assets that are not currently present in `public/`.
+
+The detailed status list is in [docs/project-audit.md](docs/project-audit.md).
+
+## Repository Notes
+
+- Main working branch in this repo: `claude/build-japanese-jesus-site-MIIzP`
+- Production deployment is intended for Vercel
+- Root-level untracked media files currently exist in the working tree; review them before committing

@@ -45,10 +45,16 @@ export function Sigil({ variant = "vermilion", size = 64, className = "", withSp
             <path id={`${id}-spiral-4`} d="M 100,100 m -30,0 a 30,30 0 1,1 60,0 a 30,30 0 1,1 -60,0" />
           </>
         )}
-        <filter id={`${id}-roughen`}>
-          <feTurbulence type="turbulence" baseFrequency="0.04" numOctaves="4" result="noise" seed="2" />
-          <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" xChannelSelector="R" yChannelSelector="G" />
-        </filter>
+        <mask id={`${id}-sigil-mask`} maskUnits="userSpaceOnUse">
+          <image
+            href="/images/sigil-handdrawn.png"
+            x="18"
+            y="0"
+            width="164"
+            height="200"
+            preserveAspectRatio="xMidYMid meet"
+          />
+        </mask>
       </defs>
 
       {/* Spiral micro-text (only if withSpiral) */}
@@ -69,42 +75,17 @@ export function Sigil({ variant = "vermilion", size = 64, className = "", withSp
         </g>
       )}
 
-      {/* Broken circle with deliberate gap at top-right */}
-      <g filter={`url(#${id}-roughen)`}>
-        {/* Main arc — broken circle, gap from ~30deg to ~70deg */}
-        <path
-          d="M 155,47 A 65,65 0 1,1 170,75"
-          fill="none"
-          stroke={stroke}
-          strokeWidth="3.5"
-          strokeLinecap="round"
-        />
-
-        {/* First slash — steeper, longer, off-center left */}
-        <line
-          x1="68"
-          y1="58"
-          x2="122"
-          y2="148"
-          stroke={stroke}
-          strokeWidth="3.5"
-          strokeLinecap="round"
-        />
-
-        {/* Second slash — shallower, shorter, tilted right */}
-        <line
-          x1="88"
-          y1="52"
-          x2="132"
-          y2="128"
-          stroke={stroke}
-          strokeWidth="3.5"
-          strokeLinecap="round"
-        />
-      </g>
+      <rect
+        x="18"
+        y="0"
+        width="164"
+        height="200"
+        fill={stroke}
+        mask={`url(#${id}-sigil-mask)`}
+      />
     </svg>
   );
 }
 
 // Inline SVG string for embedding in HTML comments / meta
-export const SIGIL_PATH = `M 155,47 A 65,65 0 1,1 170,75`;
+export const SIGIL_PATH = "";

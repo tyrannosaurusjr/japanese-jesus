@@ -1,6 +1,7 @@
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { Sigil } from "@/components/Sigil";
+import { PosterCheckout } from "@/components/PosterCheckout";
 import { OBJECTS } from "@/lib/objects";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -74,7 +75,9 @@ export default function RelicsPage() {
 
               <p className="label text-[#F5F2EB]/30 mb-6">{obj.material}</p>
 
-              {obj.price && obj.shopUrl ? (
+              {obj.id === "thin-place-print" ? (
+                <PosterCheckout />
+              ) : obj.price && obj.shopUrl ? (
                 <Link
                   href={obj.shopUrl}
                   target="_blank"

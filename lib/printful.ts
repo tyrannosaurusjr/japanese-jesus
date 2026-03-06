@@ -100,3 +100,33 @@ export async function createPrintfulFile(body: unknown) {
 
   return response.result;
 }
+
+export interface PrintfulOrderRecipient {
+  name: string;
+  email?: string;
+  address1: string;
+  address2?: string;
+  city: string;
+  state_code?: string;
+  country_code: string;
+  zip: string;
+}
+
+export interface PrintfulOrderResult {
+  id: number;
+  external_id: string | null;
+  status: string;
+}
+
+export async function createPrintfulOrder(body: {
+  recipient: PrintfulOrderRecipient;
+  items: Array<{ sync_variant_id: string; quantity: number }>;
+  confirm?: boolean;
+}) {
+  const response = await printfulRequest<PrintfulOrderResult>("/orders", {
+    method: "POST",
+    body: JSON.stringify({ confirm: true, ...body }),
+  });
+
+  return response.result;
+}

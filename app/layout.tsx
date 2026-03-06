@@ -8,13 +8,13 @@ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://japanesejesus.com";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: "Japanese Jesus — The Shingo Conduit",
-  description: "Shingo is the seam. Japanese Jesus is the one who crossed it first.",
+  description: "The legend holds that Jesus survived the crucifixion and died in a Japanese village called Shingo. The tomb still exists. Read the canon, then go north.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
     title: "Japanese Jesus — The Shingo Conduit",
-    description: "Shingo is the seam. Japanese Jesus is the one who crossed it first.",
+    description: "The legend holds that Jesus survived the crucifixion and died in a Japanese village called Shingo. The tomb still exists. Read the canon, then go north.",
     url: siteUrl,
     siteName: "Japanese Jesus",
     type: "website",

@@ -50,9 +50,9 @@ export default function Home() {
                 className="text-base md:text-lg text-[#F5F2EB]/72 mb-8 max-w-3xl"
                 style={{ fontFamily: "'Inter', system-ui, sans-serif", letterSpacing: "0.04em" }}
               >
-                Shingo is the seam. Japanese Jesus is the first consciousness in the canon to cross
-                into the northern conduit. Read the myth, then go north and see the frontier node
-                for yourself.
+                Shingo is the seam. The legend holds that Jesus survived the crucifixion, walked
+                east through Siberia, and died in this northern Japanese village at 106. The tomb
+                is still there. Read the canon, then go north and find it.
               </p>
 
               <div className="flex flex-wrap gap-4">
@@ -346,8 +346,8 @@ export default function Home() {
             className="text-[#F5F2EB]/55 mb-8 text-base"
             style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
           >
-            The canon should create intrigue. The Conduit page should make the place feel real. The
-            Journey page should make it easy to actually go.
+            The canon opens the question. Shingo makes it a place worth finding. The north is
+            closer than it looks.
           </p>
           <Link
             href="/journey"

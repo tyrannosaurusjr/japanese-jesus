@@ -30,9 +30,8 @@ export default function SignalPage() {
           className="text-[#F5F2EB]/65 text-base leading-relaxed"
           style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
         >
-          Signals do not arrive on schedule. This is the main dispatch list for Japanese Jesus: new
-          canon entries, new conduit field notes, occasional journey updates, and relic drops when
-          the system opens again.
+          Signals do not arrive on schedule. When the conduit stirs — new canon, field notes from
+          Shingo, journey updates, relic drops — the transmission goes here first.
         </p>
       </section>
 

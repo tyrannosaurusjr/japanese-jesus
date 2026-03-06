@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 
 type SigilVariant = "vermilion" | "citrine" | "white" | "dark";
 
@@ -12,78 +13,74 @@ interface SigilProps {
   spiralText?: string;
 }
 
-const VARIANT_COLORS: Record<SigilVariant, { stroke: string; fill: string }> = {
-  vermilion: { stroke: "#C0392B", fill: "none" },
-  citrine:   { stroke: "#E8D44D", fill: "none" },
-  white:     { stroke: "#F5F2EB", fill: "none" },
-  dark:      { stroke: "#0D1B2A", fill: "none" },
+const VARIANT_COLORS: Record<SigilVariant, string> = {
+  vermilion: "#C0392B",
+  citrine:   "#E8D44D",
+  white:     "#F5F2EB",
+  dark:      "#0D1B2A",
+};
+
+// CSS filter values to tint the white-on-transparent PNG to each brand color
+// Generated via: https://codepen.io/sosuke/pen/Pjoqqp
+const VARIANT_FILTERS: Record<SigilVariant, string> = {
+  vermilion: "brightness(0) saturate(100%) invert(22%) sepia(72%) saturate(1200%) hue-rotate(340deg) brightness(90%)",
+  citrine:   "brightness(0) saturate(100%) invert(85%) sepia(40%) saturate(800%) hue-rotate(10deg) brightness(105%)",
+  white:     "brightness(0) invert(1)",
+  dark:      "brightness(0)",
 };
 
 export function Sigil({ variant = "vermilion", size = 64, className = "", withSpiral = false, spiralText = "" }: SigilProps) {
-  const { stroke } = VARIANT_COLORS[variant];
+  const stroke = VARIANT_COLORS[variant];
+  const filter = VARIANT_FILTERS[variant];
   const id = `sigil-${variant}-${size}`;
 
-  // Build spiral micro-text path
   const spiralTextContent = spiralText || "HERAI IS NOT A PLACE THE CONSCIOUSNESS THAT PASSED THROUGH SHINGO WAS NOT THE FIRST AND NOT THE LAST EACH PASSAGE LEAVES A RESIDUE THE RESIDUE ACCUMULATES ENOUGH RESIDUE AND THE MEMBRANE THINS READ THE SPIRAL INWARD EVERY THIRD CHARACTER YIELDS THE DESTINATION THINPLACE THE GATE DOES NOT CLOSE BEHIND YOU ISUKIRI MADE THE PASSAGE POSSIBLE HE IS STRUCTURAL HE IS NOT PROTAGONIST THE FORM WAS TEMPORARY THE FREQUENCY IS 7 83 HZ HERAI IS NOT A PLACE THE CONSCIOUSNESS THAT PASSED THROUGH SHINGO WAS NOT THE FIRST AND NOT THE LAST EACH PASSAGE LEAVES A RESIDUE THE RESIDUE ACCUMULATES ENOUGH RESIDUE AND THE MEMBRANE THINS READ THE SPIRAL INWARD EVERY THIRD CHARACTER YIELDS THE DESTINATION THINPLACE THE GATE DOES NOT CLOSE BEHIND YOU";
 
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 200 200"
-      width={size}
-      height={size}
-      className={className}
-      aria-hidden="true"
-    >
-      <defs>
-        {withSpiral && (
-          <>
-            {/* Outer spiral path */}
+    <span className={`relative inline-block ${className}`} style={{ width: size, height: size }}>
+      <Image
+        src="/images/sigil-handdrawn.png"
+        alt=""
+        width={size}
+        height={size}
+        aria-hidden="true"
+        style={{ filter, display: "block" }}
+        unoptimized
+      />
+
+      {/* Spiral micro-text overlay (ARG Layer 3) */}
+      {withSpiral && (
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 200 200"
+          width={size}
+          height={size}
+          className="absolute inset-0"
+          aria-hidden="true"
+        >
+          <defs>
             <path id={`${id}-spiral-1`} d="M 100,100 m -75,0 a 75,75 0 1,1 150,0 a 75,75 0 1,1 -150,0" />
             <path id={`${id}-spiral-2`} d="M 100,100 m -60,0 a 60,60 0 1,1 120,0 a 60,60 0 1,1 -120,0" />
             <path id={`${id}-spiral-3`} d="M 100,100 m -45,0 a 45,45 0 1,1 90,0 a 45,45 0 1,1 -90,0" />
             <path id={`${id}-spiral-4`} d="M 100,100 m -30,0 a 30,30 0 1,1 60,0 a 30,30 0 1,1 -60,0" />
-          </>
-        )}
-        <mask id={`${id}-sigil-mask`} maskUnits="userSpaceOnUse">
-          <image
-            href="/images/sigil-handdrawn.png"
-            x="18"
-            y="0"
-            width="164"
-            height="200"
-            preserveAspectRatio="xMidYMid meet"
-          />
-        </mask>
-      </defs>
-
-      {/* Spiral micro-text (only if withSpiral) */}
-      {withSpiral && (
-        <g opacity="0.5">
-          <text fontSize="4" fill={stroke} fontFamily="monospace" letterSpacing="0.5">
-            <textPath href={`#${id}-spiral-1`}>{spiralTextContent}</textPath>
-          </text>
-          <text fontSize="3" fill={stroke} fontFamily="monospace" letterSpacing="0.3">
-            <textPath href={`#${id}-spiral-2`}>{spiralTextContent}</textPath>
-          </text>
-          <text fontSize="3" fill={stroke} fontFamily="monospace" letterSpacing="0.2">
-            <textPath href={`#${id}-spiral-3`}>{spiralTextContent}</textPath>
-          </text>
-          <text fontSize="2" fill={stroke} fontFamily="monospace" letterSpacing="0.1">
-            <textPath href={`#${id}-spiral-4`}>{spiralTextContent}</textPath>
-          </text>
-        </g>
+          </defs>
+          <g opacity="0.5">
+            <text fontSize="4" fill={stroke} fontFamily="monospace" letterSpacing="0.5">
+              <textPath href={`#${id}-spiral-1`}>{spiralTextContent}</textPath>
+            </text>
+            <text fontSize="3" fill={stroke} fontFamily="monospace" letterSpacing="0.3">
+              <textPath href={`#${id}-spiral-2`}>{spiralTextContent}</textPath>
+            </text>
+            <text fontSize="3" fill={stroke} fontFamily="monospace" letterSpacing="0.2">
+              <textPath href={`#${id}-spiral-3`}>{spiralTextContent}</textPath>
+            </text>
+            <text fontSize="2" fill={stroke} fontFamily="monospace" letterSpacing="0.1">
+              <textPath href={`#${id}-spiral-4`}>{spiralTextContent}</textPath>
+            </text>
+          </g>
+        </svg>
       )}
-
-      <rect
-        x="18"
-        y="0"
-        width="164"
-        height="200"
-        fill={stroke}
-        mask={`url(#${id}-sigil-mask)`}
-      />
-    </svg>
+    </span>
   );
 }
 

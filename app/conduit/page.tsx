@@ -62,9 +62,9 @@ export default function ConduitPage() {
               className="text-[#F5F2EB]/65 text-base leading-relaxed"
               style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
             >
-              Even without buying the canon for a second, Shingo offers something useful to an
-              actual traveler: a strange local story, a recognizable place tied to that story, and
-              a northern rural setting that feels very different from more polished tourist routes.
+              Even if you don&apos;t buy the legend for a second, Shingo offers something useful to
+              an actual traveler: a strange local story, a recognizable place tied to that story,
+              and a northern rural setting that feels very different from more polished tourist routes.
             </p>
           </div>
           <div className="bg-[#0D1B2A] border border-[#2D4A3E]/30 p-8">

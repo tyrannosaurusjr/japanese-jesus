@@ -33,7 +33,7 @@ export default function RelicsPage() {
         >
           These are not lifestyle products. They are public-facing relics from the conduit system:
           field wear, signal marks, and wall pieces that read like evidence rather than branding.
-          Each object turns live only when its fulfillment path is in place.
+          Each object becomes available when the system behind it is ready.
         </p>
       </section>
 

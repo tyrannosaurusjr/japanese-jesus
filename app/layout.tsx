@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { TransmissionPopup } from "@/components/TransmissionPopup";
+import { Analytics } from "@vercel/analytics/next";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://japanesejesus.com";
 
@@ -34,6 +35,7 @@ export default function RootLayout({
       <body className="antialiased">
         {children}
         <TransmissionPopup />
+        <Analytics />
       </body>
     </html>
   );

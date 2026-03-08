@@ -10,6 +10,7 @@ export async function GET(
   try {
     const data = await getSyncProduct(productId);
     const productName = data.sync_product.name;
+    const thumbnailUrl = data.sync_product.thumbnail_url ?? null;
 
     const variants = data.sync_variants.map((v) => {
       // Strip the product name prefix from variant name to get just the size/color label
@@ -26,7 +27,7 @@ export async function GET(
     });
 
     return NextResponse.json(
-      { variants },
+      { variants, thumbnailUrl },
       { headers: { "Cache-Control": "s-maxage=300, stale-while-revalidate=3600" } },
     );
   } catch (error) {

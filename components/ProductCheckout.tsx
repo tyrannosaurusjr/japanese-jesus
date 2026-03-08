@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 function formatPrice(price: number, currency: string): string {
   return new Intl.NumberFormat(
@@ -24,6 +25,7 @@ interface Props {
 export function ProductCheckout({ printfulSyncProductId, productName }: Props) {
   const [variants, setVariants] = useState<Variant[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const [loadingVariants, setLoadingVariants] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,13 +33,14 @@ export function ProductCheckout({ printfulSyncProductId, productName }: Props) {
   useEffect(() => {
     fetch(`/api/shop/variants/${printfulSyncProductId}`)
       .then((r) => r.json())
-      .then((data: { variants?: Variant[]; error?: string }) => {
+      .then((data: { variants?: Variant[]; thumbnailUrl?: string; error?: string }) => {
         if (data.variants && data.variants.length > 0) {
           setVariants(data.variants);
           setSelectedId(data.variants[0].id);
         } else {
           setError(data.error ?? "No variants available.");
         }
+        if (data.thumbnailUrl) setThumbnailUrl(data.thumbnailUrl);
       })
       .catch(() => setError("Could not load product options."))
       .finally(() => setLoadingVariants(false));
@@ -95,6 +98,18 @@ export function ProductCheckout({ printfulSyncProductId, productName }: Props) {
 
   return (
     <div className="space-y-4">
+      {thumbnailUrl && (
+        <div className="relative w-full aspect-square bg-[#111D2B] border border-[#2D4A3E]/40 overflow-hidden">
+          <Image
+            src={thumbnailUrl}
+            alt={productName}
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-contain p-2"
+          />
+        </div>
+      )}
+
       {variants.length > 1 && (
         <div className="flex gap-2 flex-wrap">
           {variants.map((v) => (

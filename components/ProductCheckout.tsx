@@ -2,26 +2,41 @@
 
 import { useState, useEffect } from "react";
 
-const CURRENCY_MAP: Record<string, { code: string; rate: number }> = {
-  JP: { code: "JPY", rate: 145 },
-  GB: { code: "GBP", rate: 0.79 },
-  EU: { code: "EUR", rate: 0.92 },
-  AU: { code: "AUD", rate: 1.53 },
-  CA: { code: "CAD", rate: 1.36 },
+const REGION_CURRENCY: Record<string, string> = {
+  JP: "JPY", GB: "GBP", AU: "AUD", CA: "CAD", CH: "CHF",
+  SG: "SGD", NZ: "NZD", HK: "HKD", KR: "KRW", IN: "INR",
+  MX: "MXN", BR: "BRL", DE: "EUR", FR: "EUR", IT: "EUR",
+  ES: "EUR", NL: "EUR", BE: "EUR", AT: "EUR", PT: "EUR",
+  FI: "EUR", IE: "EUR", GR: "EUR", SK: "EUR", SI: "EUR",
+  EE: "EUR", LV: "EUR", LT: "EUR", LU: "EUR", MT: "EUR", CY: "EUR",
 };
 
-const EU_LOCALES = new Set(["DE","FR","IT","ES","NL","BE","AT","PT","FI","IE","GR","SK","SI","EE","LV","LT","LU","MT","CY"]);
+// Module-level cache so we only fetch once per page load
+let ratesCache: Record<string, number> | null = null;
+let ratesFetchPromise: Promise<Record<string, number>> | null = null;
 
-function formatPrice(priceUsd: number): string {
-  const region = typeof navigator !== "undefined"
-    ? (navigator.language.split("-")[1] ?? "").toUpperCase()
-    : "";
-  const entry = CURRENCY_MAP[region] ?? (EU_LOCALES.has(region) ? CURRENCY_MAP.EU : null);
-  const { code, rate } = entry ?? { code: "USD", rate: 1 };
-  return new Intl.NumberFormat(typeof navigator !== "undefined" ? navigator.language : "en-US", {
+async function getRates(): Promise<Record<string, number>> {
+  if (ratesCache) return ratesCache;
+  if (!ratesFetchPromise) {
+    ratesFetchPromise = fetch("https://api.frankfurter.app/latest?from=USD")
+      .then((r) => r.json())
+      .then((data: { rates: Record<string, number> }) => {
+        ratesCache = data.rates;
+        return data.rates;
+      })
+      .catch(() => ({}));
+  }
+  return ratesFetchPromise;
+}
+
+function formatPrice(priceUsd: number, rates: Record<string, number>): string {
+  const locale = typeof navigator !== "undefined" ? navigator.language : "en-US";
+  const region = (locale.split("-")[1] ?? "").toUpperCase();
+  const code = REGION_CURRENCY[region] ?? "USD";
+  const rate = rates[code] ?? 1;
+  return new Intl.NumberFormat(locale, {
     style: "currency",
     currency: code,
-    maximumFractionDigits: code === "JPY" ? 0 : 2,
   }).format(priceUsd * rate);
 }
 
@@ -42,6 +57,11 @@ export function ProductCheckout({ printfulSyncProductId, productName }: Props) {
   const [loadingVariants, setLoadingVariants] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [rates, setRates] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    getRates().then(setRates);
+  }, []);
 
   useEffect(() => {
     fetch(`/api/shop/variants/${printfulSyncProductId}`)
@@ -140,7 +160,7 @@ export function ProductCheckout({ printfulSyncProductId, productName }: Props) {
       >
         {checkoutLoading
           ? "Opening checkout…"
-          : `Carry This Object${selected ? ` — ${formatPrice(selected.priceUsd)}` : ""} →`}
+          : `Carry This Object${selected ? ` — ${formatPrice(selected.priceUsd, rates)}` : ""} →`}
       </button>
 
       {error && (

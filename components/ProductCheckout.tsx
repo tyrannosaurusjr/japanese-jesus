@@ -117,7 +117,7 @@ export function ProductCheckout({ printfulSyncProductId, productName }: Props) {
       >
         {checkoutLoading
           ? "Opening checkout…"
-          : `Carry This Object${selected ? ` — $${selected.priceUsd.toFixed(2)}` : ""} →`}
+          : `Carry This Object${selected ? ` — ¥${Math.round(selected.priceUsd * 145).toLocaleString()}` : ""} →`}
       </button>
 
       {error && (

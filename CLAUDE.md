@@ -46,7 +46,11 @@ The `.label` CSS class = Inter, 0.65rem, 0.2em letter-spacing, uppercase, weight
 - `/the-legend` — Long-form narrative: The Substitution, The Farmer, The Passage, Isukiri
 - `/shingo-today` — The tomb, the Christ Festival, coordinates
 - `/get-there` — Travel directions to Shingo Village
-- `/objects` — Merch: cap, tee, hoodie, print, patch (+ Keeper Card, not for sale)
+- `/relics` — Shop: bucket hat, tee, sweatshirt, posters, patches, Keeper Card (not for sale). `/objects` permanently redirects here.
+- `/canon` — Canon epochs / series content (uses `lib/site-content` CANON_EPOCHS data)
+- `/conduit` — Conduit page (uses FactPattern component)
+- `/signal` — Signal page
+- `/journey` — Journey page. `/walk` permanently redirects here.
 
 ### Hidden ARG pages (noindex)
 - `/the-gate` — Layer 2 ARG page
@@ -119,7 +123,31 @@ HTML/Audio  Steg     /the-gate  /axis    /thin-place  Email
 - **`AudioPlayer`** (`components/AudioPlayer.tsx`) — Controls for hero drone audio
 - **`TransmissionForm`** (`components/TransmissionForm.tsx`) — Email signup on homepage
 - **`TransmissionPopup`** (`components/TransmissionPopup.tsx`) — Global popup, rendered in root layout
+- **`ProductCheckout`** (`components/ProductCheckout.tsx`) — Fetches variants + thumbnail from `/api/shop/variants/[id]`, handles Stripe checkout. Props: `printfulSyncProductId`, `productName`, `altImageUrl?`. On mount it also fetches `altThumbnailUrl` from the API (extracted from Printful variant files — prefers `type: "back"`, falls back to second file). Cross-fades to alt image on hover when available.
+- **`PosterCheckout`** (`components/PosterCheckout.tsx`) — Variant of checkout for poster products.
+- **`FactPattern`** (`components/FactPattern.tsx`) — Used on `/conduit`
 - **`Nav`** / **`Footer`** — Site-wide navigation and footer
+
+## Shop / Commerce
+
+Fully wired to Printful + Stripe:
+- **`/api/shop/variants/[productId]`** — fetches sync product from Printful, returns `{ variants, thumbnailUrl, altThumbnailUrl }`. `altThumbnailUrl` comes from first variant's files (back > second file > null). Cached 5 min.
+- **`/api/shop/checkout`** — creates Stripe checkout session
+- **`/api/shop/webhook`** — Stripe webhook handler
+- **`lib/printful.ts`** — Printful API client. `PrintfulSyncProductResponse` includes `sync_variants[].files[]` typed with `type`, `preview_url`, `thumbnail_url`.
+- **`lib/objects.ts`** — `CatalogObject` type + `OBJECTS` array. Fields: `id`, `name`, `description`, `material`, `price`, `variant`, `printfulSyncProductId?`, `notForSale?`, `altImageUrl?` (manual override for hover alt image, takes precedence over API-fetched alt).
+
+### Current product list (lib/objects.ts)
+| id | name | Printful ID |
+|---|---|---|
+| carrier-cap | Rift Sigil Bucket Hat | 422702408 |
+| gate-tee | Portal Lantern Tee | 422792119 |
+| herai-hoodie | Unisex Cotton Portal Lantern Sweatshirt | 422747921 |
+| thin-place-print | Japanese Jesus Poster | 422563554 |
+| framed-poster | Japanese Jesus Framed Poster | 422563382 |
+| frequency-patch-red | Static Conduit Patch — Red | 422788293 |
+| frequency-patch-blue | Static Conduit Patch — Blue | 422781829 |
+| keeper-card | Keeper Card | — (not for sale) |
 
 ---
 
@@ -148,11 +176,10 @@ These live outside `/public` and won't be served. Confirm `.gitignore` covers `/
 
 ## Things Still To Do / Open Questions
 
-- `/shingo-today` and `/get-there` pages — check if content is complete
-- Hero image: actual JPEG with steganography embedded needs to replace placeholder SVG
-- Hero audio: `drone.mp3` with embedded Morse code needs to be produced and added to `/public/audio/`
-- `transmission_00.wav` with DeepSound payload needs to be produced and added to `/public/audio/`
-- Gate aerial image: real image with embedded pixel cipher (or SVG placeholder confirmed)
-- Objects page: `Carry This Object` buttons are not wired to any commerce backend (Printful + Stripe mentioned in copy but not implemented)
-- Transmissions form: backend not confirmed — check if `/app/api/transmissions/route.ts` is complete
+- Hero audio: `drone.mp3` with embedded Morse code needs to be produced and placed at `/public/audio/drone.mp3`
+- `transmission_00.wav` with DeepSound payload needs to be produced and placed at `/public/audio/transmission_00.wav`
+- Hero image steganography: `hero-home.jpg` exists at `/public/images/hero-home.jpg` but LSB steg has not been embedded yet. Source lives at `/private/steg-source.jpg`.
+- Hover alt images: infrastructure is in place (`altImageUrl` field on `CatalogObject`, auto-fetch from Printful variant files). Verify that Printful is returning `files` on sync variants — if not, manually populate `altImageUrl` in `lib/objects.ts` with direct image URLs.
 - `keeper@japanesejesus.com` inbox: confirm email is set up (Postmark or Fastmail)
+- `/canon`, `/conduit`, `/signal`, `/journey` pages — verify content is complete and navigation links are correct
+- Transmissions form backend: `/app/api/transmissions/route.ts` exists — verify it's correctly saving/forwarding emails

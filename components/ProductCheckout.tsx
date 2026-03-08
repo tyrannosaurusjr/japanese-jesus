@@ -2,6 +2,29 @@
 
 import { useState, useEffect } from "react";
 
+const CURRENCY_MAP: Record<string, { code: string; rate: number }> = {
+  JP: { code: "JPY", rate: 145 },
+  GB: { code: "GBP", rate: 0.79 },
+  EU: { code: "EUR", rate: 0.92 },
+  AU: { code: "AUD", rate: 1.53 },
+  CA: { code: "CAD", rate: 1.36 },
+};
+
+const EU_LOCALES = new Set(["DE","FR","IT","ES","NL","BE","AT","PT","FI","IE","GR","SK","SI","EE","LV","LT","LU","MT","CY"]);
+
+function formatPrice(priceUsd: number): string {
+  const region = typeof navigator !== "undefined"
+    ? (navigator.language.split("-")[1] ?? "").toUpperCase()
+    : "";
+  const entry = CURRENCY_MAP[region] ?? (EU_LOCALES.has(region) ? CURRENCY_MAP.EU : null);
+  const { code, rate } = entry ?? { code: "USD", rate: 1 };
+  return new Intl.NumberFormat(typeof navigator !== "undefined" ? navigator.language : "en-US", {
+    style: "currency",
+    currency: code,
+    maximumFractionDigits: code === "JPY" ? 0 : 2,
+  }).format(priceUsd * rate);
+}
+
 interface Variant {
   id: string;
   label: string;
@@ -117,7 +140,7 @@ export function ProductCheckout({ printfulSyncProductId, productName }: Props) {
       >
         {checkoutLoading
           ? "Opening checkout…"
-          : `Carry This Object${selected ? ` — ¥${Math.round(selected.priceUsd * 145).toLocaleString()}` : ""} →`}
+          : `Carry This Object${selected ? ` — ${formatPrice(selected.priceUsd)}` : ""} →`}
       </button>
 
       {error && (

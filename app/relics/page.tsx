@@ -48,13 +48,6 @@ export default function RelicsPage() {
                 <Sigil variant={obj.variant} size={56} className="opacity-70" />
                 {obj.notForSale ? (
                   <span className="label text-[#FF4D6D]">Not For Sale</span>
-                ) : obj.price !== null ? (
-                  <span
-                    className="text-xl text-[#F5F2EB]/50"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
-                  >
-                    ¥{(obj.price * 145).toLocaleString()} / ${obj.price}
-                  </span>
                 ) : null}
               </div>
 

@@ -9,6 +9,7 @@ export interface CatalogObject {
   variant: ObjectVariant;
   printfulSyncProductId?: string; // set = wired to Printful checkout
   notForSale?: boolean;
+  primaryImageUrl?: string; // overrides Printful thumbnail as main image
   altImageUrl?: string; // optional back/alt product image shown on hover
 }
 
@@ -25,13 +26,15 @@ export const OBJECTS: CatalogObject[] = [
   },
   {
     id: "gate-tee",
-    name: "Portal Lantern Tee",
+    name: "Unisex Organic Cotton Pilgrimage T-shirt",
     description:
-      "A heavyweight tee for the long walk north. Front sigil in frozen white. Coordinates at the lower back hem like a quiet location mark. Midnight blue and intentionally severe.",
-    material: "280gsm organic cotton · oversized cut · preshrunk",
+      "Organic cotton. Minimal front — Japanese Jesus in small white type above the left chest. The back carries the full record: Shingo Village in kanji and coordinates, the walk out of the desert and into the rice fields, the Tomb of Christ, EST. 33 AD. The portal is opening.",
+    material: "Organic cotton · unisex fit · preshrunk",
     price: 54,
     variant: "white",
     printfulSyncProductId: "422792119",
+    primaryImageUrl: "/images/pilgrimage-tee-front.jpg",
+    altImageUrl: "/images/pilgrimage-tee-back.jpg",
   },
   {
     id: "herai-hoodie",

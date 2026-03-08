@@ -20,10 +20,11 @@ interface Variant {
 interface Props {
   printfulSyncProductId: string;
   productName: string;
+  primaryImageUrl?: string;
   altImageUrl?: string;
 }
 
-export function ProductCheckout({ printfulSyncProductId, productName, altImageUrl }: Props) {
+export function ProductCheckout({ printfulSyncProductId, productName, primaryImageUrl, altImageUrl }: Props) {
   const [variants, setVariants] = useState<Variant[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
@@ -100,16 +101,18 @@ export function ProductCheckout({ printfulSyncProductId, productName, altImageUr
     );
   }
 
+  const mainImageUrl = primaryImageUrl || thumbnailUrl;
+
   return (
     <div className="space-y-4">
-      {thumbnailUrl && (
+      {mainImageUrl && (
         <div
           className="relative w-full aspect-square bg-[#111D2B] border border-[#2D4A3E]/40 overflow-hidden"
           onMouseEnter={() => altImageUrl && setHovered(true)}
           onMouseLeave={() => setHovered(false)}
         >
           <Image
-            src={thumbnailUrl}
+            src={mainImageUrl}
             alt={productName}
             fill
             sizes="(max-width: 768px) 100vw, 50vw"

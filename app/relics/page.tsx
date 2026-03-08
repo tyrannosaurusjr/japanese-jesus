@@ -71,6 +71,7 @@ export default function RelicsPage() {
                 <ProductCheckout
                   printfulSyncProductId={obj.printfulSyncProductId}
                   productName={obj.name}
+                  primaryImageUrl={obj.primaryImageUrl}
                   altImageUrl={obj.altImageUrl}
                 />
               ) : null}

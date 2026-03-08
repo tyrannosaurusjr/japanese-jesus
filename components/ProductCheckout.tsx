@@ -20,15 +20,17 @@ interface Variant {
 interface Props {
   printfulSyncProductId: string;
   productName: string;
+  altImageUrl?: string;
 }
 
-export function ProductCheckout({ printfulSyncProductId, productName }: Props) {
+export function ProductCheckout({ printfulSyncProductId, productName, altImageUrl }: Props) {
   const [variants, setVariants] = useState<Variant[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const [loadingVariants, setLoadingVariants] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hovered, setHovered] = useState(false);
 
   useEffect(() => {
     fetch(`/api/shop/variants/${printfulSyncProductId}`)
@@ -99,14 +101,29 @@ export function ProductCheckout({ printfulSyncProductId, productName }: Props) {
   return (
     <div className="space-y-4">
       {thumbnailUrl && (
-        <div className="relative w-full aspect-square bg-[#111D2B] border border-[#2D4A3E]/40 overflow-hidden">
+        <div
+          className="relative w-full aspect-square bg-[#111D2B] border border-[#2D4A3E]/40 overflow-hidden"
+          onMouseEnter={() => altImageUrl && setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+        >
           <Image
             src={thumbnailUrl}
             alt={productName}
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-contain p-2"
+            className="object-contain p-2 transition-opacity duration-300"
+            style={{ opacity: hovered && altImageUrl ? 0 : 1 }}
           />
+          {altImageUrl && (
+            <Image
+              src={altImageUrl}
+              alt={`${productName} — alternate view`}
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-contain p-2 transition-opacity duration-300"
+              style={{ opacity: hovered ? 1 : 0 }}
+            />
+          )}
         </div>
       )}
 

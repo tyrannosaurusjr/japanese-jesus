@@ -9,6 +9,7 @@ export interface CatalogObject {
   variant: ObjectVariant;
   printfulSyncProductId?: string; // set = wired to Printful checkout
   notForSale?: boolean;
+  altImageUrl?: string; // optional back/alt product image shown on hover
 }
 
 export const OBJECTS: CatalogObject[] = [

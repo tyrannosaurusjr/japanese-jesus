@@ -59,7 +59,7 @@ export default function RelicsPage() {
               </h2>
 
               <p
-                className="text-[#F5F2EB]/65 text-sm leading-relaxed mb-4 flex-1"
+                className="text-[#F5F2EB]/65 text-sm leading-relaxed mb-4"
                 style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
               >
                 {obj.description}
@@ -71,6 +71,7 @@ export default function RelicsPage() {
                 <ProductCheckout
                   printfulSyncProductId={obj.printfulSyncProductId}
                   productName={obj.name}
+                  altImageUrl={obj.altImageUrl}
                 />
               ) : null}
             </article>

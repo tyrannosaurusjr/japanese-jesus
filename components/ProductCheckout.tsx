@@ -139,11 +139,11 @@ export function ProductCheckout({ printfulSyncProductId, productName }: Props) {
               className="label py-2 px-3 border transition-all duration-200"
               style={{
                 borderColor:
-                  selectedId === v.id ? "#C0392B" : "rgba(245,242,235,0.2)",
+                  selectedId === v.id ? "#C0392B" : "rgba(245,242,235,0.4)",
                 color:
-                  selectedId === v.id ? "#C0392B" : "rgba(245,242,235,0.5)",
+                  selectedId === v.id ? "#E8D44D" : "#F5F2EB",
                 background:
-                  selectedId === v.id ? "rgba(192,57,43,0.08)" : "transparent",
+                  selectedId === v.id ? "rgba(192,57,43,0.15)" : "transparent",
               }}
             >
               {v.label}
@@ -155,7 +155,7 @@ export function ProductCheckout({ printfulSyncProductId, productName }: Props) {
       <button
         onClick={handleCheckout}
         disabled={checkoutLoading || !selectedId}
-        className="label border border-[#C0392B]/60 text-[#C0392B] py-3 px-4 hover:bg-[#C0392B] hover:text-[#F5F2EB] transition-all duration-300 text-left w-full disabled:opacity-50 disabled:cursor-not-allowed"
+        className="label border border-[#C0392B] text-[#F5F2EB] py-3 px-4 hover:bg-[#C0392B] transition-all duration-300 text-left w-full disabled:opacity-50 disabled:cursor-not-allowed"
         aria-label={`Order ${productName}`}
       >
         {checkoutLoading

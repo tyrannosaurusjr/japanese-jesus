@@ -35,10 +35,10 @@ export const OBJECTS: CatalogObject[] = [
   },
   {
     id: "herai-hoodie",
-    name: "Herai Threshold Hoodie",
+    name: "Unisex Cotton Portal Lantern Sweatshirt",
     description:
-      "Heavyweight fleece built for cedar wind and late static. Sigil at the chest. HERAI on the back like a place-name passed forward instead of explained.",
-    material: "400gsm cotton fleece · boxy · unlined hood",
+      "Heavyweight cotton built for cedar wind and late static. Sigil at the chest. HERAI on the back like a place-name passed forward instead of explained.",
+    material: "100% cotton · unisex · preshrunk",
     price: 118,
     variant: "citrine",
     printfulSyncProductId: "422747921",

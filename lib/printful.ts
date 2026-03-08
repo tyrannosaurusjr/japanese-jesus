@@ -29,6 +29,11 @@ export interface PrintfulSyncProductResponse {
     currency: string;
     name: string;
     synced: boolean;
+    files?: Array<{
+      type: string;
+      preview_url: string | null;
+      thumbnail_url: string | null;
+    }>;
   }>;
 }
 

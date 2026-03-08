@@ -12,6 +12,13 @@ export async function GET(
     const productName = data.sync_product.name;
     const thumbnailUrl = data.sync_product.thumbnail_url ?? null;
 
+    // Extract an alt image from the first variant's files:
+    // prefer a "back" placement file, fall back to any second file.
+    const firstVariantFiles = data.sync_variants[0]?.files ?? [];
+    const backFile = firstVariantFiles.find((f) => f.type === "back");
+    const altFile = backFile ?? firstVariantFiles[1] ?? null;
+    const altThumbnailUrl = altFile?.preview_url ?? altFile?.thumbnail_url ?? null;
+
     const variants = data.sync_variants.map((v) => {
       // Strip the product name prefix from variant name to get just the size/color label
       const label = v.name.startsWith(productName)
@@ -27,7 +34,7 @@ export async function GET(
     });
 
     return NextResponse.json(
-      { variants, thumbnailUrl },
+      { variants, thumbnailUrl, altThumbnailUrl },
       { headers: { "Cache-Control": "s-maxage=300, stale-while-revalidate=3600" } },
     );
   } catch (error) {

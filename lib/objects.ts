@@ -14,10 +14,10 @@ export interface CatalogObject {
 export const OBJECTS: CatalogObject[] = [
   {
     id: "carrier-cap",
-    name: "Rift Signal Cap",
+    name: "Rift Sigil Bucket Hat",
     description:
-      "A black field cap for cold roads and signal weather. Marked only with the conduit sigil in vermilion thread. Built to read like issued gear from a system that never officially existed.",
-    material: "100% cotton twill · structured front · unstructured back",
+      "A black bucket hat for cold roads and signal weather. Marked only with the conduit sigil in embroidered thread. Built to read like issued gear from a system that never officially existed.",
+    material: "100% cotton · unstructured · one size",
     price: 48,
     variant: "vermilion",
     printfulSyncProductId: "422702408",

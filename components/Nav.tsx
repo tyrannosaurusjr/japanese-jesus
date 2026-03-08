@@ -18,7 +18,8 @@ export function Nav() {
   return (
     <>
       <nav
-        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-5 md:px-10 border-b border-[#2D4A3E] bg-[#0D1B2A]/95 backdrop-blur-md"
+        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-5 md:px-10 border-b border-[#2D4A3E]"
+        style={{ background: "rgba(13,27,42,0.75)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}
       >
         <Link
           href="/"

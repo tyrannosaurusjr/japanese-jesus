@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getPosterVariant, POSTER_VARIANTS } from "@/lib/shop";
+import { getSyncVariant } from "@/lib/printful";
 
 type CheckoutRequest = {
-  variantId?: string;
+  syncVariantId?: string;
 };
 
 const SHIPPING_COUNTRIES = ["US", "CA", "GB", "AU", "JP", "DE", "FR", "NL", "SE", "NO", "DK"];
@@ -15,15 +15,30 @@ export async function POST(req: NextRequest) {
   }
 
   const body = (await req.json()) as CheckoutRequest;
-  const variant = typeof body.variantId === "string" ? getPosterVariant(body.variantId) : undefined;
 
-  if (!variant) {
+  if (!body.syncVariantId || typeof body.syncVariantId !== "string") {
+    return NextResponse.json({ error: "syncVariantId is required." }, { status: 400 });
+  }
+
+  let variantName: string;
+  let priceUsd: number;
+  let productName: string;
+
+  try {
+    const data = await getSyncVariant(body.syncVariantId);
+    variantName = data.sync_variant.name;
+    priceUsd = parseFloat(data.sync_variant.retail_price);
+    productName = data.sync_product.name;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      {
-        error: `Invalid variant. Valid options: ${POSTER_VARIANTS.map((v) => v.printfulSyncVariantId).join(", ")}`,
-      },
-      { status: 400 },
+      { error: `Could not look up product variant: ${message}` },
+      { status: 502 },
     );
+  }
+
+  if (isNaN(priceUsd) || priceUsd <= 0) {
+    return NextResponse.json({ error: "Invalid product price." }, { status: 400 });
   }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? req.nextUrl.origin;
@@ -36,14 +51,11 @@ export async function POST(req: NextRequest) {
   // Line item
   params.set("line_items[0][quantity]", "1");
   params.set("line_items[0][price_data][currency]", "usd");
-  params.set("line_items[0][price_data][unit_amount]", String(variant.priceUsd * 100));
-  params.set(
-    "line_items[0][price_data][product_data][name]",
-    `Japanese Jesus Portal Poster — ${variant.label}`,
-  );
+  params.set("line_items[0][price_data][unit_amount]", String(Math.round(priceUsd * 100)));
+  params.set("line_items[0][price_data][product_data][name]", variantName);
   params.set(
     "line_items[0][price_data][product_data][description]",
-    "Enhanced Matte Paper Poster. Print-on-demand, fulfilled by Printful. Ships in 3–5 business days.",
+    "Print-on-demand, fulfilled by Printful. Ships in 3–5 business days.",
   );
 
   // Shipping address collection
@@ -68,8 +80,8 @@ export async function POST(req: NextRequest) {
   params.set("shipping_options[0][shipping_rate_data][delivery_estimate][maximum][value]", "10");
 
   // Metadata for webhook → Printful order
-  params.set("metadata[printful_sync_variant_id]", variant.printfulSyncVariantId);
-  params.set("metadata[size_label]", variant.label);
+  params.set("metadata[printful_sync_variant_id]", body.syncVariantId);
+  params.set("metadata[product_name]", productName);
 
   const response = await fetch("https://api.stripe.com/v1/checkout/sessions", {
     method: "POST",

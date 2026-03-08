@@ -1,10 +1,9 @@
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { Sigil } from "@/components/Sigil";
-import { PosterCheckout } from "@/components/PosterCheckout";
+import { ProductCheckout } from "@/components/ProductCheckout";
 import { OBJECTS } from "@/lib/objects";
 import type { Metadata } from "next";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Relics — Japanese Jesus",
@@ -47,16 +46,16 @@ export default function RelicsPage() {
             >
               <div className="mb-6 flex items-center justify-between">
                 <Sigil variant={obj.variant} size={56} className="opacity-70" />
-                {obj.price ? (
+                {obj.notForSale ? (
+                  <span className="label text-[#FF4D6D]">Not For Sale</span>
+                ) : obj.price !== null ? (
                   <span
                     className="text-xl text-[#F5F2EB]/50"
                     style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
                   >
                     ¥{(obj.price * 145).toLocaleString()} / ${obj.price}
                   </span>
-                ) : (
-                  <span className="label text-[#FF4D6D]">Not For Sale</span>
-                )}
+                ) : null}
               </div>
 
               <h2
@@ -75,37 +74,11 @@ export default function RelicsPage() {
 
               <p className="label text-[#F5F2EB]/30 mb-6">{obj.material}</p>
 
-              {obj.id === "thin-place-print" ? (
-                <PosterCheckout />
-              ) : obj.price && obj.shopUrl ? (
-                <Link
-                  href={obj.shopUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="label border border-[#C0392B]/60 text-[#C0392B] py-3 px-4 hover:bg-[#C0392B] hover:text-[#F5F2EB] transition-all duration-300 text-left"
-                  aria-label={`Order ${obj.name}`}
-                >
-                  Carry This Object →
-                </Link>
-              ) : obj.price ? (
-                <div className="space-y-3">
-                  <div
-                    className="label border border-[#F5F2EB]/15 text-[#F5F2EB]/35 py-3 px-4 text-left"
-                    aria-disabled="true"
-                  >
-                    {obj.printfulStatus === "manual"
-                      ? "Manual Setup Required"
-                      : "Printful Link Pending"}
-                  </div>
-                  <p
-                    className="text-xs leading-relaxed text-[#F5F2EB]/40"
-                    style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
-                  >
-                    {obj.printfulStatus === "manual"
-                      ? "This item needs a manual Printful decision before it can be sold."
-                      : "Add a NEXT_PUBLIC_PRINTFUL_* URL to make this object purchasable."}
-                  </p>
-                </div>
+              {obj.printfulSyncProductId ? (
+                <ProductCheckout
+                  printfulSyncProductId={obj.printfulSyncProductId}
+                  productName={obj.name}
+                />
               ) : null}
             </article>
           ))}
@@ -117,7 +90,7 @@ export default function RelicsPage() {
           className="text-[#F5F2EB]/35 text-xs leading-relaxed"
           style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
         >
-          Carrier Card is not available for purchase. Delivery is determined by other means. Not
+          Keeper Card is not available for purchase. Delivery is determined by other means. Not
           every object in the system is meant for public circulation.
         </p>
       </section>

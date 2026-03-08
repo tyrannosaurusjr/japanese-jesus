@@ -118,6 +118,29 @@ export interface PrintfulOrderResult {
   status: string;
 }
 
+export interface PrintfulSyncVariantDetail {
+  id: number;
+  name: string;
+  retail_price: string;
+  currency: string;
+  sync_product_id: number;
+}
+
+export async function getSyncProduct(syncProductId: string | number) {
+  const response = await printfulRequest<PrintfulSyncProductResponse>(
+    `/store/products/${syncProductId}`,
+  );
+  return response.result;
+}
+
+export async function getSyncVariant(syncVariantId: string | number) {
+  const response = await printfulRequest<{
+    sync_variant: PrintfulSyncVariantDetail;
+    sync_product: { id: number; name: string };
+  }>(`/store/variants/${syncVariantId}`);
+  return response.result;
+}
+
 export async function createPrintfulOrder(body: {
   recipient: PrintfulOrderRecipient;
   items: Array<{ sync_variant_id: string; quantity: number }>;

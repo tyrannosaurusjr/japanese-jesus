@@ -4,7 +4,7 @@ import { useState } from "react";
 import { POSTER_VARIANTS } from "@/lib/shop";
 
 export function PosterCheckout() {
-  const [selectedId, setSelectedId] = useState(POSTER_VARIANTS[2].printfulSyncVariantId);
+  const [selectedId, setSelectedId] = useState<string>(POSTER_VARIANTS[2].printfulSyncVariantId);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

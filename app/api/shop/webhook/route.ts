@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { createPrintfulOrder, type PrintfulOrderRecipient } from "@/lib/printful";
-import { getPosterVariant } from "@/lib/shop";
 
 interface StripeAddress {
   city: string | null;
@@ -102,9 +101,8 @@ export async function POST(req: NextRequest) {
   }
 
   const syncVariantId = session.metadata?.printful_sync_variant_id;
-  const variant = syncVariantId ? getPosterVariant(syncVariantId) : undefined;
 
-  if (!variant) {
+  if (!syncVariantId) {
     // Not a shop order (e.g. a donation) — ignore
     return NextResponse.json({ ok: true, skipped: true, reason: "no printful variant in metadata" });
   }

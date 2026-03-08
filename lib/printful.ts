@@ -134,10 +134,10 @@ export async function getSyncProduct(syncProductId: string | number) {
 }
 
 export async function getSyncVariant(syncVariantId: string | number) {
-  const response = await printfulRequest<{
-    sync_variant: PrintfulSyncVariantDetail;
-    sync_product: { id: number; name: string };
-  }>(`/store/variants/${syncVariantId}`);
+  // Printful v1 API returns the variant directly in result (not wrapped in { sync_variant })
+  const response = await printfulRequest<PrintfulSyncVariantDetail>(
+    `/store/variants/${syncVariantId}`,
+  );
   return response.result;
 }
 

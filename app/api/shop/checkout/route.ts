@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSyncVariant } from "@/lib/printful";
 
+// Stripe zero-decimal currencies (amount is in the smallest unit = the main unit)
+const ZERO_DECIMAL = new Set(["BIF","CLP","DJF","GNF","JPY","KMF","KRW","MGA","PYG","RWF","UGX","VND","VUV","XAF","XOF","XPF"]);
+
+function toStripeAmount(price: number, currency: string): number {
+  return ZERO_DECIMAL.has(currency.toUpperCase()) ? Math.round(price) : Math.round(price * 100);
+}
+
 type CheckoutRequest = {
   syncVariantId?: string;
 };
@@ -21,14 +28,14 @@ export async function POST(req: NextRequest) {
   }
 
   let variantName: string;
-  let priceUsd: number;
-  let productName: string;
+  let retailPrice: number;
+  let currency: string;
 
   try {
-    const data = await getSyncVariant(body.syncVariantId);
-    variantName = data.sync_variant.name;
-    priceUsd = parseFloat(data.sync_variant.retail_price);
-    productName = data.sync_product.name;
+    const variant = await getSyncVariant(body.syncVariantId);
+    variantName = variant.name;
+    retailPrice = parseFloat(variant.retail_price);
+    currency = variant.currency;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
@@ -37,7 +44,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (isNaN(priceUsd) || priceUsd <= 0) {
+  if (isNaN(retailPrice) || retailPrice <= 0) {
     return NextResponse.json({ error: "Invalid product price." }, { status: 400 });
   }
 
@@ -48,10 +55,20 @@ export async function POST(req: NextRequest) {
   params.set("success_url", `${siteUrl}/relics?order=success`);
   params.set("cancel_url", `${siteUrl}/relics`);
 
+  const stripeCurrency = currency.toLowerCase();
+  const stripeAmount = toStripeAmount(retailPrice, currency);
+  // Shipping: ~$8 USD equivalent, scaled per currency
+  const shippingAmount = ZERO_DECIMAL.has(currency.toUpperCase())
+    ? toStripeAmount(800 / 100, currency) * 100  // rough parity
+    : 800;
+  // Simple fixed shipping amounts for known currencies
+  const SHIPPING: Record<string, number> = { usd: 800, eur: 700, gbp: 600, jpy: 1200, aud: 1200, cad: 1100 };
+  const shippingFinal = SHIPPING[stripeCurrency] ?? shippingAmount;
+
   // Line item
   params.set("line_items[0][quantity]", "1");
-  params.set("line_items[0][price_data][currency]", "usd");
-  params.set("line_items[0][price_data][unit_amount]", String(Math.round(priceUsd * 100)));
+  params.set("line_items[0][price_data][currency]", stripeCurrency);
+  params.set("line_items[0][price_data][unit_amount]", String(stripeAmount));
   params.set("line_items[0][price_data][product_data][name]", variantName);
   params.set(
     "line_items[0][price_data][product_data][description]",
@@ -66,8 +83,8 @@ export async function POST(req: NextRequest) {
   // Flat shipping rate
   params.set("shipping_options[0][shipping_rate_data][type]", "fixed_amount");
   params.set("shipping_options[0][shipping_rate_data][display_name]", "Standard Shipping");
-  params.set("shipping_options[0][shipping_rate_data][fixed_amount][amount]", "800");
-  params.set("shipping_options[0][shipping_rate_data][fixed_amount][currency]", "usd");
+  params.set("shipping_options[0][shipping_rate_data][fixed_amount][amount]", String(shippingFinal));
+  params.set("shipping_options[0][shipping_rate_data][fixed_amount][currency]", stripeCurrency);
   params.set(
     "shipping_options[0][shipping_rate_data][delivery_estimate][minimum][unit]",
     "business_day",
@@ -81,7 +98,7 @@ export async function POST(req: NextRequest) {
 
   // Metadata for webhook → Printful order
   params.set("metadata[printful_sync_variant_id]", body.syncVariantId);
-  params.set("metadata[product_name]", productName);
+  params.set("metadata[product_name]", variantName);
 
   const response = await fetch("https://api.stripe.com/v1/checkout/sessions", {
     method: "POST",

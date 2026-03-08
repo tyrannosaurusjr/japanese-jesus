@@ -20,7 +20,8 @@ export async function GET(
       return {
         id: String(v.id),
         label: label || v.name,
-        priceUsd: parseFloat(v.retail_price),
+        price: parseFloat(v.retail_price),
+        currency: v.currency,
       };
     });
 

@@ -17,7 +17,10 @@ export function Nav() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-5 md:px-10">
+      <nav
+        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-5 md:px-10 border-b border-[#2D4A3E]"
+        style={{ background: "rgba(13,27,42,0.92)", backdropFilter: "blur(12px)" }}
+      >
         <Link
           href="/"
           className="flex items-center gap-3 opacity-80 hover:opacity-100 transition-opacity duration-500"
@@ -34,7 +37,7 @@ export function Nav() {
             <Link
               key={href}
               href={href}
-              className="label text-[#F5F2EB] opacity-70 hover:opacity-100 transition-opacity duration-300"
+              className="label text-[#F5F2EB] hover:text-[#E8D44D] transition-colors duration-300 pb-px border-b border-transparent hover:border-[#C0392B]"
             >
               {label}
             </Link>

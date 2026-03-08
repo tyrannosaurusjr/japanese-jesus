@@ -39,7 +39,7 @@ const PRINTFUL_CONFIG_BY_OBJECT_ID: Record<ReadyObjectId, PrintfulCatalogConfig>
 function getReadyObject(id: string) {
   const object = OBJECTS.find((candidate) => candidate.id === id);
 
-  if (!object || object.printfulStatus !== "ready") {
+  if (!object || !object.printfulSyncProductId) {
     return null;
   }
 

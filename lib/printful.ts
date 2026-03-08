@@ -29,6 +29,11 @@ export interface PrintfulSyncProductResponse {
     currency: string;
     name: string;
     synced: boolean;
+    files?: Array<{
+      type: string;
+      preview_url: string | null;
+      thumbnail_url: string | null;
+    }>;
   }>;
 }
 
@@ -96,6 +101,59 @@ export async function createPrintfulFile(body: unknown) {
   const response = await printfulRequest<PrintfulFileResponse>("/files", {
     method: "POST",
     body: JSON.stringify(body),
+  });
+
+  return response.result;
+}
+
+export interface PrintfulOrderRecipient {
+  name: string;
+  email?: string;
+  address1: string;
+  address2?: string;
+  city: string;
+  state_code?: string;
+  country_code: string;
+  zip: string;
+}
+
+export interface PrintfulOrderResult {
+  id: number;
+  external_id: string | null;
+  status: string;
+}
+
+export interface PrintfulSyncVariantDetail {
+  id: number;
+  name: string;
+  retail_price: string;
+  currency: string;
+  sync_product_id: number;
+}
+
+export async function getSyncProduct(syncProductId: string | number) {
+  const response = await printfulRequest<PrintfulSyncProductResponse>(
+    `/store/products/${syncProductId}`,
+  );
+  return response.result;
+}
+
+export async function getSyncVariant(syncVariantId: string | number) {
+  // Printful v1 API returns the variant directly in result (not wrapped in { sync_variant })
+  const response = await printfulRequest<PrintfulSyncVariantDetail>(
+    `/store/variants/${syncVariantId}`,
+  );
+  return response.result;
+}
+
+export async function createPrintfulOrder(body: {
+  recipient: PrintfulOrderRecipient;
+  items: Array<{ sync_variant_id: string; quantity: number }>;
+  confirm?: boolean;
+}) {
+  const response = await printfulRequest<PrintfulOrderResult>("/orders", {
+    method: "POST",
+    body: JSON.stringify({ confirm: true, ...body }),
   });
 
   return response.result;

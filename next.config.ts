@@ -2,10 +2,14 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    // Lazy loading is enabled by default in Next.js Image
-    // Only hero image uses priority/eager loading
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 86400,
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "files.cdn.printful.com",
+      },
+    ],
   },
   // Ensure ARG routes are never statically cached
   async headers() {

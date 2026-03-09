@@ -22,7 +22,7 @@ export default function CanonPage() {
           className="text-5xl md:text-7xl text-[#F5F2EB] leading-none mb-8"
           style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
         >
-          Four epochs.<br />One crossing.<br />A myth that keeps moving north.
+          Five epochs.<br />One crossing.<br />A myth that keeps moving north.
         </h1>
         <div className="w-16 h-px bg-[#C0392B]" />
       </section>
@@ -106,14 +106,16 @@ export default function CanonPage() {
             className="text-2xl md:text-3xl text-[#F5F2EB] mb-4"
             style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
           >
-            Canon Harvest Game
+            Canon Blade Game
           </h2>
           <p
             className="text-[#F5F2EB]/68 text-sm md:text-base leading-relaxed"
             style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
           >
-            Farm the Shingo field node: plant, water, harvest, and use temporary buffs to hit the
-            seasonal target before winter lock.
+            Play through the first four canon epochs in a 16-bit side-scrolling myth-action run.
+            Master blade, conduit shot, and phase dash while pushing through lush stages, enemy
+            waves, and boss fights from wandering spirit to the Herai years. Epoch 5, where the
+            portal opens, is the next chapter in canon.
           </p>
         </Link>
       </section>

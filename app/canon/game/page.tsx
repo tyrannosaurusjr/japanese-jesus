@@ -5,9 +5,9 @@ import { Footer } from "@/components/Footer";
 import { CanonGameCanvas } from "@/components/CanonGameCanvas";
 
 export const metadata: Metadata = {
-  title: "Canon Harvest Game — Japanese Jesus",
+  title: "Canon Blade Game — Japanese Jesus",
   description:
-    "Play a simple farming game in the Shingo field node: plant, water, harvest, and hit the seasonal coin target before winter lock.",
+    "Play a 16-bit mythological side-scrolling action game through the first four Japanese Jesus epochs while canon moves toward Epoch 5, where the portal opens.",
 };
 
 export default function CanonGamePage() {
@@ -27,14 +27,17 @@ export default function CanonGamePage() {
           className="text-5xl md:text-7xl text-[#F5F2EB] leading-[0.95] mb-6"
           style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
         >
-          Canon Harvest
+          Canon Blade
         </h1>
         <p
           className="max-w-3xl text-[#F5F2EB]/72 text-base md:text-lg leading-relaxed"
           style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
         >
-          Work the field at the Shingo node: plant crops, keep them watered, harvest for coin, and
-          use temporary buffs to secure the season before the clock runs out.
+          Slash through the first four canon epochs in a 16-bit myth-action run: wandering spirit,
+          incarnation and burden, eastward journey, and the Herai years in Shingo. Fight with
+          blade combos, conduit shots, phase dashes, and boss encounters across lush parallax
+          stages while character dialogue reveals the Memory Thread arc. Epoch 5, where the portal
+          opens, follows this playable phase.
         </p>
       </section>
 
@@ -47,9 +50,9 @@ export default function CanonGamePage() {
       <section className="px-6 md:px-10 pb-24 max-w-6xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[#2D4A3E]/20">
           {[
-            "Use WASD or Arrow Keys.",
-            "Press Space or B near a tile to plant, water, or harvest.",
-            "Press F to toggle fullscreen. Press R to retry.",
+            "Move with Left/Right and jump with Up.",
+            "Use B for slash, Space for conduit shot, and A for phase dash.",
+            "Press Enter to start/advance and skip dialogue, R to retry, F fullscreen.",
           ].map((note) => (
             <div key={note} className="bg-[#0D1B2A] border border-[#2D4A3E]/30 p-5">
               <p

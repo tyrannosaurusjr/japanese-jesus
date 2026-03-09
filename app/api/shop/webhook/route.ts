@@ -30,6 +30,21 @@ interface StripeEvent {
   data: { object: StripeCheckoutSession };
 }
 
+function buildExternalOrderId(sessionId: string): string {
+  return `jj-stripe-${sessionId}`;
+}
+
+function isDuplicateExternalIdError(message: string): boolean {
+  const normalized = message.toLowerCase();
+  const hasExternalId = normalized.includes("external_id");
+  const isDuplicate =
+    normalized.includes("already exists") ||
+    normalized.includes("already been taken") ||
+    normalized.includes("duplicate");
+
+  return hasExternalId && isDuplicate;
+}
+
 function verifyStripeSignature(payload: string, sig: string, secret: string): boolean {
   const parts = sig.split(",");
   const tPart = parts.find((p) => p.startsWith("t="));
@@ -108,6 +123,7 @@ export async function POST(req: NextRequest) {
   }
 
   const recipient = buildRecipient(session);
+  const externalOrderId = buildExternalOrderId(session.id);
 
   if (!recipient) {
     console.error("[shop/webhook] Missing shipping details for session", session.id);
@@ -116,6 +132,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const order = await createPrintfulOrder({
+      external_id: externalOrderId,
       recipient,
       items: [{ sync_variant_id: syncVariantId, quantity: 1 }],
       confirm: true,
@@ -125,8 +142,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, printfulOrderId: order.id });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
-    console.error("[shop/webhook] Printful order failed:", message);
-    // Return 200 so Stripe doesn't retry — log the failure instead
-    return NextResponse.json({ ok: false, error: message }, { status: 200 });
+    if (isDuplicateExternalIdError(message)) {
+      console.warn(
+        "[shop/webhook] Duplicate external_id; assuming order already exists",
+        externalOrderId,
+        "for session",
+        session.id,
+      );
+      return NextResponse.json({
+        ok: true,
+        skipped: true,
+        reason: "duplicate external_id",
+        externalOrderId,
+      });
+    }
+
+    console.error("[shop/webhook] Printful order failed:", message, "for session", session.id);
+    // Return 5xx so Stripe retries transient downstream failures.
+    return NextResponse.json({ ok: false, error: message }, { status: 502 });
   }
 }

@@ -147,6 +147,7 @@ export async function getSyncVariant(syncVariantId: string | number) {
 }
 
 export async function createPrintfulOrder(body: {
+  external_id?: string;
   recipient: PrintfulOrderRecipient;
   items: Array<{ sync_variant_id: string; quantity: number }>;
   confirm?: boolean;

@@ -48,3 +48,6 @@ next-env.d.ts
 # Steganography source (keep in /private, never commit)
 steg-source.jpg
 *.steg
+
+# Generated web-game run artifacts
+/output/web-game/

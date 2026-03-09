@@ -1,12 +1,52 @@
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
+import { StructuredData } from "@/components/StructuredData";
 import { CANON_EPOCHS, CANON_SERIES_BY_EPOCH } from "@/lib/site-content";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import { SITE_URL, buildPageMetadata, toAbsoluteUrl } from "@/lib/metadata";
 
 export async function generateStaticParams() {
   return CANON_EPOCHS.map((epoch) => ({ slug: epoch.slug }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const epoch = CANON_EPOCHS.find((item) => item.slug === slug);
+
+  if (!epoch) {
+    return buildPageMetadata({
+      title: "Canon Epoch — Japanese Jesus",
+      description: "A canon epoch page from the Japanese Jesus myth system.",
+      path: "/canon",
+      image: "/images/og/canon.jpg",
+      imageWidth: 1200,
+      imageHeight: 630,
+      imageAlt: "A hilltop marker in Shingo under low evening light",
+    });
+  }
+
+  return buildPageMetadata({
+    title: `${epoch.title} — Canon — Japanese Jesus`,
+    description: epoch.summary,
+    path: `/canon/${epoch.slug}`,
+    keywords: [
+      "Japanese Jesus canon",
+      "Shingo mythology",
+      "Jesus in Japan legend",
+      epoch.title,
+    ],
+    image: "/images/og/canon.jpg",
+    imageWidth: 1200,
+    imageHeight: 630,
+    imageAlt: epoch.imageAlt,
+  });
 }
 
 export default async function CanonSpokePage({
@@ -22,10 +62,51 @@ export default async function CanonSpokePage({
   }
 
   const liveSeries = CANON_SERIES_BY_EPOCH[epoch.slug] ?? [];
+  const epochUrl = `${SITE_URL}/canon/${epoch.slug}`;
+  const canonicalEpochStructuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "CollectionPage",
+        "@id": `${epochUrl}#collection`,
+        name: `${epoch.title} - Japanese Jesus Canon`,
+        description: epoch.summary,
+        url: epochUrl,
+        image: toAbsoluteUrl(epoch.image),
+        isPartOf: {
+          "@id": `${SITE_URL}/#website`,
+        },
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: SITE_URL,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Canon",
+            item: `${SITE_URL}/canon`,
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: epoch.title,
+            item: epochUrl,
+          },
+        ],
+      },
+    ],
+  };
 
   return (
     <main className="min-h-screen bg-[#0D1B2A]">
       <Nav />
+      <StructuredData id="canon-epoch-structured-data" data={canonicalEpochStructuredData} />
 
       <section className="pt-40 pb-16 px-6 md:px-10 max-w-4xl mx-auto">
         <Link

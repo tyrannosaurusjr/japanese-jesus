@@ -3,11 +3,24 @@ import { Footer } from "@/components/Footer";
 import { Sigil } from "@/components/Sigil";
 import { TransmissionForm } from "@/components/TransmissionForm";
 import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: "Signal — Japanese Jesus",
-  description: "A direct intake for transmissions from the conduit.",
-};
+export const metadata: Metadata = buildPageMetadata({
+  title: "Subscribe to Japanese Jesus: Shingo Updates & Canon Signals",
+  description:
+    "Subscribe for Japanese Jesus updates: new canon releases, Shingo field notes, relic drops, and journey dispatches from Aomori.",
+  path: "/signal",
+  keywords: [
+    "Japanese Jesus updates",
+    "Shingo field notes",
+    "Aomori legend newsletter",
+    "Japanese Jesus canon updates",
+  ],
+  image: "/images/og/signal.jpg",
+  imageWidth: 1200,
+  imageHeight: 630,
+  imageAlt: "Rural fields in northern Japan under a spectral sky",
+});
 
 export default function SignalPage() {
   return (
@@ -20,8 +33,11 @@ export default function SignalPage() {
           className="text-5xl md:text-7xl text-[#F5F2EB] leading-none mb-8"
           style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
         >
-          The channel is open.<br />Leave a trace.<br />Wait for static.
+          Stay Connected to Japanese Jesus.
         </h1>
+        <p className="label text-[#E8D44D]/85 mb-8">
+          Japanese Jesus Updates, Canon Releases &amp; Shingo Field Notes
+        </p>
         <div className="w-16 h-px bg-[#C0392B]" />
       </section>
 
@@ -58,13 +74,13 @@ export default function SignalPage() {
         <div className="max-w-2xl mx-auto border border-[#2D4A3E]/30 bg-[#09131F]/80 p-8 md:p-10">
           <div className="flex items-center gap-4 mb-6">
             <Sigil variant="citrine" size={36} className="opacity-70" />
-            <p className="label text-[#E8D44D]">Transmission Intake</p>
+            <p className="label text-[#E8D44D]">Newsletter &amp; Updates</p>
           </div>
           <p
             className="text-[#F5F2EB]/55 text-sm leading-relaxed mb-6"
             style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
           >
-            This is the primary newsletter and notification channel for the site. There is not a
+            This is the primary newsletter and notification channel for the site. There is no
             separate public list right now.
           </p>
           <TransmissionForm />

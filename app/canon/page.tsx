@@ -4,12 +4,24 @@ import { CANON_EPOCHS, CANON_SERIES_BY_EPOCH } from "@/lib/site-content";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: "Canon — Japanese Jesus",
+export const metadata: Metadata = buildPageMetadata({
+  title: "The Five Epochs: Japanese Jesus Canon & Shingo Mythology",
   description:
-    "The canonical backbone: the wandering spirit, incarnation and burden, the long walk east, and the Shingo conduit.",
-};
+    "Explore the five-epoch canon behind the Japanese Jesus legend: the wandering spirit, incarnation, the long walk east, and the Shingo conduit in Aomori, Japan.",
+  path: "/canon",
+  keywords: [
+    "Japanese Jesus canon",
+    "Shingo mythology",
+    "Jesus in Japan legend",
+    "Five epochs Japanese Jesus",
+  ],
+  image: "/images/og/canon.jpg",
+  imageWidth: 1200,
+  imageHeight: 630,
+  imageAlt: "A hilltop marker in Shingo under low evening light",
+});
 
 export default function CanonPage() {
   return (
@@ -22,8 +34,9 @@ export default function CanonPage() {
           className="text-5xl md:text-7xl text-[#F5F2EB] leading-none mb-8"
           style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
         >
-          Five epochs.<br />One crossing.<br />A myth that keeps moving north.
+          Five Epochs<br />of Japanese Jesus.
         </h1>
+        <p className="label text-[#E8D44D]/85 mb-8">The Japanese Jesus Canon</p>
         <div className="w-16 h-px bg-[#C0392B]" />
       </section>
 

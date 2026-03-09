@@ -2,21 +2,80 @@ import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { FactPattern } from "@/components/FactPattern";
 import { Sigil } from "@/components/Sigil";
+import { StructuredData } from "@/components/StructuredData";
 import { CONDUIT_NOTES } from "@/lib/site-content";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { SITE_URL, buildPageMetadata, toAbsoluteUrl } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: "Conduit — Japanese Jesus",
+export const metadata: Metadata = buildPageMetadata({
+  title: "Shingo Village, Aomori: The Japanese Jesus Conduit",
   description:
-    "The Shingo conduit. The village. The primary node. 40.6542° N, 141.1389° E.",
-};
+    "Shingo Village in Aomori Prefecture, Japan: the home of the Japanese Jesus legend. Field notes, local readings, and the real place behind the myth.",
+  path: "/conduit",
+  keywords: [
+    "Shingo Village Aomori",
+    "Japanese Jesus conduit",
+    "Jesus tomb Shingo",
+    "Aomori legend",
+  ],
+  image: "/images/og/conduit.jpg",
+  imageWidth: 1200,
+  imageHeight: 630,
+  imageAlt: "Open fields in Aomori with distant mountain ridges",
+});
 
 export default function ConduitPage() {
+  const conduitStructuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Place",
+        "@id": `${SITE_URL}/conduit#place`,
+        name: "Shingo Village, Aomori, Japan",
+        description:
+          "A village in Aomori Prefecture known for the Christ legend and Japanese Jesus conduit readings.",
+        url: "https://www.vill.shingo.aomori.jp/",
+        geo: {
+          "@type": "GeoCoordinates",
+          latitude: 40.6542,
+          longitude: 141.1389,
+        },
+        address: {
+          "@type": "PostalAddress",
+          addressLocality: "Shingo",
+          addressRegion: "Aomori",
+          addressCountry: "JP",
+        },
+      },
+      {
+        "@type": "TouristAttraction",
+        "@id": `${SITE_URL}/conduit#attraction`,
+        name: "Shingo Village (Christ's Grave)",
+        description:
+          "Field notes and local context around Shingo Village, the real-world location behind the Japanese Jesus legend.",
+        url: `${SITE_URL}/conduit`,
+        image: toAbsoluteUrl("/images/shingo-village-photo.jpg"),
+        isPartOf: {
+          "@id": `${SITE_URL}/#website`,
+        },
+        containedInPlace: {
+          "@id": `${SITE_URL}/conduit#place`,
+        },
+        geo: {
+          "@type": "GeoCoordinates",
+          latitude: 40.6542,
+          longitude: 141.1389,
+        },
+      },
+    ],
+  };
+
   return (
     <main className="min-h-screen bg-[#0D1B2A]">
       <Nav />
+      <StructuredData id="conduit-structured-data" data={conduitStructuredData} />
 
       <section className="pt-40 pb-16 px-6 md:px-10 max-w-4xl mx-auto">
         <p className="label text-[#E8D44D] mb-6">Conduit</p>
@@ -24,8 +83,9 @@ export default function ConduitPage() {
           className="text-5xl md:text-7xl text-[#F5F2EB] leading-none mb-8"
           style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
         >
-          The village is small.<br />The seam is not.
+          Shingo is small.<br />The seam is not.
         </h1>
+        <p className="label text-[#E8D44D]/85 mb-8">Shingo Village, Aomori Prefecture</p>
         <div className="w-16 h-px bg-[#C0392B]" />
       </section>
 
@@ -111,7 +171,7 @@ export default function ConduitPage() {
             </div>
           </div>
           <div className="static-panel border border-[#2D4A3E]/30 p-8 bg-[#0D1B2A]">
-            <p className="label text-[#E8D44D] mb-3">Population Signal</p>
+            <p className="label text-[#E8D44D] mb-3">Population &amp; Scale</p>
             <p
               className="text-[#F5F2EB] text-lg mb-4"
               style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}

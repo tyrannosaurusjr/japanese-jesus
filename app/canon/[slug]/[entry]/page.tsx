@@ -1,9 +1,12 @@
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
+import { StructuredData } from "@/components/StructuredData";
 import { CANON_EPOCHS, CANON_SERIES_BY_EPOCH } from "@/lib/site-content";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import { SITE_URL, buildPageMetadata, toAbsoluteUrl } from "@/lib/metadata";
 
 interface CanonReference {
   label: string;
@@ -118,6 +121,45 @@ export async function generateStaticParams() {
   );
 }
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string; entry: string }>;
+}): Promise<Metadata> {
+  const { slug, entry } = await params;
+  const epoch = CANON_EPOCHS.find((item) => item.slug === slug);
+  const article = (CANON_SERIES_BY_EPOCH[slug] ?? []).find((item) => item.slug === entry);
+
+  if (!epoch || !article) {
+    return buildPageMetadata({
+      title: "Canon Article — Japanese Jesus",
+      description: "Long-form canon writing from the Japanese Jesus myth system.",
+      path: "/canon",
+      image: "/images/og/canon.jpg",
+      imageWidth: 1200,
+      imageHeight: 630,
+      imageAlt: "A hilltop marker in Shingo under low evening light",
+    });
+  }
+
+  return buildPageMetadata({
+    title: `${article.title} — ${epoch.title} — Japanese Jesus`,
+    description: article.dek,
+    path: `/canon/${epoch.slug}/${article.slug}`,
+    keywords: [
+      "Japanese Jesus canon",
+      "Shingo legend article",
+      epoch.title,
+      article.title,
+      "Aomori mythology",
+    ],
+    image: "/images/og/canon.jpg",
+    imageWidth: 1200,
+    imageHeight: 630,
+    imageAlt: epoch.imageAlt,
+  });
+}
+
 export default async function CanonEntryPage({
   params,
 }: {
@@ -133,10 +175,64 @@ export default async function CanonEntryPage({
   }
 
   const references = CANON_REFERENCES_BY_EPOCH[epoch.slug] ?? DEFAULT_CANON_REFERENCES;
+  const articleUrl = `${SITE_URL}/canon/${epoch.slug}/${article.slug}`;
+  const articleStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "@id": `${articleUrl}#article`,
+    headline: article.title,
+    description: article.dek,
+    articleSection: epoch.title,
+    mainEntityOfPage: articleUrl,
+    image: toAbsoluteUrl(epoch.image),
+    author: {
+      "@type": "Organization",
+      name: "Japanese Jesus Editorial Desk",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Japanese Jesus",
+      url: SITE_URL,
+    },
+    datePublished: "2026-03-09",
+    dateModified: "2026-03-09",
+  };
+  const articleBreadcrumbStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: SITE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Canon",
+        item: `${SITE_URL}/canon`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: epoch.title,
+        item: `${SITE_URL}/canon/${epoch.slug}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
+        name: article.title,
+        item: articleUrl,
+      },
+    ],
+  };
 
   return (
     <main className="min-h-screen bg-[#0D1B2A]">
       <Nav />
+      <StructuredData id="canon-article-structured-data" data={articleStructuredData} />
+      <StructuredData id="canon-article-breadcrumb-structured-data" data={articleBreadcrumbStructuredData} />
 
       <section className="pt-40 pb-16 px-6 md:px-10 max-w-5xl mx-auto">
         <Link

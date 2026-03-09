@@ -2,19 +2,65 @@ import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { Sigil } from "@/components/Sigil";
 import { ProductCheckout } from "@/components/ProductCheckout";
+import { StructuredData } from "@/components/StructuredData";
 import { OBJECTS } from "@/lib/objects";
 import type { Metadata } from "next";
 import Image from "next/image";
+import { SITE_URL, buildPageMetadata, toAbsoluteUrl } from "@/lib/metadata";
 
-export const metadata: Metadata = {
-  title: "Relics — Japanese Jesus",
-  description: "Relics, signals, field gear, and wall pieces from the northern conduit.",
-};
+export const metadata: Metadata = buildPageMetadata({
+  title: "Japanese Jesus Relics: Prints & Field Gear from Shingo",
+  description:
+    "Japanese Jesus prints, posters, and field gear. Wall art and objects from the Shingo conduit, designed as evidence rather than decoration.",
+  path: "/relics",
+  keywords: [
+    "Japanese Jesus prints",
+    "Shingo poster",
+    "Japanese Jesus relics",
+    "Jesus tomb art",
+  ],
+  image: "/images/og/relics.jpg",
+  imageWidth: 1200,
+  imageHeight: 630,
+  imageAlt: "Rift Sigil bucket hat set against dark fabric",
+});
 
 export default function RelicsPage() {
+  const relicsStructuredData = {
+    "@context": "https://schema.org",
+    "@graph": OBJECTS.map((obj) => ({
+      "@type": "Product",
+      "@id": `${SITE_URL}/relics#${obj.id}`,
+      name: obj.name,
+      description: obj.description,
+      sku: obj.id,
+      brand: {
+        "@type": "Brand",
+        name: "Japanese Jesus",
+      },
+      image: obj.primaryImageUrl
+        ? obj.primaryImageUrl
+        : obj.imageSrc
+          ? toAbsoluteUrl(obj.imageSrc)
+          : toAbsoluteUrl("/images/rift-sigil-bucket-hat.jpg"),
+      url: `${SITE_URL}/relics`,
+      offers:
+        obj.price !== null
+          ? {
+              "@type": "Offer",
+              price: obj.price.toFixed(2),
+              priceCurrency: "USD",
+              availability: "https://schema.org/InStock",
+              url: `${SITE_URL}/relics`,
+            }
+          : undefined,
+    })),
+  };
+
   return (
     <main className="min-h-screen bg-[#0D1B2A]">
       <Nav />
+      <StructuredData id="relics-structured-data" data={relicsStructuredData} />
 
       <section className="pt-40 pb-16 px-6 md:px-10 max-w-4xl mx-auto">
         <p className="label text-[#E8D44D] mb-6">Relics</p>
@@ -22,7 +68,7 @@ export default function RelicsPage() {
           className="text-5xl md:text-7xl text-[#F5F2EB] leading-none mb-8"
           style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
         >
-          Recovered proof.<br />Signal marks.<br />Artifacts from the seam.
+          Relics &amp; Prints from the Japanese Jesus Conduit
         </h1>
         <div className="w-16 h-px bg-[#C0392B]" />
       </section>

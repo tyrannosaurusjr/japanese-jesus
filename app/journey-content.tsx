@@ -1,18 +1,64 @@
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
+import { StructuredData } from "@/components/StructuredData";
 import Image from "next/image";
 import type { Metadata } from "next";
+import { SITE_URL, buildPageMetadata, toAbsoluteUrl } from "@/lib/metadata";
 
-export const journeyMetadata: Metadata = {
-  title: "Journey — Japanese Jesus",
+export const journeyMetadata: Metadata = buildPageMetadata({
+  title: "How to Visit Shingo Village & the Jesus Tomb, Aomori Japan",
   description:
-    "How to reach the Shingo conduit in Aomori. Flights, roads, lodging, and the final approach.",
-};
+    "How to visit Shingo Village and the Jesus Tomb in Aomori, Japan. Flights, rail, local roads, and lodging options for the northern approach.",
+  path: "/journey",
+  keywords: [
+    "visit Shingo Village",
+    "Jesus tomb Aomori",
+    "how to get to Shingo",
+    "Aomori travel guide",
+  ],
+  image: "/images/og/journey.jpg",
+  imageWidth: 1200,
+  imageHeight: 630,
+  imageAlt: "A small railway station in northern Aomori beneath a bright sky",
+});
 
 export function JourneyContent() {
+  const journeyStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: "How to Visit Shingo Village and the Jesus Tomb in Aomori, Japan",
+    description:
+      "Travel steps for reaching Shingo Village from major transport hubs, selecting a base, and completing the final road approach.",
+    url: `${SITE_URL}/journey`,
+    image: toAbsoluteUrl("/images/get-there-road.jpg"),
+    step: [
+      {
+        "@type": "HowToStep",
+        name: "Reach Aomori Prefecture",
+        text: "Fly into Aomori Airport or ride the Tohoku Shinkansen north to Shin-Aomori.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Choose your regional base",
+        text: "Use Hachinohe for transport flexibility or Towada for a quieter overnight base.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Complete the final road leg to Shingo",
+        text: "Drive local roads into Shingo Village and account for changing weather and seasonal conditions.",
+      },
+      {
+        "@type": "HowToStep",
+        name: "Stay near the site",
+        text: "If available, confirm an overnight stay at Onsenkan in Shingo before departure.",
+      },
+    ],
+  };
+
   return (
     <main className="min-h-screen bg-[#0D1B2A]">
       <Nav />
+      <StructuredData id="journey-structured-data" data={journeyStructuredData} />
 
       <section className="pt-40 pb-16 px-6 md:px-10 max-w-4xl mx-auto">
         <p className="label text-[#E8D44D] mb-6">Journey</p>
@@ -20,8 +66,11 @@ export function JourneyContent() {
           className="text-5xl md:text-7xl text-[#F5F2EB] leading-none mb-8"
           style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
         >
-          Get there.<br />Stay near the edge.<br />Let the approach do its work.
+          Visit Shingo.
         </h1>
+        <p className="label text-[#E8D44D]/85 mb-8">
+          How to Visit Shingo Village &amp; the Jesus Tomb in Aomori, Japan
+        </p>
         <div className="w-16 h-px bg-[#C0392B]" />
       </section>
 
@@ -125,7 +174,7 @@ export function JourneyContent() {
             <div className="absolute inset-0 bg-gradient-to-t from-[#0D1B2A]/50 via-transparent to-transparent" />
           </div>
           <p className="label text-[#F5F2EB]/30 mt-3">
-            Rail gets you close. Local roads finish the sentence.
+            Rail gets you close. Local roads take you the rest of the way.
           </p>
         </div>
       </section>
@@ -260,7 +309,7 @@ export function JourneyContent() {
               />
             </div>
             <p className="label text-[#F5F2EB]/30 mt-3">
-              The final leg is by road, weather, and attention span.
+              The final leg is by road. Weather and season change how the approach feels.
             </p>
           </div>
 
@@ -284,8 +333,8 @@ export function JourneyContent() {
               className="text-[#F5F2EB]/50 text-sm leading-relaxed"
               style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
             >
-              Use the airport and rail resources above to lock the regional leg first, then choose
-              lodging by how much road time you want before and after the visit.
+              Use the airport and rail resources above to plan your regional transport first, then
+              choose lodging by how much road time you want before and after the visit.
             </p>
             <div className="flex flex-wrap gap-3 mt-5">
               <a

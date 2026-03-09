@@ -1,13 +1,55 @@
 import { Nav } from "@/components/Nav";
 import { FactPattern } from "@/components/FactPattern";
 import { Footer } from "@/components/Footer";
+import { StructuredData } from "@/components/StructuredData";
 import { CONDUIT_NOTES } from "@/lib/site-content";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import { SITE_URL, buildPageMetadata, toAbsoluteUrl } from "@/lib/metadata";
 
 export async function generateStaticParams() {
   return CONDUIT_NOTES.map((note) => ({ slug: note.slug }));
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const note = CONDUIT_NOTES.find((item) => item.slug === slug);
+
+  if (!note) {
+    return buildPageMetadata({
+      title: "Conduit Note — Japanese Jesus",
+      description: "Field notes from the Shingo conduit.",
+      path: "/conduit",
+      image: "/images/og/conduit.jpg",
+      imageWidth: 1200,
+      imageHeight: 630,
+      imageAlt: "Open fields in Aomori with distant mountain ridges",
+    });
+  }
+
+  return buildPageMetadata({
+    title: `${note.title}: Japanese Jesus Field Note from Shingo Village`,
+    description: `${note.body} Read this Shingo, Aomori conduit field note in the Japanese Jesus archive.`,
+    path: `/conduit/${note.slug}`,
+    keywords: [
+      "Japanese Jesus",
+      "Shingo Village",
+      "Aomori field note",
+      "Japanese Jesus conduit",
+      note.title,
+      note.label,
+    ],
+    image: "/images/og/conduit.jpg",
+    imageWidth: 1200,
+    imageHeight: 630,
+    imageAlt: note.imageAlt,
+  });
 }
 
 export default async function ConduitSpokePage({
@@ -21,10 +63,59 @@ export default async function ConduitSpokePage({
   if (!note) {
     notFound();
   }
+  const noteUrl = `${SITE_URL}/conduit/${note.slug}`;
+  const conduitArticleStructuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Article",
+        "@id": `${noteUrl}#article`,
+        headline: `${note.title} - Shingo Conduit Field Note`,
+        description: note.body,
+        mainEntityOfPage: noteUrl,
+        image: toAbsoluteUrl(note.image),
+        author: {
+          "@type": "Organization",
+          name: "Japanese Jesus Editorial Desk",
+        },
+        publisher: {
+          "@type": "Organization",
+          name: "Japanese Jesus",
+          url: SITE_URL,
+        },
+        datePublished: "2026-03-09",
+        dateModified: "2026-03-09",
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: SITE_URL,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Conduit",
+            item: `${SITE_URL}/conduit`,
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: note.title,
+            item: noteUrl,
+          },
+        ],
+      },
+    ],
+  };
 
   return (
     <main className="min-h-screen bg-[#0D1B2A]">
       <Nav />
+      <StructuredData id="conduit-note-structured-data" data={conduitArticleStructuredData} />
 
       <section className="pt-40 pb-16 px-6 md:px-10 max-w-4xl mx-auto">
         <Link

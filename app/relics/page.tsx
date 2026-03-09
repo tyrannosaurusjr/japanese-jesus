@@ -4,6 +4,7 @@ import { Sigil } from "@/components/Sigil";
 import { ProductCheckout } from "@/components/ProductCheckout";
 import { OBJECTS } from "@/lib/objects";
 import type { Metadata } from "next";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "Relics — Japanese Jesus",
@@ -74,6 +75,16 @@ export default function RelicsPage() {
                   primaryImageUrl={obj.primaryImageUrl}
                   altImageUrl={obj.altImageUrl}
                 />
+              ) : obj.imageSrc ? (
+                <div className="relative w-full aspect-square bg-[#111D2B] border border-[#2D4A3E]/40 overflow-hidden">
+                  <Image
+                    src={obj.imageSrc}
+                    alt={obj.imageAlt || obj.name}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                    className="object-contain p-2"
+                  />
+                </div>
               ) : null}
             </article>
           ))}

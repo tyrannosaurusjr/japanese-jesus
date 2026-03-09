@@ -2,14 +2,39 @@
 
 import { useEffect, useRef } from "react";
 
-type GameMode = "menu" | "playing" | "victory" | "failed";
-type PowerupType = "rain" | "fertilizer" | "lantern";
-type CropState = "soil" | "sprout" | "growing" | "ripe";
+type GameMode = "menu" | "playing" | "stageClear" | "victory" | "failed";
+type EnemyType =
+  | "deer"
+  | "boar"
+  | "monkey"
+  | "wraith"
+  | "guardian"
+  | "serpent"
+  | "oni"
+  | "dragon";
+type PickupType = "health" | "energy" | "relic";
+type EffectType = "spark" | "burst" | "trail" | "damageText";
+type DialogueBeat = "intro" | "midpoint" | "boss" | "clear";
+type StageMotif = "cedarGate" | "riverPillars" | "snowPass" | "shrineVillage";
 
-interface CropTile {
-  state: CropState;
-  growth: number;
-  water: number;
+interface StageConfig {
+  title: string;
+  subtitle: string;
+  length: number;
+  skyA: string;
+  skyB: string;
+  haze: string;
+  mountains: string;
+  forest: string;
+  groundA: string;
+  groundB: string;
+  accent: string;
+  enemyPool: EnemyType[];
+  bossType: EnemyType;
+  bossName: string;
+  bossTitle: string;
+  bossThreatLine: string;
+  motif: StageMotif;
 }
 
 interface Player {
@@ -17,36 +42,160 @@ interface Player {
   y: number;
   vx: number;
   vy: number;
-  r: number;
+  w: number;
+  h: number;
+  facing: -1 | 1;
+  onGround: boolean;
+  hp: number;
+  maxHp: number;
+  energy: number;
+  maxEnergy: number;
+  invuln: number;
+  slashCooldown: number;
+  slashTimer: number;
+  shotCooldown: number;
+  dashCooldown: number;
+  dashTimer: number;
+  combo: number;
+  comboTimer: number;
+  score: number;
 }
 
-interface WorldPowerup {
+interface Enemy {
   id: number;
-  type: PowerupType;
+  type: EnemyType;
+  isBoss: boolean;
   x: number;
   y: number;
-  r: number;
+  vx: number;
+  vy: number;
+  w: number;
+  h: number;
+  hp: number;
+  maxHp: number;
+  onGround: boolean;
+  attackCooldown: number;
+  aiTimer: number;
+  sine: number;
+  contactDamage: number;
+  worth: number;
+  hitFlash: number;
 }
 
-interface BuffState {
-  rain: number;
-  fertilizer: number;
-  lantern: number;
+interface Projectile {
+  id: number;
+  owner: "player" | "enemy";
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  r: number;
+  ttl: number;
+  damage: number;
+  color: string;
+}
+
+interface Pickup {
+  id: number;
+  type: PickupType;
+  x: number;
+  y: number;
+  vy: number;
+  r: number;
+  ttl: number;
+}
+
+interface Effect {
+  id: number;
+  type: EffectType;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  size: number;
+  color: string;
+  ttl: number;
+  text?: string;
+}
+
+interface DialogueLine {
+  id: string;
+  speaker: string;
+  text: string;
+  tone: "ally" | "warning" | "myth";
+  holdSec?: number;
+}
+
+interface StageDialogueScript {
+  intro: Omit<DialogueLine, "id">[];
+  midpoint: Omit<DialogueLine, "id">[];
+  boss: Omit<DialogueLine, "id">[];
+  clear: Omit<DialogueLine, "id">[];
+}
+
+interface NarrativeFlags {
+  intro: boolean;
+  midpoint: boolean;
+  boss: boolean;
+  clear: boolean;
 }
 
 interface GameState {
   mode: GameMode;
+  stageIndex: number;
+  stageDistance: number;
+  totalDistance: number;
+  elapsedSec: number;
+  relics: number;
+  threadFragments: number;
+  narrativeTitle: string;
+  lastEvent: string;
   player: Player;
-  tiles: CropTile[][];
-  coins: number;
-  harvested: number;
-  seasonSec: number;
-  interactCooldown: number;
-  powerups: WorldPowerup[];
-  powerupSpawnTimer: number;
-  buffs: BuffState;
+  enemies: Enemy[];
+  projectiles: Projectile[];
+  pickups: Pickup[];
+  effects: Effect[];
+  spawnTimer: number;
+  bossSpawned: boolean;
+  bossDefeated: boolean;
+  bossIntroTimer: number;
+  narrativeFlags: NarrativeFlags;
+  dialogQueue: DialogueLine[];
+  activeDialogue: DialogueLine | null;
+  dialogTimer: number;
+  chronicle: string[];
+  cameraX: number;
+  screenShake: number;
+  hitStop: number;
   fullscreen: boolean;
-  nextPowerupId: number;
+  nextEnemyId: number;
+  nextProjectileId: number;
+  nextPickupId: number;
+  nextEffectId: number;
+}
+
+interface EnemyTemplate {
+  w: number;
+  h: number;
+  hp: number;
+  speed: number;
+  flying: boolean;
+  contactDamage: number;
+  worth: number;
+}
+
+interface SpriteSet {
+  idle: HTMLCanvasElement[];
+  run: HTMLCanvasElement[];
+  jump: HTMLCanvasElement[];
+  slash: HTMLCanvasElement[];
+  dash: HTMLCanvasElement[];
+  hurt: HTMLCanvasElement[];
+}
+
+interface SpriteLibrary {
+  player: SpriteSet;
+  enemies: Record<EnemyType, HTMLCanvasElement[]>;
 }
 
 declare global {
@@ -59,20 +208,302 @@ declare global {
 const WIDTH = 960;
 const HEIGHT = 540;
 const FIXED_DT = 1 / 60;
+const GROUND_Y = 430;
+const GRAVITY = 1800;
+const PLAYER_MOVE_SPEED = 262;
+const PLAYER_JUMP_SPEED = 702;
+const PLAYER_DASH_SPEED = 590;
+const AUTO_SCROLL_SPEED = 92;
+const CONTROL_CODES = {
+  left: "ArrowLeft",
+  right: "ArrowRight",
+  jump: "ArrowUp",
+  slash: "KeyB",
+  shot: "Space",
+  dash: "KeyA",
+  start: "Enter",
+  retry: "KeyR",
+  fullscreen: "KeyF",
+} as const;
+const BLOCK_BROWSER_CODES = new Set<string>([
+  CONTROL_CODES.shot,
+  CONTROL_CODES.left,
+  CONTROL_CODES.right,
+  CONTROL_CODES.jump,
+  "ArrowDown",
+]);
 
-const FIELD_COLS = 8;
-const FIELD_ROWS = 4;
-const TILE_SIZE = 86;
-const TILE_GAP = 8;
-const FIELD_WIDTH = FIELD_COLS * TILE_SIZE + (FIELD_COLS - 1) * TILE_GAP;
-const FIELD_HEIGHT = FIELD_ROWS * TILE_SIZE + (FIELD_ROWS - 1) * TILE_GAP;
-const FIELD_X = (WIDTH - FIELD_WIDTH) / 2;
-const FIELD_Y = 112;
+function normalizeInputCode(event: KeyboardEvent): string {
+  if (event.code) {
+    return event.code;
+  }
 
-const PLAYER_SPEED = 220;
-const INTERACT_DISTANCE = 56;
-const SEASON_DURATION = 150;
-const TARGET_COINS = 260;
+  const key = event.key.toLowerCase();
+  if (key === " " || key === "space" || key === "spacebar") {
+    return "Space";
+  }
+  if (key === "arrowleft" || key === "left") {
+    return "ArrowLeft";
+  }
+  if (key === "arrowright" || key === "right") {
+    return "ArrowRight";
+  }
+  if (key === "arrowup" || key === "up") {
+    return "ArrowUp";
+  }
+  if (key === "arrowdown" || key === "down") {
+    return "ArrowDown";
+  }
+  if (key === "a") {
+    return "KeyA";
+  }
+  if (key === "b") {
+    return "KeyB";
+  }
+  if (key === "f") {
+    return "KeyF";
+  }
+  if (key === "r") {
+    return "KeyR";
+  }
+  if (key === "enter") {
+    return "Enter";
+  }
+  return key;
+}
+
+function isEditableTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) {
+    return false;
+  }
+
+  const tag = target.tagName;
+  return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || target.isContentEditable;
+}
+
+const STAGES: StageConfig[] = [
+  {
+    title: "Epoch 01 - The Wandering Spirit",
+    subtitle: "Liminal cedar valleys and spectral currents.",
+    length: 1220,
+    skyA: "#1a2f5e",
+    skyB: "#28518b",
+    haze: "#5e8ec8",
+    mountains: "#243e73",
+    forest: "#2f6d61",
+    groundA: "#2a2f58",
+    groundB: "#1a2245",
+    accent: "#a9cdff",
+    enemyPool: ["deer", "monkey"],
+    bossType: "guardian",
+    bossName: "Torii Warden Akakaze",
+    bossTitle: "Gatekeeper of the Cedar Threshold",
+    bossThreatLine: "A stone sentinel seals the liminal crossing.",
+    motif: "cedarGate",
+  },
+  {
+    title: "Epoch 02 - Incarnated As Jesus In Egypt",
+    subtitle: "River fields, heat shimmer, and temple wards.",
+    length: 1340,
+    skyA: "#593327",
+    skyB: "#965338",
+    haze: "#d78756",
+    mountains: "#744736",
+    forest: "#668748",
+    groundA: "#5d4539",
+    groundB: "#3f2b22",
+    accent: "#ffd7a7",
+    enemyPool: ["deer", "boar", "monkey"],
+    bossType: "serpent",
+    bossName: "Serpent of the Sun Court",
+    bossTitle: "Temple Coil of Incarnate Trial",
+    bossThreatLine: "The Nile temple ward hunts every oath you carry.",
+    motif: "riverPillars",
+  },
+  {
+    title: "Epoch 03 - Eastward Journey Toward Aomori",
+    subtitle: "Cold passes, broken maps, and whiteout spirits.",
+    length: 1460,
+    skyA: "#253847",
+    skyB: "#3f6688",
+    haze: "#84aacd",
+    mountains: "#30526d",
+    forest: "#477064",
+    groundA: "#36506a",
+    groundB: "#23384d",
+    accent: "#d8ecff",
+    enemyPool: ["boar", "monkey", "wraith"],
+    bossType: "oni",
+    bossName: "Blizzard Oni Kuroyuki",
+    bossTitle: "Whiteout Tyrant of the Eastward Pass",
+    bossThreatLine: "A winter warlord blocks the final mountain route.",
+    motif: "snowPass",
+  },
+  {
+    title: "Epoch 04 - Life In Aomori",
+    subtitle: "Lush northern fields, shrine winds, storm light.",
+    length: 1280,
+    skyA: "#37295f",
+    skyB: "#5c3f92",
+    haze: "#8e75c7",
+    mountains: "#473776",
+    forest: "#549167",
+    groundA: "#473a71",
+    groundB: "#31254f",
+    accent: "#e8dcff",
+    enemyPool: ["deer", "boar", "monkey", "wraith"],
+    bossType: "dragon",
+    bossName: "Ryujin of Aomori Storm",
+    bossTitle: "Conduit Dragon of the Northern Fields",
+    bossThreatLine: "The final guardian tests whether memory can remain human.",
+    motif: "shrineVillage",
+  },
+];
+
+const NARRATIVE_TITLE = "THE MEMORY THREAD";
+
+const STAGE_DIALOGUES: StageDialogueScript[] = [
+  {
+    intro: [
+      {
+        speaker: "Keeper",
+        text: "Before flesh, you are only witness. Carry the first memory fragment.",
+        tone: "myth",
+      },
+      {
+        speaker: "Wanderer",
+        text: "I can see every life below me, but I still cannot feel one heartbeat from inside.",
+        tone: "ally",
+      },
+    ],
+    midpoint: [
+      {
+        speaker: "Isukiri",
+        text: "The thread wakes in the cedar static. Stay moving and it will answer.",
+        tone: "ally",
+      },
+    ],
+    boss: [
+      {
+        speaker: "Akakaze",
+        text: "No crossing without burden. Prove you can carry memory into flesh.",
+        tone: "warning",
+      },
+    ],
+    clear: [
+      {
+        speaker: "Keeper",
+        text: "First fragment secured. Egypt waits, and pain will give the thread a voice.",
+        tone: "myth",
+      },
+    ],
+  },
+  {
+    intro: [
+      {
+        speaker: "Keeper",
+        text: "Now you are embodied in Egypt. Hunger, heat, and fear will write themselves into you.",
+        tone: "myth",
+      },
+      {
+        speaker: "Wanderer",
+        text: "Every wound stays. Every kindness stays. Nothing is abstract anymore.",
+        tone: "ally",
+      },
+    ],
+    midpoint: [
+      {
+        speaker: "Isukiri",
+        text: "Belief can cage you faster than chains. Keep the thread moving east.",
+        tone: "warning",
+      },
+    ],
+    boss: [
+      {
+        speaker: "Sun Court Serpent",
+        text: "Your body belongs to this story now. Leave and you leave blood behind.",
+        tone: "warning",
+      },
+    ],
+    clear: [
+      {
+        speaker: "Keeper",
+        text: "Second fragment secured. Turn north-east and walk until the maps begin to fail.",
+        tone: "myth",
+      },
+    ],
+  },
+  {
+    intro: [
+      {
+        speaker: "Keeper",
+        text: "Desert becomes ice. Empire becomes silence. Keep the third fragment alive.",
+        tone: "myth",
+      },
+      {
+        speaker: "Wanderer",
+        text: "I carry human memory now, and each mile makes it heavier.",
+        tone: "ally",
+      },
+    ],
+    midpoint: [
+      {
+        speaker: "Isukiri",
+        text: "When the storm erases direction, follow the thread and not the horizon.",
+        tone: "ally",
+      },
+    ],
+    boss: [
+      {
+        speaker: "Kuroyuki",
+        text: "You crossed too far to turn back. Let winter keep your name.",
+        tone: "warning",
+      },
+    ],
+    clear: [
+      {
+        speaker: "Keeper",
+        text: "Third fragment secured. Aomori is close enough to remember you back.",
+        tone: "myth",
+      },
+    ],
+  },
+  {
+    intro: [
+      {
+        speaker: "Village Elder",
+        text: "You arrived in Aomori as a stranger carrying weather in your eyes.",
+        tone: "ally",
+      },
+      {
+        speaker: "Keeper",
+        text: "One final fragment. Keep memory and body joined until the thread seals.",
+        tone: "myth",
+      },
+    ],
+    midpoint: [
+      {
+        speaker: "Wanderer",
+        text: "For the first time, this place feels less like a destination and more like a home.",
+        tone: "ally",
+      },
+    ],
+    boss: [
+      {
+        speaker: "Ryujin",
+        text: "If memory survives your final fear, the gate will remain open.",
+        tone: "warning",
+      },
+    ],
+    clear: [
+      {
+        speaker: "Keeper",
+        text: "Fourth fragment secured. The Memory Thread closes, and the canon begins again.",
+        tone: "myth",
+      },
+    ],
+  },
+];
 
 function isFullscreenActive(): boolean {
   return typeof document !== "undefined" && Boolean(document.fullscreenElement);
@@ -82,266 +513,1693 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
-function createField(): CropTile[][] {
-  return Array.from({ length: FIELD_ROWS }, () =>
-    Array.from({ length: FIELD_COLS }, () => ({
-      state: "soil" as const,
-      growth: 0,
-      water: 0,
-    })),
-  );
+function rand(min: number, max: number): number {
+  return min + Math.random() * (max - min);
+}
+
+function lerp(a: number, b: number, t: number): number {
+  return a + (b - a) * t;
+}
+
+function rectsOverlap(
+  ax: number,
+  ay: number,
+  aw: number,
+  ah: number,
+  bx: number,
+  by: number,
+  bw: number,
+  bh: number,
+): boolean {
+  return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+}
+
+function circleRectOverlap(
+  cx: number,
+  cy: number,
+  r: number,
+  rx: number,
+  ry: number,
+  rw: number,
+  rh: number,
+): boolean {
+  const closestX = clamp(cx, rx, rx + rw);
+  const closestY = clamp(cy, ry, ry + rh);
+  const dx = cx - closestX;
+  const dy = cy - closestY;
+  return dx * dx + dy * dy <= r * r;
+}
+
+function createPlayer(): Player {
+  return {
+    x: 220,
+    y: GROUND_Y,
+    vx: 0,
+    vy: 0,
+    w: 46,
+    h: 84,
+    facing: 1,
+    onGround: true,
+    hp: 150,
+    maxHp: 150,
+    energy: 100,
+    maxEnergy: 100,
+    invuln: 0,
+    slashCooldown: 0,
+    slashTimer: 0,
+    shotCooldown: 0,
+    dashCooldown: 0,
+    dashTimer: 0,
+    combo: 0,
+    comboTimer: 0,
+    score: 0,
+  };
+}
+
+function createNarrativeFlags(): NarrativeFlags {
+  return {
+    intro: false,
+    midpoint: false,
+    boss: false,
+    clear: false,
+  };
+}
+
+function pushChronicle(game: GameState, entry: string) {
+  game.chronicle.push(entry);
+  if (game.chronicle.length > 8) {
+    game.chronicle = game.chronicle.slice(game.chronicle.length - 8);
+  }
+}
+
+function dialogueDuration(line: DialogueLine): number {
+  if (line.holdSec) {
+    return line.holdSec;
+  }
+  return clamp(2.8 + line.text.length * 0.028, 2.8, 7.6);
+}
+
+function advanceDialogue(game: GameState) {
+  const next = game.dialogQueue.shift() ?? null;
+  game.activeDialogue = next;
+  game.dialogTimer = next ? dialogueDuration(next) : 0;
+}
+
+function queueDialogue(game: GameState, lines: Omit<DialogueLine, "id">[]) {
+  const stamped = lines.map((line, index) => ({
+    ...line,
+    id: `${game.stageIndex}-${game.elapsedSec.toFixed(2)}-${index}-${game.nextEffectId + index}`,
+  }));
+  game.dialogQueue.push(...stamped);
+  if (!game.activeDialogue) {
+    advanceDialogue(game);
+  }
+}
+
+function queueStageBeat(game: GameState, beat: DialogueBeat) {
+  const script = STAGE_DIALOGUES[game.stageIndex];
+  if (!script) {
+    return;
+  }
+  queueDialogue(game, script[beat]);
+}
+
+function updateDialogue(game: GameState, dt: number) {
+  if (!game.activeDialogue) {
+    if (game.dialogQueue.length > 0) {
+      advanceDialogue(game);
+    }
+    return;
+  }
+
+  game.dialogTimer -= dt;
+  if (game.dialogTimer <= 0) {
+    advanceDialogue(game);
+  }
 }
 
 function createMenuState(): GameState {
   return {
     mode: "menu",
-    player: {
-      x: WIDTH / 2,
-      y: FIELD_Y + FIELD_HEIGHT / 2,
-      vx: 0,
-      vy: 0,
-      r: 14,
-    },
-    tiles: createField(),
-    coins: 0,
-    harvested: 0,
-    seasonSec: 0,
-    interactCooldown: 0,
-    powerups: [],
-    powerupSpawnTimer: 8,
-    buffs: {
-      rain: 0,
-      fertilizer: 0,
-      lantern: 0,
-    },
+    stageIndex: 0,
+    stageDistance: 0,
+    totalDistance: 0,
+    elapsedSec: 0,
+    relics: 0,
+    threadFragments: 0,
+    narrativeTitle: NARRATIVE_TITLE,
+    lastEvent: "Channel the canon and begin the crossing.",
+    player: createPlayer(),
+    enemies: [],
+    projectiles: [],
+    pickups: [],
+    effects: [],
+    spawnTimer: 1.2,
+    bossSpawned: false,
+    bossDefeated: false,
+    bossIntroTimer: 0,
+    narrativeFlags: createNarrativeFlags(),
+    dialogQueue: [],
+    activeDialogue: null,
+    dialogTimer: 0,
+    chronicle: [],
+    cameraX: 0,
+    screenShake: 0,
+    hitStop: 0,
     fullscreen: isFullscreenActive(),
-    nextPowerupId: 1,
+    nextEnemyId: 1,
+    nextProjectileId: 1,
+    nextPickupId: 1,
+    nextEffectId: 1,
   };
 }
 
 function createPlayingState(): GameState {
   const state = createMenuState();
   state.mode = "playing";
+  state.narrativeFlags.intro = true;
+  pushChronicle(state, `Epoch 01 opened: The Wandering Spirit.`);
+  queueStageBeat(state, "intro");
   return state;
 }
 
-function tileCenter(col: number, row: number): { x: number; y: number } {
-  return {
-    x: FIELD_X + col * (TILE_SIZE + TILE_GAP) + TILE_SIZE / 2,
-    y: FIELD_Y + row * (TILE_SIZE + TILE_GAP) + TILE_SIZE / 2,
-  };
+function enemyTemplate(type: EnemyType): EnemyTemplate {
+  if (type === "deer") {
+    return { w: 44, h: 38, hp: 38, speed: 142, flying: false, contactDamage: 12, worth: 42 };
+  }
+  if (type === "boar") {
+    return { w: 56, h: 40, hp: 62, speed: 108, flying: false, contactDamage: 14, worth: 56 };
+  }
+  if (type === "monkey") {
+    return { w: 40, h: 48, hp: 40, speed: 124, flying: false, contactDamage: 11, worth: 46 };
+  }
+  if (type === "wraith") {
+    return { w: 42, h: 42, hp: 36, speed: 122, flying: true, contactDamage: 10, worth: 52 };
+  }
+  if (type === "guardian") {
+    return { w: 94, h: 102, hp: 340, speed: 82, flying: false, contactDamage: 18, worth: 320 };
+  }
+  if (type === "serpent") {
+    return { w: 108, h: 74, hp: 380, speed: 90, flying: true, contactDamage: 18, worth: 360 };
+  }
+  if (type === "oni") {
+    return { w: 98, h: 110, hp: 430, speed: 94, flying: false, contactDamage: 20, worth: 400 };
+  }
+  return { w: 120, h: 88, hp: 520, speed: 102, flying: true, contactDamage: 22, worth: 500 };
 }
 
-function distSquared(ax: number, ay: number, bx: number, by: number): number {
-  const dx = ax - bx;
-  const dy = ay - by;
-  return dx * dx + dy * dy;
+function makeSprite(
+  width: number,
+  height: number,
+  painter: (ctx: CanvasRenderingContext2D, width: number, height: number) => void,
+): HTMLCanvasElement {
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    return canvas;
+  }
+  ctx.imageSmoothingEnabled = false;
+  painter(ctx, width, height);
+  return canvas;
 }
 
-function chooseNearestTile(game: GameState): { col: number; row: number } | null {
-  let best: { col: number; row: number } | null = null;
-  let bestDist = INTERACT_DISTANCE * INTERACT_DISTANCE;
+function drawPlayerFrame(
+  legOffset: number,
+  cloakShift: number,
+  sword: boolean,
+  dash: boolean,
+  hurt: boolean,
+): HTMLCanvasElement {
+  return makeSprite(24, 42, (ctx) => {
+    const body = hurt ? "#c36f6f" : "#9f3b35";
+    const bodyDark = hurt ? "#7f3535" : "#5f211f";
+    const skin = "#f0dcc0";
 
-  for (let row = 0; row < FIELD_ROWS; row += 1) {
-    for (let col = 0; col < FIELD_COLS; col += 1) {
-      const center = tileCenter(col, row);
-      const d = distSquared(game.player.x, game.player.y, center.x, center.y);
-      if (d <= bestDist) {
-        bestDist = d;
-        best = { col, row };
-      }
+    ctx.fillStyle = skin;
+    ctx.fillRect(10, 4, 6, 6);
+
+    ctx.fillStyle = "#cfcbc6";
+    ctx.fillRect(9, 10, 8, 7);
+
+    ctx.fillStyle = body;
+    ctx.fillRect(7, 17, 10, 12);
+    ctx.fillStyle = bodyDark;
+    ctx.fillRect(8, 18, 8, 9);
+
+    ctx.fillStyle = "#6a2f87";
+    ctx.fillRect(17 + cloakShift, 15, 5, 13);
+
+    ctx.fillStyle = "#d9c167";
+    ctx.fillRect(8, 29 + legOffset, 3, 10);
+    ctx.fillRect(13, 29 - legOffset, 3, 10);
+
+    if (dash) {
+      ctx.fillStyle = "#9fe7ff";
+      ctx.fillRect(1, 16, 6, 10);
+      ctx.fillRect(0, 18, 5, 8);
     }
-  }
 
-  return best;
+    if (sword) {
+      ctx.fillStyle = "#e6f7ff";
+      ctx.fillRect(18, 18, 6, 2);
+      ctx.fillStyle = "#8ec2e6";
+      ctx.fillRect(20, 16, 3, 6);
+    }
+  });
 }
 
-function interactWithTile(game: GameState) {
-  if (game.mode !== "playing" || game.interactCooldown > 0) {
-    return;
-  }
+function drawEnemyFrame(type: EnemyType, hop: number, boss: boolean): HTMLCanvasElement {
+  return makeSprite(32, 32, (ctx) => {
+    const palette =
+      type === "deer"
+        ? { body: "#c8a17a", shade: "#71523b", eye: "#fff4e5", accent: "#e7c9a8" }
+        : type === "boar"
+          ? { body: "#906b4f", shade: "#3e2b1e", eye: "#ffd8be", accent: "#bc926d" }
+          : type === "monkey"
+            ? { body: "#d4b087", shade: "#6f5033", eye: "#fff4e0", accent: "#f0d3af" }
+            : type === "wraith"
+              ? { body: "#b8afff", shade: "#4a438d", eye: "#fff3ff", accent: "#d9d4ff" }
+              : type === "guardian"
+                ? { body: "#ccb37f", shade: "#5b4a29", eye: "#fff2d0", accent: "#f0dcae" }
+                : type === "serpent"
+                  ? { body: "#ddb07a", shade: "#744f2f", eye: "#fff3df", accent: "#f3c997" }
+                  : type === "oni"
+                    ? { body: "#bf5f62", shade: "#5f2528", eye: "#ffe8e8", accent: "#ef9a9f" }
+                    : { body: "#c38ee2", shade: "#5d3078", eye: "#fef0ff", accent: "#e7bfff" };
 
-  const nearest = chooseNearestTile(game);
-  if (!nearest) {
-    return;
-  }
+    const y = 8 + hop;
 
-  const tile = game.tiles[nearest.row][nearest.col];
+    if (!boss) {
+      if (type === "deer") {
+        ctx.fillStyle = palette.body;
+        ctx.fillRect(7, y + 7, 18, 11);
+        ctx.fillStyle = palette.shade;
+        ctx.fillRect(10, y + 9, 12, 7);
+        ctx.fillStyle = palette.accent;
+        ctx.fillRect(22, y + 5, 6, 7);
+        ctx.fillStyle = palette.eye;
+        ctx.fillRect(25, y + 7, 2, 2);
+        ctx.fillStyle = "#dfc392";
+        ctx.fillRect(24, y + 2, 1, 3);
+        ctx.fillRect(26, y + 1, 1, 4);
+        ctx.fillStyle = "#9e7b58";
+        ctx.fillRect(11, y + 18, 2, 6);
+        ctx.fillRect(16, y + 18, 2, 6);
+      } else if (type === "boar") {
+        ctx.fillStyle = palette.body;
+        ctx.fillRect(6, y + 9, 20, 10);
+        ctx.fillStyle = palette.shade;
+        ctx.fillRect(9, y + 11, 14, 6);
+        ctx.fillStyle = palette.accent;
+        ctx.fillRect(23, y + 10, 6, 6);
+        ctx.fillStyle = "#f6e4d1";
+        ctx.fillRect(27, y + 13, 2, 1);
+        ctx.fillRect(27, y + 15, 2, 1);
+        ctx.fillStyle = palette.eye;
+        ctx.fillRect(24, y + 11, 2, 2);
+        ctx.fillStyle = "#5a3f2c";
+        ctx.fillRect(11, y + 19, 3, 5);
+        ctx.fillRect(17, y + 19, 3, 5);
+      } else if (type === "monkey") {
+        ctx.fillStyle = palette.body;
+        ctx.fillRect(9, y + 5, 13, 14);
+        ctx.fillStyle = palette.shade;
+        ctx.fillRect(11, y + 8, 9, 9);
+        ctx.fillStyle = palette.accent;
+        ctx.fillRect(20, y + 6, 7, 8);
+        ctx.fillStyle = palette.eye;
+        ctx.fillRect(22, y + 8, 2, 2);
+        ctx.fillStyle = "#7f5f40";
+        ctx.fillRect(10, y + 19, 4, 5);
+        ctx.fillRect(16, y + 19, 4, 5);
+        ctx.fillRect(23, y + 14, 4, 2);
+      } else {
+        ctx.fillStyle = palette.body;
+        ctx.fillRect(8, y + 6, 14, 13);
+        ctx.fillRect(6, y + 19, 18, 5);
+        ctx.fillStyle = palette.shade;
+        ctx.fillRect(10, y + 9, 10, 8);
+        ctx.fillStyle = palette.eye;
+        ctx.fillRect(18, y + 11, 3, 2);
+        ctx.fillStyle = "rgba(245,242,235,0.3)";
+        ctx.fillRect(12, y + 5, 6, 2);
+      }
+      return;
+    }
 
-  if (tile.state === "soil") {
-    tile.state = "sprout";
-    tile.growth = 0.05;
-    tile.water = 42;
-  } else if (tile.state === "ripe") {
-    const lanternBonus = game.buffs.lantern > 0 ? 7 : 0;
-    game.coins += 18 + lanternBonus;
-    game.harvested += 1;
-    tile.state = "soil";
-    tile.growth = 0;
-    tile.water = 0;
+    if (type === "guardian") {
+      ctx.fillStyle = palette.body;
+      ctx.fillRect(6, 8 + hop, 20, 18);
+      ctx.fillStyle = palette.shade;
+      ctx.fillRect(9, 11 + hop, 14, 12);
+      ctx.fillStyle = palette.accent;
+      ctx.fillRect(11, 5 + hop, 10, 6);
+      ctx.fillStyle = "#3d3121";
+      ctx.fillRect(13, 12 + hop, 6, 6);
+      ctx.fillStyle = palette.eye;
+      ctx.fillRect(14, 13 + hop, 2, 1);
+      ctx.fillRect(17, 13 + hop, 2, 1);
+      ctx.fillStyle = "#f4d89b";
+      ctx.fillRect(8, 5 + hop, 3, 3);
+      ctx.fillRect(21, 5 + hop, 3, 3);
+      ctx.fillStyle = "#81663f";
+      ctx.fillRect(8, 26 + hop, 5, 3);
+      ctx.fillRect(19, 26 + hop, 5, 3);
+    } else if (type === "serpent") {
+      ctx.fillStyle = palette.body;
+      ctx.fillRect(4, 18 + hop, 24, 8);
+      ctx.fillRect(8, 12 + hop, 16, 6);
+      ctx.fillRect(12, 6 + hop, 12, 6);
+      ctx.fillStyle = palette.shade;
+      ctx.fillRect(7, 20 + hop, 18, 4);
+      ctx.fillRect(11, 14 + hop, 11, 3);
+      ctx.fillStyle = palette.accent;
+      ctx.fillRect(22, 7 + hop, 6, 6);
+      ctx.fillStyle = palette.eye;
+      ctx.fillRect(25, 9 + hop, 2, 2);
+      ctx.fillStyle = "#f6dfbf";
+      ctx.fillRect(27, 11 + hop, 3, 1);
+      for (let x = 6; x <= 24; x += 4) {
+        ctx.fillStyle = x % 8 === 0 ? "#7b5636" : "#9b6d47";
+        ctx.fillRect(x, 22 + hop, 2, 2);
+      }
+    } else if (type === "oni") {
+      ctx.fillStyle = palette.body;
+      ctx.fillRect(7, 7 + hop, 18, 19);
+      ctx.fillStyle = palette.shade;
+      ctx.fillRect(10, 10 + hop, 12, 12);
+      ctx.fillStyle = palette.accent;
+      ctx.fillRect(10, 4 + hop, 4, 4);
+      ctx.fillRect(19, 4 + hop, 4, 4);
+      ctx.fillStyle = "#2a1215";
+      ctx.fillRect(13, 12 + hop, 6, 6);
+      ctx.fillStyle = palette.eye;
+      ctx.fillRect(14, 13 + hop, 2, 1);
+      ctx.fillRect(17, 13 + hop, 2, 1);
+      ctx.fillStyle = "#6f2f31";
+      ctx.fillRect(4, 16 + hop, 4, 12);
+      ctx.fillStyle = "#c9ab6a";
+      ctx.fillRect(4, 15 + hop, 4, 2);
+      ctx.fillStyle = "#5b2528";
+      ctx.fillRect(9, 26 + hop, 4, 3);
+      ctx.fillRect(18, 26 + hop, 4, 3);
+    } else {
+      ctx.fillStyle = palette.body;
+      ctx.fillRect(8, 11 + hop, 18, 10);
+      ctx.fillRect(10, 6 + hop, 14, 6);
+      ctx.fillStyle = palette.shade;
+      ctx.fillRect(11, 13 + hop, 12, 6);
+      ctx.fillStyle = palette.accent;
+      ctx.fillRect(22, 8 + hop, 7, 5);
+      ctx.fillStyle = palette.eye;
+      ctx.fillRect(25, 9 + hop, 2, 2);
+      ctx.fillStyle = "#f7dfbe";
+      ctx.fillRect(28, 12 + hop, 3, 1);
+      ctx.fillStyle = "#8d5da9";
+      ctx.fillRect(5, 9 + hop, 4, 12);
+      ctx.fillRect(6, 12 + hop, 3, 5);
+      ctx.fillRect(12, 21 + hop, 10, 3);
+      ctx.fillStyle = "#6d3f87";
+      ctx.fillRect(5, 10 + hop, 2, 8);
+      ctx.fillRect(4, 16 + hop, 2, 2);
+    }
+  });
+}
+
+function buildSprites(): SpriteLibrary {
+  const player: SpriteSet = {
+    idle: [drawPlayerFrame(0, 0, false, false, false), drawPlayerFrame(1, 0, false, false, false)],
+    run: [
+      drawPlayerFrame(2, 0, false, false, false),
+      drawPlayerFrame(-2, 1, false, false, false),
+      drawPlayerFrame(1, -1, false, false, false),
+      drawPlayerFrame(-1, 0, false, false, false),
+    ],
+    jump: [drawPlayerFrame(-2, 0, false, false, false), drawPlayerFrame(-1, 1, false, false, false)],
+    slash: [drawPlayerFrame(0, 0, true, false, false), drawPlayerFrame(1, 0, true, false, false)],
+    dash: [drawPlayerFrame(0, 1, false, true, false), drawPlayerFrame(0, -1, false, true, false)],
+    hurt: [drawPlayerFrame(0, 0, false, false, true), drawPlayerFrame(1, 0, false, false, true)],
+  };
+
+  const enemies: Record<EnemyType, HTMLCanvasElement[]> = {
+    deer: [drawEnemyFrame("deer", 0, false), drawEnemyFrame("deer", 1, false)],
+    boar: [drawEnemyFrame("boar", 0, false), drawEnemyFrame("boar", 1, false)],
+    monkey: [drawEnemyFrame("monkey", 0, false), drawEnemyFrame("monkey", -1, false)],
+    wraith: [drawEnemyFrame("wraith", -1, false), drawEnemyFrame("wraith", 1, false)],
+    guardian: [drawEnemyFrame("guardian", 0, true), drawEnemyFrame("guardian", 1, true)],
+    serpent: [drawEnemyFrame("serpent", 0, true), drawEnemyFrame("serpent", 1, true)],
+    oni: [drawEnemyFrame("oni", 0, true), drawEnemyFrame("oni", 1, true)],
+    dragon: [drawEnemyFrame("dragon", 0, true), drawEnemyFrame("dragon", 1, true)],
+  };
+
+  return { player, enemies };
+}
+
+function drawSprite(
+  ctx: CanvasRenderingContext2D,
+  sprite: HTMLCanvasElement,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  flip: boolean,
+  alpha = 1,
+) {
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  if (flip) {
+    ctx.translate(x + w * 0.5, y);
+    ctx.scale(-1, 1);
+    ctx.drawImage(sprite, -w * 0.5, 0, w, h);
   } else {
-    tile.water = 100;
+    ctx.drawImage(sprite, x, y, w, h);
   }
-
-  game.interactCooldown = 0.16;
+  ctx.restore();
 }
 
-function applyPowerup(game: GameState, type: PowerupType) {
-  if (type === "rain") {
-    game.buffs.rain = 11;
-  } else if (type === "fertilizer") {
-    game.buffs.fertilizer = 13;
-  } else {
-    game.buffs.lantern = 15;
-  }
-}
-
-function spawnPowerup(game: GameState) {
-  const typeSeed = Math.floor(game.seasonSec * 10 + game.harvested);
-  const type = (["rain", "fertilizer", "lantern"] as const)[typeSeed % 3];
-
-  const margin = 16;
-  const x = FIELD_X + margin + Math.random() * (FIELD_WIDTH - margin * 2);
-  const y = FIELD_Y + margin + Math.random() * (FIELD_HEIGHT - margin * 2);
-
-  game.powerups.push({
-    id: game.nextPowerupId,
+function addEffect(
+  game: GameState,
+  type: EffectType,
+  x: number,
+  y: number,
+  color: string,
+  size: number,
+  ttl: number,
+  vx = 0,
+  vy = 0,
+  text?: string,
+) {
+  game.effects.push({
+    id: game.nextEffectId,
     type,
     x,
     y,
-    r: 14,
+    vx,
+    vy,
+    size,
+    color,
+    ttl,
+    text,
   });
-  game.nextPowerupId += 1;
+  game.nextEffectId += 1;
 }
 
-function growthTick(game: GameState) {
-  for (let row = 0; row < FIELD_ROWS; row += 1) {
-    for (let col = 0; col < FIELD_COLS; col += 1) {
-      const tile = game.tiles[row][col];
+function spawnProjectile(
+  game: GameState,
+  owner: "player" | "enemy",
+  x: number,
+  y: number,
+  vx: number,
+  vy: number,
+  damage: number,
+  color: string,
+  r = 6,
+  ttl = 2,
+) {
+  game.projectiles.push({
+    id: game.nextProjectileId,
+    owner,
+    x,
+    y,
+    vx,
+    vy,
+    r,
+    ttl,
+    damage,
+    color,
+  });
+  game.nextProjectileId += 1;
+}
 
-      if (tile.state === "soil" || tile.state === "ripe") {
-        continue;
-      }
+function spawnPickup(game: GameState, type: PickupType, x: number, y: number) {
+  game.pickups.push({
+    id: game.nextPickupId,
+    type,
+    x,
+    y,
+    vy: rand(-240, -170),
+    r: type === "relic" ? 11 : 9,
+    ttl: 10,
+  });
+  game.nextPickupId += 1;
+}
 
-      if (game.buffs.rain > 0) {
-        tile.water = Math.max(tile.water, 76);
-      }
+function spawnEnemy(game: GameState, forcedType?: EnemyType, isBoss = false) {
+  const stage = STAGES[game.stageIndex];
+  const type = forcedType ?? stage.enemyPool[Math.floor(Math.random() * stage.enemyPool.length)];
+  const template = enemyTemplate(type);
 
-      const fertilizerMultiplier = game.buffs.fertilizer > 0 ? 1.8 : 1;
-      if (tile.water > 0) {
-        tile.growth += 0.34 * fertilizerMultiplier;
-        tile.water = Math.max(0, tile.water - 27);
-      } else {
-        tile.growth += 0.06;
-      }
+  const spawnX = game.cameraX + WIDTH * 0.75 + rand(80, 220);
+  const spawnY = template.flying ? rand(218, 340) : GROUND_Y;
 
-      if (tile.growth >= 2.2) {
-        tile.state = "ripe";
-      } else if (tile.growth >= 1.05) {
-        tile.state = "growing";
-      } else {
-        tile.state = "sprout";
-      }
-    }
+  game.enemies.push({
+    id: game.nextEnemyId,
+    type,
+    isBoss,
+    x: spawnX,
+    y: spawnY,
+    vx: -template.speed,
+    vy: 0,
+    w: template.w,
+    h: template.h,
+    hp: template.hp,
+    maxHp: template.hp,
+    onGround: !template.flying,
+    attackCooldown: isBoss ? 0.8 : rand(0.7, 1.7),
+    aiTimer: rand(0.8, 1.6),
+    sine: rand(0, Math.PI * 2),
+    contactDamage: template.contactDamage,
+    worth: template.worth,
+    hitFlash: 0,
+  });
+
+  game.nextEnemyId += 1;
+}
+
+function applyDamageToPlayer(game: GameState, damage: number, sourceX: number) {
+  const player = game.player;
+  if (player.invuln > 0 || game.mode !== "playing") {
+    return;
+  }
+
+  player.hp = Math.max(0, player.hp - damage);
+  player.invuln = 0.84;
+  player.combo = 0;
+  player.comboTimer = 0;
+  player.vx += sourceX > player.x ? -200 : 200;
+  player.vy = -340;
+
+  game.hitStop = Math.max(game.hitStop, 0.05);
+  game.screenShake = Math.max(game.screenShake, 0.3);
+  addEffect(game, "burst", player.x, player.y - player.h * 0.65, "#ff9ea8", 34, 0.25);
+  addEffect(game, "damageText", player.x, player.y - player.h - 12, "#ffd2da", 12, 0.7, 0, -44, `-${damage}`);
+  game.lastEvent = `Hit taken -${damage} HP`;
+
+  if (player.hp <= 0) {
+    game.mode = "failed";
+    game.lastEvent = "The vessel falls before the myth completes.";
   }
 }
 
-function drawTile(ctx: CanvasRenderingContext2D, tile: CropTile, col: number, row: number) {
-  const x = FIELD_X + col * (TILE_SIZE + TILE_GAP);
-  const y = FIELD_Y + row * (TILE_SIZE + TILE_GAP);
+function rewardHit(game: GameState, value: number) {
+  const player = game.player;
+  player.combo += 1;
+  player.comboTimer = 2.5;
+  player.score += value + Math.min(220, player.combo * 5);
+  player.energy = clamp(player.energy + 5.8, 0, player.maxEnergy);
+}
 
-  ctx.fillStyle = "#1C2B3A";
-  ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+function maybeDropLoot(game: GameState, enemy: Enemy) {
+  const roll = Math.random();
+  if (enemy.isBoss) {
+    spawnPickup(game, "relic", enemy.x, enemy.y - enemy.h * 0.5);
+    spawnPickup(game, "energy", enemy.x - 18, enemy.y - enemy.h * 0.5);
+    spawnPickup(game, "health", enemy.x + 18, enemy.y - enemy.h * 0.5);
+    return;
+  }
 
-  ctx.strokeStyle = "rgba(45, 74, 62, 0.72)";
-  ctx.strokeRect(x + 0.5, y + 0.5, TILE_SIZE - 1, TILE_SIZE - 1);
+  if (roll < 0.24) {
+    spawnPickup(game, "health", enemy.x, enemy.y - enemy.h * 0.4);
+  } else if (roll < 0.54) {
+    spawnPickup(game, "energy", enemy.x, enemy.y - enemy.h * 0.4);
+  } else if (roll > 0.95) {
+    spawnPickup(game, "relic", enemy.x, enemy.y - enemy.h * 0.4);
+  }
+}
 
-  if (tile.state === "soil") {
-    ctx.fillStyle = "#3A2A1F";
-    ctx.fillRect(x + 9, y + 10, TILE_SIZE - 18, TILE_SIZE - 20);
+function applyDamageToEnemy(game: GameState, enemy: Enemy, damage: number): boolean {
+  const stage = STAGES[game.stageIndex];
+  enemy.hp -= damage;
+  enemy.hitFlash = 0.12;
+
+  game.hitStop = Math.max(game.hitStop, enemy.isBoss ? 0.06 : 0.035);
+  addEffect(game, "spark", enemy.x, enemy.y - enemy.h * 0.56, "#ffdeae", 16, 0.18);
+
+  if (enemy.hp > 0) {
+    rewardHit(game, Math.ceil(enemy.worth * 0.26));
+    return false;
+  }
+
+  rewardHit(game, enemy.worth);
+  game.screenShake = Math.max(game.screenShake, enemy.isBoss ? 0.5 : 0.24);
+  addEffect(game, "burst", enemy.x, enemy.y - enemy.h * 0.5, "#ffe9b8", enemy.isBoss ? 56 : 34, 0.3);
+  addEffect(game, "damageText", enemy.x, enemy.y - enemy.h, "#fff4db", 14, 0.9, 0, -58, `${enemy.worth}`);
+  game.lastEvent = enemy.isBoss ? `${stage.bossName.toUpperCase()} defeated.` : `${enemy.type.toUpperCase()} purged.`;
+  maybeDropLoot(game, enemy);
+  return true;
+}
+
+function trySlash(game: GameState) {
+  const player = game.player;
+  if (game.mode !== "playing" || player.slashCooldown > 0 || player.energy < 7) {
+    return;
+  }
+
+  player.energy -= 7;
+  player.slashCooldown = 0.24;
+  player.slashTimer = 0.14;
+
+  const reach = 96;
+  const slashX = player.facing === 1 ? player.x + player.w * 0.5 : player.x - player.w * 0.5 - reach;
+  const slashY = player.y - player.h + 8;
+  const slashW = reach;
+  const slashH = player.h - 4;
+
+  let hits = 0;
+  const survivors: Enemy[] = [];
+  for (const enemy of game.enemies) {
+    const ex = enemy.x - enemy.w * 0.5;
+    const ey = enemy.y - enemy.h;
+    if (rectsOverlap(slashX, slashY, slashW, slashH, ex, ey, enemy.w, enemy.h)) {
+      const damage = enemy.isBoss ? 22 : 32;
+      const dead = applyDamageToEnemy(game, enemy, damage);
+      hits += 1;
+      if (!dead) {
+        survivors.push(enemy);
+      }
+    } else {
+      survivors.push(enemy);
+    }
+  }
+  game.enemies = survivors;
+
+  const arcX = player.facing === 1 ? player.x + 46 : player.x - 46;
+  addEffect(game, "trail", arcX, player.y - 42, "#ffe49a", 48, 0.14, player.facing * 20, 0);
+  if (hits === 0) {
+    game.lastEvent = "Spirit blade cuts only wind.";
+  }
+}
+
+function tryShoot(game: GameState) {
+  const player = game.player;
+  if (game.mode !== "playing" || player.shotCooldown > 0 || player.energy < 12) {
+    return;
+  }
+
+  player.energy -= 12;
+  player.shotCooldown = 0.32;
+
+  const dir = player.facing;
+  spawnProjectile(game, "player", player.x + dir * 30, player.y - 42, dir * 590, 0, 24, "#9ee8ff", 7, 1.55);
+  addEffect(game, "spark", player.x + dir * 28, player.y - 42, "#b8f3ff", 14, 0.14);
+  game.lastEvent = "Conduit shot released.";
+}
+
+function tryDash(game: GameState) {
+  const player = game.player;
+  if (game.mode !== "playing" || player.dashCooldown > 0 || player.energy < 18) {
+    return;
+  }
+
+  player.energy -= 18;
+  player.dashCooldown = 1.1;
+  player.dashTimer = 0.2;
+  player.invuln = Math.max(player.invuln, 0.3);
+  player.vx = player.facing * PLAYER_DASH_SPEED;
+
+  addEffect(game, "trail", player.x - player.facing * 24, player.y - 40, "#c5f0ff", 40, 0.2, -player.facing * 80, 0);
+  game.lastEvent = "Phase dash engaged.";
+}
+
+function advanceToNextStage(game: GameState) {
+  game.stageIndex += 1;
+  game.stageDistance = 0;
+  game.mode = "playing";
+  game.enemies = [];
+  game.projectiles = [];
+  game.pickups = [];
+  game.effects = [];
+  game.spawnTimer = 1.1;
+  game.bossSpawned = false;
+  game.bossDefeated = false;
+  game.bossIntroTimer = 0;
+  game.narrativeFlags = createNarrativeFlags();
+  game.narrativeFlags.intro = true;
+  game.dialogQueue = [];
+  game.activeDialogue = null;
+  game.dialogTimer = 0;
+  game.screenShake = 0;
+  game.hitStop = 0;
+
+  const player = game.player;
+  player.x = 220;
+  player.y = GROUND_Y;
+  player.vx = 0;
+  player.vy = 0;
+  player.onGround = true;
+  player.hp = clamp(player.hp + 36, 0, player.maxHp);
+  player.energy = clamp(player.energy + 30, 0, player.maxEnergy);
+  player.invuln = 0;
+  player.combo = 0;
+  player.comboTimer = 0;
+
+  pushChronicle(game, `Epoch ${String(game.stageIndex + 1).padStart(2, "0")} opened: ${STAGES[game.stageIndex].title}.`);
+  queueStageBeat(game, "intro");
+  game.lastEvent = `Entering ${STAGES[game.stageIndex].title}.`;
+}
+
+function updateEnemyAI(game: GameState, enemy: Enemy, dt: number) {
+  const player = game.player;
+  enemy.aiTimer -= dt;
+  enemy.attackCooldown -= dt;
+  enemy.hitFlash = Math.max(0, enemy.hitFlash - dt);
+
+  if (enemy.type === "deer") {
+    const charge = enemy.aiTimer > 0;
+    const base = 120 + game.stageIndex * 10;
+    enemy.vx = -(charge ? base + 110 : base);
+    if (enemy.aiTimer <= 0 && enemy.x > player.x + 140) {
+      enemy.aiTimer = rand(0.9, 1.4);
+    }
+  } else if (enemy.type === "boar") {
+    enemy.vx = -(92 + game.stageIndex * 9);
+  } else if (enemy.type === "monkey") {
+    enemy.vx = -(112 + game.stageIndex * 7);
+    if (enemy.onGround && enemy.aiTimer <= 0) {
+      enemy.vy = -rand(470, 560);
+      enemy.onGround = false;
+      enemy.aiTimer = rand(0.9, 1.5);
+    }
+  } else if (enemy.type === "wraith") {
+    enemy.vx = -(106 + game.stageIndex * 8);
+    enemy.y += Math.sin(game.elapsedSec * 5 + enemy.sine) * 72 * dt;
+    if (enemy.attackCooldown <= 0 && Math.abs(enemy.x - player.x) < 330) {
+      const dx = player.x - enemy.x;
+      const dy = player.y - 42 - enemy.y;
+      const len = Math.hypot(dx, dy) || 1;
+      spawnProjectile(game, "enemy", enemy.x, enemy.y, (dx / len) * 240, (dy / len) * 240, 10, "#ffadca", 5, 2.4);
+      enemy.attackCooldown = rand(2.1, 3.1);
+    }
+  } else if (enemy.type === "guardian") {
+    const anchor = game.cameraX + WIDTH * 0.68;
+    const drift = enemy.x > anchor ? -1 : enemy.x < anchor - 86 ? 1 : 0;
+    enemy.vx = drift * 92;
+    if (enemy.attackCooldown <= 0) {
+      const dir = player.x < enemy.x ? -1 : 1;
+      spawnProjectile(game, "enemy", enemy.x + dir * 24, enemy.y - 58, dir * 300, -20, 15, "#ffd39d", 7, 2.1);
+      enemy.attackCooldown = 1.35;
+    }
+  } else if (enemy.type === "serpent") {
+    const anchor = game.cameraX + WIDTH * 0.7;
+    const drift = enemy.x > anchor ? -1 : enemy.x < anchor - 74 ? 1 : 0;
+    enemy.vx = drift * 96;
+    enemy.y = 252 + Math.sin(game.elapsedSec * 2.5 + enemy.sine) * 74;
+    if (enemy.attackCooldown <= 0) {
+      const spread = [-0.24, 0, 0.24];
+      for (const off of spread) {
+        spawnProjectile(game, "enemy", enemy.x - 8, enemy.y, -268, off * 280, 13, "#ffd7aa", 6, 2.5);
+      }
+      enemy.attackCooldown = 1.62;
+    }
+  } else if (enemy.type === "oni") {
+    if (enemy.aiTimer <= 0) {
+      enemy.aiTimer = rand(0.8, 1.3);
+      enemy.vx = -rand(300, 360);
+    } else {
+      enemy.vx = -144;
+    }
+    if (enemy.attackCooldown <= 0) {
+      spawnProjectile(game, "enemy", enemy.x - 28, enemy.y - 60, -218, -84, 16, "#ff9aa8", 7, 2.4);
+      enemy.attackCooldown = 1.9;
+    }
+  } else if (enemy.type === "dragon") {
+    const anchor = game.cameraX + WIDTH * 0.74;
+    const drift = enemy.x > anchor ? -1 : enemy.x < anchor - 82 ? 1 : 0;
+    enemy.vx = drift * 106;
+    enemy.y = 222 + Math.sin(game.elapsedSec * 2.2 + enemy.sine) * 88;
+    if (enemy.attackCooldown <= 0) {
+      const spread = [-0.3, -0.1, 0.1, 0.3];
+      for (const off of spread) {
+        spawnProjectile(game, "enemy", enemy.x - 22, enemy.y - 10, -312, off * 260, 15, "#ffc27e", 7, 2.4);
+      }
+      enemy.attackCooldown = 1.45;
+    }
+  }
+
+  const template = enemyTemplate(enemy.type);
+  if (!template.flying) {
+    enemy.vy += GRAVITY * dt;
+    enemy.y += enemy.vy * dt;
+    if (enemy.y >= GROUND_Y) {
+      enemy.y = GROUND_Y;
+      enemy.vy = 0;
+      enemy.onGround = true;
+    } else {
+      enemy.onGround = false;
+    }
+  }
+
+  enemy.x += enemy.vx * dt;
+}
+
+function updatePlaying(game: GameState, dt: number, keys: Set<string>, jumpJustPressed: boolean) {
+  const stage = STAGES[game.stageIndex];
+  const player = game.player;
+
+  game.elapsedSec += dt;
+  game.screenShake = Math.max(0, game.screenShake - dt * 1.8);
+  player.invuln = Math.max(0, player.invuln - dt);
+  player.slashCooldown = Math.max(0, player.slashCooldown - dt);
+  player.shotCooldown = Math.max(0, player.shotCooldown - dt);
+  player.dashCooldown = Math.max(0, player.dashCooldown - dt);
+  player.slashTimer = Math.max(0, player.slashTimer - dt);
+  player.dashTimer = Math.max(0, player.dashTimer - dt);
+  player.comboTimer = Math.max(0, player.comboTimer - dt);
+  if (player.comboTimer <= 0) {
+    player.combo = 0;
+  }
+
+  player.energy = clamp(player.energy + dt * 15, 0, player.maxEnergy);
+
+  const left = keys.has(CONTROL_CODES.left);
+  const right = keys.has(CONTROL_CODES.right);
+  const move = (right ? 1 : 0) - (left ? 1 : 0);
+
+  if (move !== 0) {
+    player.facing = move > 0 ? 1 : -1;
+  }
+
+  if (player.dashTimer > 0) {
+    player.vx = player.facing * PLAYER_DASH_SPEED;
+    if (Math.random() < 0.62) {
+      addEffect(game, "trail", player.x - player.facing * 22, player.y - 44, "#c6ecff", 26, 0.16, -player.facing * 60, 0);
+    }
   } else {
-    ctx.fillStyle = "#4B3124";
-    ctx.fillRect(x + 9, y + 10, TILE_SIZE - 18, TILE_SIZE - 20);
+    player.vx = move * PLAYER_MOVE_SPEED;
+  }
 
-    if (tile.state === "sprout") {
-      ctx.fillStyle = "#58A95A";
-      ctx.fillRect(x + TILE_SIZE / 2 - 4, y + TILE_SIZE / 2 + 5, 8, 14);
-      ctx.fillRect(x + TILE_SIZE / 2 - 10, y + TILE_SIZE / 2 + 2, 7, 6);
-      ctx.fillRect(x + TILE_SIZE / 2 + 3, y + TILE_SIZE / 2, 7, 6);
-    } else if (tile.state === "growing") {
-      ctx.fillStyle = "#7DB66E";
-      for (let i = 0; i < 3; i += 1) {
-        const px = x + 24 + i * 16;
-        ctx.fillRect(px, y + 40, 10, 20);
-        ctx.fillRect(px - 5, y + 50, 8, 8);
-        ctx.fillRect(px + 8, y + 46, 8, 8);
+  if (jumpJustPressed && player.onGround) {
+    player.vy = -PLAYER_JUMP_SPEED;
+    player.onGround = false;
+    addEffect(game, "spark", player.x, player.y - 8, "#d7ecff", 14, 0.14, 0, -70);
+  }
+
+  player.vy += GRAVITY * dt;
+
+  const baseForward = AUTO_SCROLL_SPEED + Math.max(0, move) * 58 + Math.min(76, player.combo * 3.4);
+  player.x += (player.vx + baseForward) * dt;
+  player.x = clamp(player.x, 80, stage.length + 260);
+
+  player.y += player.vy * dt;
+  if (player.y >= GROUND_Y) {
+    player.y = GROUND_Y;
+    player.vy = 0;
+    player.onGround = true;
+  }
+
+  const targetCamera = player.x - 220;
+  game.cameraX = lerp(game.cameraX, targetCamera, 0.12);
+
+  game.stageDistance = clamp(player.x - 220, 0, stage.length);
+  game.totalDistance += baseForward * dt;
+
+  if (!game.narrativeFlags.midpoint && game.stageDistance >= stage.length * 0.45) {
+    game.narrativeFlags.midpoint = true;
+    pushChronicle(game, `Midpoint crossed in ${stage.title}.`);
+    queueStageBeat(game, "midpoint");
+  }
+
+  if (!game.bossSpawned) {
+    game.spawnTimer -= dt;
+    if (game.spawnTimer <= 0) {
+      spawnEnemy(game);
+      const pressure = clamp(game.stageDistance / stage.length, 0, 1);
+      game.spawnTimer = rand(0.72, 1.62) - pressure * 0.42;
+    }
+
+    if (game.stageDistance >= stage.length) {
+      game.bossSpawned = true;
+      game.bossIntroTimer = 1.5;
+      spawnEnemy(game, stage.bossType, true);
+      if (!game.narrativeFlags.boss) {
+        game.narrativeFlags.boss = true;
+        pushChronicle(game, `Boss encountered: ${stage.bossName}.`);
+        queueStageBeat(game, "boss");
       }
-    } else if (tile.state === "ripe") {
-      ctx.fillStyle = "#E8D44D";
-      for (let i = 0; i < 4; i += 1) {
-        const px = x + 18 + i * 14;
-        ctx.fillRect(px, y + 34, 9, 23);
-      }
-      ctx.fillStyle = "#9E6A2A";
-      ctx.fillRect(x + 16, y + 56, TILE_SIZE - 32, 5);
+      game.lastEvent = `${stage.bossName} enters the field.`;
     }
   }
 
-  if (tile.water > 0 && tile.state !== "soil") {
-    const alpha = clamp(tile.water / 130, 0.08, 0.32);
-    ctx.fillStyle = `rgba(88, 165, 224, ${alpha})`;
-    ctx.fillRect(x + 5, y + 5, TILE_SIZE - 10, TILE_SIZE - 10);
+  if (game.bossIntroTimer > 0) {
+    game.bossIntroTimer = Math.max(0, game.bossIntroTimer - dt);
+  }
+
+  const pauseCombat = game.bossIntroTimer > 0;
+
+  const enemySurvivors: Enemy[] = [];
+  for (const enemy of game.enemies) {
+    if (!pauseCombat) {
+      updateEnemyAI(game, enemy, dt);
+    } else {
+      enemy.hitFlash = Math.max(0, enemy.hitFlash - dt);
+    }
+
+    const ex = enemy.x - enemy.w * 0.5;
+    const ey = enemy.y - enemy.h;
+    const px = player.x - player.w * 0.5;
+    const py = player.y - player.h;
+
+    if (!pauseCombat && rectsOverlap(ex, ey, enemy.w, enemy.h, px, py, player.w, player.h)) {
+      applyDamageToPlayer(game, enemy.contactDamage, enemy.x);
+    }
+
+    if (!enemy.isBoss && enemy.x < game.cameraX - 220) {
+      continue;
+    }
+    enemySurvivors.push(enemy);
+  }
+  game.enemies = enemySurvivors;
+
+  const projectileSurvivors: Projectile[] = [];
+  for (const projectile of game.projectiles) {
+    projectile.x += projectile.vx * dt;
+    projectile.y += projectile.vy * dt;
+    projectile.ttl -= dt;
+
+    let consumed = false;
+
+    if (!pauseCombat && projectile.owner === "player") {
+      const nextEnemies: Enemy[] = [];
+      for (const enemy of game.enemies) {
+        const ex = enemy.x - enemy.w * 0.5;
+        const ey = enemy.y - enemy.h;
+        if (!consumed && circleRectOverlap(projectile.x, projectile.y, projectile.r, ex, ey, enemy.w, enemy.h)) {
+          const dead = applyDamageToEnemy(game, enemy, projectile.damage);
+          consumed = true;
+          if (!dead) {
+            nextEnemies.push(enemy);
+          }
+        } else {
+          nextEnemies.push(enemy);
+        }
+      }
+      game.enemies = nextEnemies;
+    } else if (!pauseCombat && projectile.owner === "enemy") {
+      const px = player.x - player.w * 0.5;
+      const py = player.y - player.h;
+      if (circleRectOverlap(projectile.x, projectile.y, projectile.r, px, py, player.w, player.h)) {
+        applyDamageToPlayer(game, projectile.damage, projectile.x);
+        consumed = true;
+      }
+    }
+
+    if (
+      consumed ||
+      projectile.ttl <= 0 ||
+      projectile.x < game.cameraX - 260 ||
+      projectile.x > game.cameraX + WIDTH + 260 ||
+      projectile.y < -120 ||
+      projectile.y > HEIGHT + 120
+    ) {
+      continue;
+    }
+
+    projectileSurvivors.push(projectile);
+  }
+  game.projectiles = projectileSurvivors;
+
+  const pickupSurvivors: Pickup[] = [];
+  for (const pickup of game.pickups) {
+    pickup.ttl -= dt;
+    pickup.vy += GRAVITY * dt * 0.5;
+    pickup.y += pickup.vy * dt;
+
+    if (pickup.y >= GROUND_Y - 4) {
+      pickup.y = GROUND_Y - 4;
+      pickup.vy *= -0.35;
+    }
+
+    const px = player.x - player.w * 0.5;
+    const py = player.y - player.h;
+    if (circleRectOverlap(pickup.x, pickup.y, pickup.r, px, py, player.w, player.h)) {
+      if (pickup.type === "health") {
+        player.hp = clamp(player.hp + 24, 0, player.maxHp);
+        game.lastEvent = "Herbal relic recovered.";
+      } else if (pickup.type === "energy") {
+        player.energy = clamp(player.energy + 28, 0, player.maxEnergy);
+        game.lastEvent = "Conduit charge restored.";
+      } else {
+        game.relics += 1;
+        player.score += 150;
+        game.lastEvent = "Rare relic fragment secured.";
+        pushChronicle(game, `Relic ${game.relics} recovered in ${stage.title}.`);
+        if (game.relics % 2 === 1) {
+          queueDialogue(game, [
+            {
+              speaker: "Keeper",
+              text: "Another fragment resonates. The Memory Thread holds.",
+              tone: "myth",
+            },
+          ]);
+        }
+      }
+      addEffect(game, "burst", pickup.x, pickup.y, "#fff1c1", 22, 0.17);
+      continue;
+    }
+
+    if (pickup.ttl <= 0 || pickup.x < game.cameraX - 220) {
+      continue;
+    }
+    pickupSurvivors.push(pickup);
+  }
+  game.pickups = pickupSurvivors;
+
+  const effectSurvivors: Effect[] = [];
+  for (const effect of game.effects) {
+    effect.ttl -= dt;
+    effect.x += effect.vx * dt;
+    effect.y += effect.vy * dt;
+
+    if (effect.type === "trail") {
+      effect.size *= 0.98;
+    }
+
+    if (effect.ttl > 0) {
+      effectSurvivors.push(effect);
+    }
+  }
+  game.effects = effectSurvivors;
+
+  if (game.bossSpawned) {
+    const boss = game.enemies.find((enemy) => enemy.isBoss);
+    if (!boss && !game.bossDefeated) {
+      game.bossDefeated = true;
+      if (!game.narrativeFlags.clear) {
+        game.narrativeFlags.clear = true;
+        game.threadFragments = Math.min(4, game.threadFragments + 1);
+        pushChronicle(game, `Fragment ${game.threadFragments} secured after ${stage.title}.`);
+        queueStageBeat(game, "clear");
+      }
+      if (game.stageIndex >= STAGES.length - 1) {
+        game.mode = "victory";
+        game.lastEvent = "Aomori endures. The four-epoch crossing is complete.";
+      } else {
+        game.mode = "stageClear";
+        game.lastEvent = `${stage.title} cleared.`;
+      }
+    }
   }
 }
 
-function drawPowerup(ctx: CanvasRenderingContext2D, powerup: WorldPowerup) {
+function drawParallaxLayer(
+  ctx: CanvasRenderingContext2D,
+  cameraX: number,
+  color: string,
+  baseY: number,
+  widthStep: number,
+  minHeight: number,
+  maxHeight: number,
+  factor: number,
+) {
+  const offset = cameraX * factor;
+  for (let i = -3; i < 18; i += 1) {
+    const x = i * widthStep - (offset % widthStep);
+    const seed = ((i * 19) % 10) / 9;
+    const h = minHeight + seed * (maxHeight - minHeight);
+    ctx.fillStyle = color;
+    ctx.fillRect(x, baseY - h, widthStep * 0.78, h);
+  }
+}
+
+function drawStageMotif(ctx: CanvasRenderingContext2D, game: GameState, stage: StageConfig) {
+  const motifOffset = game.cameraX * 0.42;
+
+  if (stage.motif === "cedarGate") {
+    for (let i = -2; i < 11; i += 1) {
+      const x = i * 236 - (motifOffset % 236);
+      const y = GROUND_Y - 6;
+      ctx.fillStyle = "#384e7f";
+      ctx.fillRect(x + 26, y - 62, 8, 62);
+      ctx.fillRect(x + 88, y - 62, 8, 62);
+      ctx.fillRect(x + 16, y - 66, 92, 6);
+      ctx.fillRect(x + 20, y - 72, 84, 4);
+      ctx.fillStyle = "rgba(169,205,255,0.22)";
+      ctx.fillRect(x + 18, y - 70, 88, 2);
+    }
+    return;
+  }
+
+  if (stage.motif === "riverPillars") {
+    for (let i = -2; i < 14; i += 1) {
+      const x = i * 174 - (motifOffset % 174);
+      const y = GROUND_Y - 4;
+      ctx.fillStyle = "#845642";
+      ctx.fillRect(x + 30, y - 58, 16, 58);
+      ctx.fillStyle = "#a77554";
+      ctx.fillRect(x + 32, y - 54, 12, 50);
+      ctx.fillStyle = "#cf965f";
+      ctx.fillRect(x + 26, y - 61, 24, 4);
+      ctx.fillStyle = "#5e7f49";
+      ctx.fillRect(x + 58, y - 32, 4, 32);
+      ctx.fillRect(x + 64, y - 22, 3, 22);
+    }
+    return;
+  }
+
+  if (stage.motif === "snowPass") {
+    for (let i = -2; i < 13; i += 1) {
+      const x = i * 190 - (motifOffset % 190);
+      const y = GROUND_Y - 5;
+      ctx.fillStyle = "#2f536f";
+      ctx.fillRect(x + 22, y - 46, 6, 46);
+      ctx.fillRect(x + 42, y - 58, 7, 58);
+      ctx.fillStyle = "#3f6889";
+      ctx.fillRect(x + 16, y - 36, 18, 7);
+      ctx.fillRect(x + 35, y - 43, 21, 8);
+      ctx.fillRect(x + 30, y - 56, 22, 8);
+      ctx.fillStyle = "#d8ecff";
+      ctx.fillRect(x + 16, y - 36, 18, 2);
+      ctx.fillRect(x + 35, y - 43, 21, 2);
+      ctx.fillRect(x + 30, y - 56, 22, 2);
+    }
+    return;
+  }
+
+  for (let i = -2; i < 12; i += 1) {
+    const x = i * 214 - (motifOffset % 214);
+    const y = GROUND_Y - 6;
+    ctx.fillStyle = "#4f3d7b";
+    ctx.fillRect(x + 28, y - 32, 66, 32);
+    ctx.fillStyle = "#6f5a9f";
+    ctx.fillRect(x + 22, y - 40, 78, 10);
+    ctx.fillRect(x + 24, y - 46, 74, 4);
+    ctx.fillStyle = "#e8dcff";
+    ctx.fillRect(x + 54, y - 24, 6, 24);
+    ctx.fillStyle = "#f6cc7a";
+    ctx.fillRect(x + 112, y - 24, 6, 10);
+  }
+}
+
+function drawBackground(ctx: CanvasRenderingContext2D, game: GameState) {
+  const stage = STAGES[game.stageIndex];
+
+  for (let y = 0; y < HEIGHT; y += 8) {
+    const t = y / HEIGHT;
+    ctx.fillStyle = t < 0.5 ? stage.skyA : stage.skyB;
+    if (y % 16 === 0) {
+      ctx.fillStyle = stage.skyB;
+    }
+    ctx.fillRect(0, y, WIDTH, 8);
+  }
+
+  drawParallaxLayer(ctx, game.cameraX, stage.mountains, 336, 176, 68, 150, 0.15);
+  drawParallaxLayer(ctx, game.cameraX, stage.haze, 370, 124, 54, 128, 0.32);
+  drawParallaxLayer(ctx, game.cameraX, stage.forest, 412, 88, 28, 94, 0.58);
+
+  const horizonShift = game.cameraX * 0.24;
+  for (let i = -3; i < 26; i += 1) {
+    const x = i * 68 - (horizonShift % 68);
+    const glow = 8 + ((i * 13) % 4) * 3;
+    ctx.fillStyle = "rgba(245,242,235,0.08)";
+    ctx.fillRect(x + 24, 180 + ((i * 7) % 3) * 2, glow, 2);
+  }
+
+  ctx.fillStyle = stage.groundA;
+  ctx.fillRect(0, GROUND_Y + 1, WIDTH, HEIGHT - GROUND_Y);
+
+  for (let y = GROUND_Y + 6; y < HEIGHT; y += 10) {
+    ctx.fillStyle = y % 20 === 0 ? stage.groundB : stage.groundA;
+    ctx.fillRect(0, y, WIDTH, 6);
+  }
+
+  const tileSize = 32;
+  const tileOffset = game.cameraX % tileSize;
+  for (let x = -tileSize; x < WIDTH + tileSize; x += tileSize) {
+    ctx.fillStyle = stage.groundB;
+    ctx.fillRect(x - tileOffset, GROUND_Y - 2, 18, 4);
+  }
+
+  const nearOffset = game.cameraX * 0.9;
+  for (let i = -4; i < 28; i += 1) {
+    const x = i * 70 - (nearOffset % 70);
+    const h = 14 + ((i * 5) % 4) * 6;
+    ctx.fillStyle = stage.forest;
+    ctx.fillRect(x + 10, GROUND_Y - h, 4, h);
+    ctx.fillRect(x + 4, GROUND_Y - Math.floor(h * 0.55), 3, 9);
+    ctx.fillRect(x + 15, GROUND_Y - Math.floor(h * 0.5), 3, 9);
+  }
+
+  drawStageMotif(ctx, game, stage);
+
+  ctx.fillStyle = "rgba(255,255,255,0.08)";
+  for (let i = 0; i < 6; i += 1) {
+    const waveY = 150 + i * 22;
+    ctx.fillRect(0, waveY, WIDTH, 2);
+  }
+
+  const fogAlpha = stage.title.includes("Egypt") ? 0.12 : stage.title.includes("Eastward") ? 0.09 : 0.06;
+  ctx.fillStyle = `rgba(245,242,235,${fogAlpha})`;
+  ctx.fillRect(0, 118, WIDTH, 60);
+}
+
+function drawPlayer(ctx: CanvasRenderingContext2D, game: GameState, sprites: SpriteLibrary) {
+  const player = game.player;
+
+  let frames: HTMLCanvasElement[];
+  if (player.invuln > 0.12) {
+    frames = sprites.player.hurt;
+  } else if (player.slashTimer > 0) {
+    frames = sprites.player.slash;
+  } else if (player.dashTimer > 0) {
+    frames = sprites.player.dash;
+  } else if (!player.onGround) {
+    frames = sprites.player.jump;
+  } else if (Math.abs(player.vx) > 12) {
+    frames = sprites.player.run;
+  } else {
+    frames = sprites.player.idle;
+  }
+
+  const frameIndex = Math.floor(game.elapsedSec * 10) % frames.length;
+  const sprite = frames[frameIndex];
+
+  const left = player.x - player.w * 0.5;
+  const top = player.y - player.h;
+
+  const flicker = player.invuln > 0 && Math.floor(player.invuln * 20) % 2 === 0;
+  if (!flicker) {
+    drawSprite(ctx, sprite, left, top, player.w, player.h, player.facing === -1, 1);
+  }
+
+  if (player.slashTimer > 0) {
+    ctx.strokeStyle = "#ffe39d";
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    if (player.facing === 1) {
+      ctx.arc(player.x + 42, player.y - 42, 34, -0.9, 0.85);
+    } else {
+      ctx.arc(player.x - 42, player.y - 42, 34, 2.3, 4.05);
+    }
+    ctx.stroke();
+  }
+}
+
+function drawEnemy(ctx: CanvasRenderingContext2D, game: GameState, enemy: Enemy, sprites: SpriteLibrary) {
+  const frames = sprites.enemies[enemy.type];
+  const frame = frames[Math.floor(game.elapsedSec * 8 + enemy.id) % frames.length];
+
+  const left = enemy.x - enemy.w * 0.5;
+  const top = enemy.y - enemy.h;
+
+  drawSprite(ctx, frame, left, top, enemy.w, enemy.h, enemy.vx > 0, 1);
+
+  if (enemy.hitFlash > 0) {
+    ctx.fillStyle = `rgba(255,255,255,${clamp(enemy.hitFlash * 6, 0, 0.7)})`;
+    ctx.fillRect(left, top, enemy.w, enemy.h);
+  }
+
+  if (enemy.isBoss) {
+    ctx.fillStyle = "#f5f2eb";
+    ctx.font = "700 11px 'Courier New', monospace";
+    ctx.textAlign = "center";
+    const bossTag = STAGES[game.stageIndex].bossName.split(" ")[0] ?? "BOSS";
+    ctx.fillText(bossTag.toUpperCase(), enemy.x, top - 8);
+    ctx.textAlign = "left";
+  }
+}
+
+function drawProjectile(ctx: CanvasRenderingContext2D, projectile: Projectile) {
+  const glow = projectile.owner === "player" ? "rgba(158,232,255,0.34)" : "rgba(255,156,184,0.34)";
+  ctx.fillStyle = glow;
   ctx.beginPath();
-  if (powerup.type === "rain") {
-    ctx.fillStyle = "#5CA6E0";
-  } else if (powerup.type === "fertilizer") {
-    ctx.fillStyle = "#8BE27F";
-  } else {
-    ctx.fillStyle = "#F2B050";
-  }
-  ctx.arc(powerup.x, powerup.y, powerup.r, 0, Math.PI * 2);
+  ctx.arc(projectile.x, projectile.y, projectile.r + 4, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.fillStyle = "#0D1B2A";
-  ctx.font = "700 11px Inter";
-  ctx.textAlign = "center";
-  const label = powerup.type === "rain" ? "RAIN" : powerup.type === "fertilizer" ? "GROW" : "GOLD";
-  ctx.fillText(label, powerup.x, powerup.y + 4);
+  ctx.fillStyle = projectile.color;
+  ctx.beginPath();
+  ctx.arc(projectile.x, projectile.y, projectile.r, 0, Math.PI * 2);
+  ctx.fill();
 }
 
-function drawOverlay(ctx: CanvasRenderingContext2D, title: string, lines: string[], action: string) {
-  ctx.fillStyle = "rgba(13, 27, 42, 0.88)";
+function drawPickup(ctx: CanvasRenderingContext2D, pickup: Pickup) {
+  const left = pickup.x - pickup.r;
+  const top = pickup.y - pickup.r;
+
+  const palette =
+    pickup.type === "health"
+      ? { a: "#ff9c9c", b: "#7a2f2f", t: "H" }
+      : pickup.type === "energy"
+        ? { a: "#94ddff", b: "#2f5978", t: "E" }
+        : { a: "#ffe2a2", b: "#7a612a", t: "R" };
+
+  ctx.fillStyle = palette.a;
+  ctx.fillRect(left, top, pickup.r * 2, pickup.r * 2);
+  ctx.fillStyle = palette.b;
+  ctx.fillRect(left + 3, top + 3, pickup.r * 2 - 6, pickup.r * 2 - 6);
+  ctx.fillStyle = "#f5f2eb";
+  ctx.font = "700 9px 'Courier New', monospace";
+  ctx.textAlign = "center";
+  ctx.fillText(palette.t, pickup.x, pickup.y + 3);
+  ctx.textAlign = "left";
+}
+
+function drawEffect(ctx: CanvasRenderingContext2D, effect: Effect) {
+  if (effect.type === "spark") {
+    ctx.fillStyle = effect.color;
+    ctx.fillRect(effect.x - 3, effect.y - 3, 6, 6);
+    return;
+  }
+
+  if (effect.type === "burst") {
+    const alpha = clamp(effect.ttl * 4, 0, 1);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = effect.color;
+    ctx.fillRect(effect.x - effect.size * 0.5, effect.y - effect.size * 0.5, effect.size, effect.size);
+    ctx.restore();
+    return;
+  }
+
+  if (effect.type === "trail") {
+    const alpha = clamp(effect.ttl * 6, 0, 0.7);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = effect.color;
+    ctx.fillRect(effect.x - effect.size * 0.5, effect.y - effect.size * 0.5, effect.size, effect.size * 0.6);
+    ctx.restore();
+    return;
+  }
+
+  const alpha = clamp(effect.ttl * 1.8, 0, 1);
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = effect.color;
+  ctx.font = "700 14px 'Courier New', monospace";
+  ctx.textAlign = "center";
+  ctx.fillText(effect.text ?? "", effect.x, effect.y);
+  ctx.textAlign = "left";
+  ctx.restore();
+}
+
+function drawHud(ctx: CanvasRenderingContext2D, game: GameState) {
+  const stage = STAGES[game.stageIndex];
+  const player = game.player;
+
+  ctx.fillStyle = "rgba(8, 13, 34, 0.9)";
+  ctx.fillRect(0, 0, WIDTH, 92);
+  ctx.fillStyle = stage.accent;
+  ctx.font = "700 14px 'Courier New', monospace";
+  ctx.textAlign = "left";
+  ctx.fillText("CANON BLADE // 16-BIT MYTH ACTION", 18, 24);
+
+  ctx.fillStyle = "#f5f2eb";
+  ctx.font = "700 12px 'Courier New', monospace";
+  ctx.fillText(stage.title.toUpperCase(), 18, 45);
+  ctx.fillStyle = "#cad8ff";
+  ctx.fillText(stage.subtitle.toUpperCase(), 18, 63);
+
+  const ratio = clamp(game.stageDistance / stage.length, 0, 1);
+  ctx.fillStyle = "#2c3b6a";
+  ctx.fillRect(18, 72, 402, 10);
+  ctx.fillStyle = stage.accent;
+  ctx.fillRect(18, 72, Math.floor(402 * ratio), 10);
+  ctx.strokeStyle = "#6074b6";
+  ctx.strokeRect(18, 72, 402, 10);
+  ctx.fillStyle = "#f5f2eb";
+  ctx.fillText(`DIST ${Math.floor(game.stageDistance)}/${stage.length}`, 430, 81);
+  ctx.fillText(`THREAD ${game.threadFragments}/4`, 640, 45);
+  ctx.fillText(`CHRONICLE ${game.chronicle.length}`, 640, 63);
+
+  ctx.fillStyle = "#0b1534";
+  ctx.fillRect(0, HEIGHT - 72, WIDTH, 72);
+
+  ctx.fillStyle = "#36487f";
+  ctx.fillRect(18, HEIGHT - 57, 210, 10);
+  ctx.fillStyle = "#ff9a9a";
+  ctx.fillRect(18, HEIGHT - 57, Math.floor((player.hp / player.maxHp) * 210), 10);
+  ctx.strokeStyle = "#6b80bc";
+  ctx.strokeRect(18, HEIGHT - 57, 210, 10);
+
+  ctx.fillStyle = "#36487f";
+  ctx.fillRect(18, HEIGHT - 39, 210, 10);
+  ctx.fillStyle = "#9fe7ff";
+  ctx.fillRect(18, HEIGHT - 39, Math.floor((player.energy / player.maxEnergy) * 210), 10);
+  ctx.strokeStyle = "#6b80bc";
+  ctx.strokeRect(18, HEIGHT - 39, 210, 10);
+
+  ctx.fillStyle = "#f5f2eb";
+  ctx.font = "700 11px 'Courier New', monospace";
+  ctx.fillText(`HP ${Math.ceil(player.hp)}`, 236, HEIGHT - 48);
+  ctx.fillText(`EN ${Math.ceil(player.energy)}`, 236, HEIGHT - 30);
+
+  ctx.fillText(`SCORE ${player.score}`, 362, HEIGHT - 48);
+  ctx.fillText(`COMBO ${player.combo}`, 362, HEIGHT - 30);
+  ctx.fillText(`RELIC ${game.relics}`, 502, HEIGHT - 48);
+  ctx.fillText(`ENEMY ${game.enemies.length}`, 502, HEIGHT - 30);
+
+  ctx.fillText(`SLASH ${Math.ceil(player.slashCooldown * 10) / 10}`, 642, HEIGHT - 48);
+  ctx.fillText(`SHOT ${Math.ceil(player.shotCooldown * 10) / 10}`, 642, HEIGHT - 30);
+  ctx.fillText(`DASH ${Math.ceil(player.dashCooldown * 10) / 10}`, 794, HEIGHT - 48);
+  ctx.fillText(`TIME ${Math.floor(game.elapsedSec)}s`, 794, HEIGHT - 30);
+
+  ctx.fillStyle = "rgba(10, 18, 44, 0.86)";
+  ctx.fillRect(18, 97, WIDTH - 36, 22);
+  ctx.strokeStyle = "rgba(112, 133, 206, 0.85)";
+  ctx.strokeRect(18, 97, WIDTH - 36, 22);
+  ctx.fillStyle = "#e8d44d";
+  ctx.fillText(game.lastEvent.slice(0, 118).toUpperCase(), 26, 111);
+
+  const boss = game.enemies.find((enemy) => enemy.isBoss);
+  if (boss) {
+    const barX = WIDTH * 0.22;
+    const barW = WIDTH * 0.56;
+    const hpRatio = clamp(boss.hp / boss.maxHp, 0, 1);
+
+    ctx.fillStyle = "rgba(26, 10, 18, 0.92)";
+    ctx.fillRect(barX, 124, barW, 16);
+    ctx.fillStyle = "#ff808f";
+    ctx.fillRect(barX, 124, barW * hpRatio, 16);
+    ctx.strokeStyle = "#ebadba";
+    ctx.strokeRect(barX, 124, barW, 16);
+
+    ctx.fillStyle = "#f5f2eb";
+    ctx.font = "700 11px 'Courier New', monospace";
+    ctx.textAlign = "center";
+    ctx.fillText(`${stage.bossName.toUpperCase()} ${Math.ceil(boss.hp)} HP`, WIDTH / 2, 136);
+    ctx.font = "700 9px 'Courier New', monospace";
+    ctx.fillStyle = "#ffd8a7";
+    ctx.fillText(stage.bossTitle.toUpperCase(), WIDTH / 2, 148);
+    ctx.textAlign = "left";
+  }
+}
+
+function drawOverlay(ctx: CanvasRenderingContext2D, title: string, lines: string[], footer: string) {
+  ctx.fillStyle = "rgba(4, 8, 24, 0.9)";
   ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
-  ctx.strokeStyle = "rgba(232, 212, 77, 0.22)";
-  ctx.strokeRect(120, 92, WIDTH - 240, HEIGHT - 184);
+  ctx.fillStyle = "#1a2f66";
+  ctx.fillRect(116, 86, WIDTH - 232, HEIGHT - 172);
+  ctx.fillStyle = "#09142f";
+  ctx.fillRect(124, 94, WIDTH - 248, HEIGHT - 188);
 
-  ctx.fillStyle = "#F5F2EB";
+  ctx.fillStyle = "#f5f2eb";
   ctx.textAlign = "center";
-  ctx.font = "900 56px Playfair Display";
-  ctx.fillText(title, WIDTH / 2, 182);
+  ctx.font = "700 34px 'Courier New', monospace";
+  ctx.fillText(title.toUpperCase(), WIDTH / 2, 168);
 
-  ctx.fillStyle = "rgba(245, 242, 235, 0.83)";
-  ctx.font = "400 20px Inter";
+  ctx.fillStyle = "#c8d6ff";
+  ctx.font = "700 14px 'Courier New', monospace";
   lines.forEach((line, index) => {
-    ctx.fillText(line, WIDTH / 2, 238 + index * 34);
+    ctx.fillText(line.toUpperCase(), WIDTH / 2, 212 + index * 30);
   });
 
-  ctx.fillStyle = "#E8D44D";
-  ctx.fillRect(WIDTH / 2 - 196, HEIGHT - 132, 392, 56);
-  ctx.fillStyle = "#0D1B2A";
-  ctx.font = "700 14px Inter";
-  ctx.fillText(action, WIDTH / 2, HEIGHT - 97);
+  ctx.fillStyle = "#ffbf52";
+  ctx.fillRect(WIDTH / 2 - 214, HEIGHT - 118, 428, 50);
+  ctx.fillStyle = "#5d3f13";
+  ctx.fillRect(WIDTH / 2 - 205, HEIGHT - 109, 410, 32);
+  ctx.fillStyle = "#ffebc4";
+  ctx.font = "700 13px 'Courier New', monospace";
+  ctx.fillText(footer.toUpperCase(), WIDTH / 2, HEIGHT - 88);
+}
+
+function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
+  const words = text.split(" ");
+  const lines: string[] = [];
+  let current = "";
+
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word;
+    if (ctx.measureText(candidate).width > maxWidth && current) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = candidate;
+    }
+  }
+
+  if (current) {
+    lines.push(current);
+  }
+
+  return lines.slice(0, 3);
+}
+
+function dialogueToneColor(tone: DialogueLine["tone"]): string {
+  if (tone === "warning") {
+    return "#ffadad";
+  }
+  if (tone === "myth") {
+    return "#e8d44d";
+  }
+  return "#b6d8ff";
+}
+
+function drawDialoguePanel(ctx: CanvasRenderingContext2D, game: GameState) {
+  const line = game.activeDialogue;
+  if (!line) {
+    return;
+  }
+
+  const panelX = 24;
+  const panelY = HEIGHT - 170;
+  const panelW = WIDTH - 48;
+  const panelH = 88;
+
+  ctx.fillStyle = "rgba(7, 12, 31, 0.9)";
+  ctx.fillRect(panelX, panelY, panelW, panelH);
+  ctx.strokeStyle = "rgba(116, 137, 209, 0.85)";
+  ctx.strokeRect(panelX, panelY, panelW, panelH);
+
+  const accent = dialogueToneColor(line.tone);
+  ctx.fillStyle = accent;
+  ctx.fillRect(panelX + 12, panelY + 12, 44, 44);
+  ctx.fillStyle = "#0b1734";
+  ctx.font = "700 20px 'Courier New', monospace";
+  ctx.textAlign = "center";
+  ctx.fillText(line.speaker[0] ?? "?", panelX + 34, panelY + 40);
+
+  ctx.textAlign = "left";
+  ctx.fillStyle = accent;
+  ctx.font = "700 12px 'Courier New', monospace";
+  ctx.fillText(line.speaker.toUpperCase(), panelX + 68, panelY + 25);
+
+  ctx.fillStyle = "#f5f2eb";
+  ctx.font = "700 12px 'Courier New', monospace";
+  const wrapped = wrapText(ctx, line.text, panelW - 88);
+  wrapped.forEach((part, index) => {
+    ctx.fillText(part.toUpperCase(), panelX + 68, panelY + 46 + index * 16);
+  });
+
+  ctx.fillStyle = "rgba(184, 201, 255, 0.9)";
+  ctx.font = "700 10px 'Courier New', monospace";
+  ctx.fillText(
+    `${game.narrativeTitle} ${game.threadFragments}/4  //  ENTER TO SKIP DIALOGUE`,
+    panelX + 12,
+    panelY + panelH - 10,
+  );
+}
+
+function toTextState(game: GameState): string {
+  const stage = STAGES[game.stageIndex];
+  const boss = game.enemies.find((enemy) => enemy.isBoss);
+
+  return JSON.stringify({
+    coordinateSystem:
+      "origin=(0,0) top-left, +x right, +y down, canvas=960x540, world uses cameraX, groundY=430",
+    mode: game.mode,
+    stage: {
+      index: game.stageIndex,
+      title: stage.title,
+      distance: Number(game.stageDistance.toFixed(1)),
+      length: stage.length,
+      ratio: Number((game.stageDistance / stage.length).toFixed(3)),
+      totalDistance: Number(game.totalDistance.toFixed(1)),
+      elapsedSec: Number(game.elapsedSec.toFixed(1)),
+      bossSpawned: game.bossSpawned,
+      bossIntroSec: Number(game.bossIntroTimer.toFixed(2)),
+    },
+    narrative: {
+      title: game.narrativeTitle,
+      threadFragments: game.threadFragments,
+      chronicle: game.chronicle.slice(-6),
+      activeDialogue: game.activeDialogue
+        ? {
+            speaker: game.activeDialogue.speaker,
+            text: game.activeDialogue.text,
+            tone: game.activeDialogue.tone,
+            remainingSec: Number(game.dialogTimer.toFixed(2)),
+          }
+        : null,
+      queuedDialogueCount: game.dialogQueue.length,
+    },
+    camera: {
+      x: Number(game.cameraX.toFixed(1)),
+      shake: Number(game.screenShake.toFixed(2)),
+      hitStop: Number(game.hitStop.toFixed(2)),
+    },
+    player: {
+      x: Number(game.player.x.toFixed(1)),
+      y: Number(game.player.y.toFixed(1)),
+      vx: Number(game.player.vx.toFixed(1)),
+      vy: Number(game.player.vy.toFixed(1)),
+      hp: Number(game.player.hp.toFixed(1)),
+      maxHp: game.player.maxHp,
+      energy: Number(game.player.energy.toFixed(1)),
+      maxEnergy: game.player.maxEnergy,
+      facing: game.player.facing,
+      onGround: game.player.onGround,
+      invuln: Number(game.player.invuln.toFixed(2)),
+      cooldowns: {
+        slash: Number(game.player.slashCooldown.toFixed(2)),
+        shot: Number(game.player.shotCooldown.toFixed(2)),
+        dash: Number(game.player.dashCooldown.toFixed(2)),
+      },
+      combat: {
+        combo: game.player.combo,
+        comboTimer: Number(game.player.comboTimer.toFixed(2)),
+        score: game.player.score,
+        relics: game.relics,
+      },
+    },
+    world: {
+      boss: boss
+        ? {
+            name: stage.bossName,
+            title: stage.bossTitle,
+            type: boss.type,
+            x: Number(boss.x.toFixed(1)),
+            y: Number(boss.y.toFixed(1)),
+            hp: Number(boss.hp.toFixed(1)),
+            maxHp: boss.maxHp,
+          }
+        : null,
+      enemies: game.enemies.slice(0, 12).map((enemy) => ({
+        id: enemy.id,
+        type: enemy.type,
+        isBoss: enemy.isBoss,
+        x: Number(enemy.x.toFixed(1)),
+        y: Number(enemy.y.toFixed(1)),
+        hp: Number(enemy.hp.toFixed(1)),
+        maxHp: enemy.maxHp,
+      })),
+      projectiles: game.projectiles.slice(0, 14).map((projectile) => ({
+        id: projectile.id,
+        owner: projectile.owner,
+        x: Number(projectile.x.toFixed(1)),
+        y: Number(projectile.y.toFixed(1)),
+        vx: Number(projectile.vx.toFixed(1)),
+        vy: Number(projectile.vy.toFixed(1)),
+        ttl: Number(projectile.ttl.toFixed(2)),
+      })),
+      pickups: game.pickups.slice(0, 10).map((pickup) => ({
+        id: pickup.id,
+        type: pickup.type,
+        x: Number(pickup.x.toFixed(1)),
+        y: Number(pickup.y.toFixed(1)),
+        ttl: Number(pickup.ttl.toFixed(2)),
+      })),
+    },
+    lastEvent: game.lastEvent,
+  });
 }
 
 export function CanonGameCanvas() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const gameRef = useRef<GameState>(createMenuState());
   const keysRef = useRef<Set<string>>(new Set());
+  const spritesRef = useRef<SpriteLibrary | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -354,13 +2212,20 @@ export function CanonGameCanvas() {
       return;
     }
 
-    let growthAccumulator = 0;
-    let interactPressed = false;
+    spritesRef.current = buildSprites();
+
+    let upHeld = false;
+    let slashHeld = false;
+    let shotHeld = false;
+    let dashHeld = false;
 
     const startGame = () => {
       gameRef.current = createPlayingState();
-      growthAccumulator = 0;
-      interactPressed = false;
+      keysRef.current.clear();
+      upHeld = false;
+      slashHeld = false;
+      shotHeld = false;
+      dashHeld = false;
     };
 
     const toggleFullscreen = async () => {
@@ -375,214 +2240,153 @@ export function CanonGameCanvas() {
     const update = (dt: number) => {
       const game = gameRef.current;
 
-      if (game.mode !== "playing") {
-        return;
-      }
+      const jumpDown = keysRef.current.has(CONTROL_CODES.jump);
+      const slashDown = keysRef.current.has(CONTROL_CODES.slash);
+      const shotDown = keysRef.current.has(CONTROL_CODES.shot);
+      const dashDown = keysRef.current.has(CONTROL_CODES.dash);
 
-      game.seasonSec += dt;
-      game.interactCooldown = Math.max(0, game.interactCooldown - dt);
-      game.buffs.rain = Math.max(0, game.buffs.rain - dt);
-      game.buffs.fertilizer = Math.max(0, game.buffs.fertilizer - dt);
-      game.buffs.lantern = Math.max(0, game.buffs.lantern - dt);
-
-      const left = keysRef.current.has("arrowleft") || keysRef.current.has("a");
-      const right = keysRef.current.has("arrowright") || keysRef.current.has("d");
-      const up = keysRef.current.has("arrowup") || keysRef.current.has("w");
-      const down = keysRef.current.has("arrowdown") || keysRef.current.has("s");
-
-      const moveX = (right ? 1 : 0) - (left ? 1 : 0);
-      const moveY = (down ? 1 : 0) - (up ? 1 : 0);
-      const magnitude = Math.hypot(moveX, moveY) || 1;
-
-      game.player.vx = (moveX / magnitude) * PLAYER_SPEED;
-      game.player.vy = (moveY / magnitude) * PLAYER_SPEED;
-
-      game.player.x = clamp(game.player.x + game.player.vx * dt, FIELD_X + 16, FIELD_X + FIELD_WIDTH - 16);
-      game.player.y = clamp(game.player.y + game.player.vy * dt, FIELD_Y + 16, FIELD_Y + FIELD_HEIGHT - 16);
-
-      const interactDown = keysRef.current.has(" ") || keysRef.current.has("b");
-      if (interactDown && !interactPressed) {
-        interactWithTile(game);
-      }
-      interactPressed = interactDown;
-
-      game.powerupSpawnTimer -= dt;
-      if (game.powerupSpawnTimer <= 0) {
-        spawnPowerup(game);
-        game.powerupSpawnTimer = 8 + Math.random() * 7;
-      }
-
-      game.powerups = game.powerups.filter((powerup) => {
-        const d2 = distSquared(powerup.x, powerup.y, game.player.x, game.player.y);
-        if (d2 <= (powerup.r + game.player.r) * (powerup.r + game.player.r)) {
-          applyPowerup(game, powerup.type);
-          game.coins += 6;
-          return false;
+      if (game.mode === "playing") {
+        if (slashDown && !slashHeld) {
+          trySlash(game);
         }
-        return true;
-      });
+        if (shotDown && !shotHeld) {
+          tryShoot(game);
+        }
+        if (dashDown && !dashHeld) {
+          tryDash(game);
+        }
 
-      growthAccumulator += dt;
-      while (growthAccumulator >= 1) {
-        growthTick(game);
-        growthAccumulator -= 1;
+        if (game.hitStop > 0) {
+          game.hitStop = Math.max(0, game.hitStop - dt);
+
+          const effectSurvivors: Effect[] = [];
+          for (const effect of game.effects) {
+            effect.ttl -= dt * 0.35;
+            effect.x += effect.vx * dt * 0.2;
+            effect.y += effect.vy * dt * 0.2;
+            if (effect.ttl > 0) {
+              effectSurvivors.push(effect);
+            }
+          }
+          game.effects = effectSurvivors;
+        } else {
+          updatePlaying(game, dt, keysRef.current, jumpDown && !upHeld);
+        }
       }
 
-      if (game.coins >= TARGET_COINS) {
-        game.mode = "victory";
-      } else if (game.seasonSec >= SEASON_DURATION) {
-        game.mode = "failed";
-      }
+      updateDialogue(game, dt);
+
+      upHeld = jumpDown;
+      slashHeld = slashDown;
+      shotHeld = shotDown;
+      dashHeld = dashDown;
     };
 
     const draw = () => {
       const game = gameRef.current;
-      const remaining = Math.max(0, Math.ceil(SEASON_DURATION - game.seasonSec));
-
-      const bgGradient = ctx.createLinearGradient(0, 0, WIDTH, HEIGHT);
-      bgGradient.addColorStop(0, "#071222");
-      bgGradient.addColorStop(0.4, "#0A2038");
-      bgGradient.addColorStop(1, "#10263A");
-      ctx.fillStyle = bgGradient;
-      ctx.fillRect(0, 0, WIDTH, HEIGHT);
-
-      for (let i = 0; i < 36; i += 1) {
-        ctx.fillStyle = "rgba(232, 212, 77, 0.06)";
-        const x = (i * 173 + game.seasonSec * 9) % (WIDTH + 120) - 60;
-        const y = 52 + (i * 61) % 80;
-        ctx.fillRect(x, y, 2, 2);
+      const sprites = spritesRef.current;
+      if (!sprites) {
+        return;
       }
 
-      ctx.fillStyle = "rgba(13, 27, 42, 0.62)";
-      ctx.fillRect(FIELD_X - 18, FIELD_Y - 18, FIELD_WIDTH + 36, FIELD_HEIGHT + 36);
-      ctx.strokeStyle = "rgba(45, 74, 62, 0.65)";
-      ctx.strokeRect(FIELD_X - 17.5, FIELD_Y - 17.5, FIELD_WIDTH + 35, FIELD_HEIGHT + 35);
+      ctx.save();
+      ctx.imageSmoothingEnabled = false;
 
-      for (let row = 0; row < FIELD_ROWS; row += 1) {
-        for (let col = 0; col < FIELD_COLS; col += 1) {
-          drawTile(ctx, game.tiles[row][col], col, row);
+      const shakeMag = game.screenShake > 0 ? Math.ceil(game.screenShake * 10) : 0;
+      const shakeX = shakeMag > 0 ? rand(-shakeMag, shakeMag) : 0;
+      const shakeY = shakeMag > 0 ? rand(-shakeMag, shakeMag) : 0;
+      ctx.translate(shakeX, shakeY);
+
+      drawBackground(ctx, game);
+
+      ctx.save();
+      ctx.translate(-game.cameraX, 0);
+
+      for (const pickup of game.pickups) {
+        drawPickup(ctx, pickup);
+      }
+      for (const projectile of game.projectiles) {
+        drawProjectile(ctx, projectile);
+      }
+      for (const enemy of game.enemies) {
+        drawEnemy(ctx, game, enemy, sprites);
+      }
+      drawPlayer(ctx, game, sprites);
+      for (const effect of game.effects) {
+        drawEffect(ctx, effect);
+      }
+
+      ctx.restore();
+      ctx.restore();
+
+      drawHud(ctx, game);
+      if (game.mode === "playing") {
+        drawDialoguePanel(ctx, game);
+      }
+
+      if (game.bossIntroTimer > 0 && game.mode === "playing") {
+        const boss = game.enemies.find((enemy) => enemy.isBoss);
+        if (boss) {
+          const stage = STAGES[game.stageIndex];
+          drawOverlay(
+            ctx,
+            `${stage.bossName.toUpperCase()} RISES`,
+            [stage.bossTitle, stage.bossThreatLine],
+            "Survive, adapt, and strike",
+          );
         }
       }
-
-      game.powerups.forEach((powerup) => {
-        drawPowerup(ctx, powerup);
-      });
-
-      ctx.beginPath();
-      ctx.fillStyle = "#F5F2EB";
-      ctx.arc(game.player.x, game.player.y, game.player.r, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.strokeStyle = "#C0392B";
-      ctx.lineWidth = 3;
-      ctx.arc(game.player.x, game.player.y, game.player.r + 7, 0, Math.PI * 2);
-      ctx.stroke();
-
-      ctx.fillStyle = "#E8D44D";
-      ctx.font = "700 13px Inter";
-      ctx.textAlign = "left";
-      ctx.fillText("CANON HARVEST // SHINGO FIELD NODE", 22, 32);
-
-      ctx.fillStyle = "rgba(245, 242, 235, 0.82)";
-      ctx.font = "500 14px Inter";
-      ctx.fillText("Plant, water, harvest. Hit target before the season closes.", 22, 54);
-
-      ctx.fillStyle = "#F5F2EB";
-      ctx.fillText(`Coins ${game.coins} / ${TARGET_COINS}`, 22, HEIGHT - 26);
-      ctx.fillText(`Harvests ${game.harvested}`, 220, HEIGHT - 26);
-      ctx.fillText(`Season ${remaining}s`, 380, HEIGHT - 26);
-      ctx.fillText(`Rain ${Math.ceil(game.buffs.rain)}s`, 540, HEIGHT - 26);
-      ctx.fillText(`Grow ${Math.ceil(game.buffs.fertilizer)}s`, 660, HEIGHT - 26);
-      ctx.fillText(`Gold ${Math.ceil(game.buffs.lantern)}s`, 770, HEIGHT - 26);
 
       if (game.mode === "menu") {
         drawOverlay(
           ctx,
-          "Canon Harvest",
+          "Canon Blade",
           [
-            "Move: WASD or Arrow Keys",
-            "Action: Space or B (plant/water/harvest nearest tile)",
-            "Collect floating buffs and hit the coin target before season end.",
+            "16-bit mythological side-scrolling action through four canon epochs.",
+            "Lush environments, detailed sprites, and flashy combat mechanics.",
+            "Named characters speak across each epoch and bind the Memory Thread arc.",
+            "Move: Left/Right | Jump: Up | Slash: B | Shot: Space | Dash: A",
           ],
-          "PRESS ENTER TO START",
+          "Press Enter to Start // F Fullscreen",
         );
-      } else if (game.mode === "victory") {
+      } else if (game.mode === "stageClear") {
+        const chronicleLine = game.chronicle[game.chronicle.length - 1] ?? "The memory thread remains active.";
         drawOverlay(
           ctx,
-          "Season Secured",
+          "Epoch Cleared",
           [
-            `You produced ${game.harvested} harvests and ${game.coins} coins.`,
-            "The Shingo field stays open for another cycle.",
+            STAGES[game.stageIndex].title,
+            `Score ${game.player.score} // Relics ${game.relics} // HP ${Math.ceil(game.player.hp)}`,
+            chronicleLine,
+            `${game.narrativeTitle} ${game.threadFragments}/4`,
           ],
-          "PRESS R TO PLAY AGAIN",
+          "Press Enter for Next Epoch",
+        );
+      } else if (game.mode === "victory") {
+        const chronicleLine = game.chronicle[game.chronicle.length - 1] ?? "The memory thread closes.";
+        drawOverlay(
+          ctx,
+          "Aomori Endures",
+          [
+            `Total Score ${game.player.score}`,
+            `Relics ${game.relics} // Time ${Math.floor(game.elapsedSec)}s // Distance ${Math.floor(game.totalDistance)}`,
+            chronicleLine,
+            `${game.narrativeTitle} ${game.threadFragments}/4`,
+          ],
+          "Press R or Enter to Run Again",
         );
       } else if (game.mode === "failed") {
         drawOverlay(
           ctx,
-          "Season Closed",
+          "Crossing Broken",
           [
-            `You reached ${game.coins} / ${TARGET_COINS} coins before winter lock.`,
-            "Reset and optimize your planting rhythm.",
+            `Final Score ${game.player.score} // Relics ${game.relics}`,
+            "Chain slash, shot, and dash to control pressure.",
+            `${game.narrativeTitle} ${game.threadFragments}/4`,
           ],
-          "PRESS R TO RETRY",
+          "Press R or Enter to Retry",
         );
       }
-    };
-
-    const toText = () => {
-      const game = gameRef.current;
-      const activePowerups = game.powerups.slice(0, 6).map((item) => ({
-        id: item.id,
-        type: item.type,
-        x: Number(item.x.toFixed(1)),
-        y: Number(item.y.toFixed(1)),
-        r: item.r,
-      }));
-
-      const ripeTiles: Array<{ col: number; row: number }> = [];
-      const needyTiles: Array<{ col: number; row: number; water: number }> = [];
-
-      for (let row = 0; row < FIELD_ROWS; row += 1) {
-        for (let col = 0; col < FIELD_COLS; col += 1) {
-          const tile = game.tiles[row][col];
-          if (tile.state === "ripe") {
-            ripeTiles.push({ col, row });
-          } else if (tile.state !== "soil" && tile.water < 30) {
-            needyTiles.push({ col, row, water: Number(tile.water.toFixed(1)) });
-          }
-        }
-      }
-
-      return JSON.stringify({
-        coordinateSystem:
-          "origin=(0,0) top-left, +x right, +y down, canvas=960x540, field starts at (108,112)",
-        mode: game.mode,
-        player: {
-          x: Number(game.player.x.toFixed(1)),
-          y: Number(game.player.y.toFixed(1)),
-          r: game.player.r,
-          vx: Number(game.player.vx.toFixed(1)),
-          vy: Number(game.player.vy.toFixed(1)),
-        },
-        economy: {
-          coins: game.coins,
-          targetCoins: TARGET_COINS,
-          harvested: game.harvested,
-          seasonRemainingSec: Number(Math.max(0, SEASON_DURATION - game.seasonSec).toFixed(2)),
-        },
-        buffs: {
-          rainSec: Number(game.buffs.rain.toFixed(1)),
-          fertilizerSec: Number(game.buffs.fertilizer.toFixed(1)),
-          lanternSec: Number(game.buffs.lantern.toFixed(1)),
-        },
-        crops: {
-          grid: { cols: FIELD_COLS, rows: FIELD_ROWS },
-          ripeTiles: ripeTiles.slice(0, 10),
-          dryTiles: needyTiles.slice(0, 10),
-        },
-        worldPowerups: activePowerups,
-      });
     };
 
     let animationFrameId = 0;
@@ -612,39 +2416,69 @@ export function CanonGameCanvas() {
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      const key = event.key.toLowerCase();
-      keysRef.current.add(key);
+      const code = normalizeInputCode(event);
+      if (BLOCK_BROWSER_CODES.has(code) && !isEditableTarget(event.target)) {
+        event.preventDefault();
+      }
+
+      keysRef.current.add(code);
 
       const game = gameRef.current;
-      if (key === "enter" && game.mode === "menu") {
+      if (code === CONTROL_CODES.start && game.mode === "menu") {
         startGame();
       }
-      if ((key === "r" || key === "enter") && (game.mode === "victory" || game.mode === "failed")) {
+      if (
+        (code === CONTROL_CODES.retry || code === CONTROL_CODES.start) &&
+        (game.mode === "victory" || game.mode === "failed")
+      ) {
         startGame();
       }
-      if (key === "f") {
+      if (
+        code === CONTROL_CODES.start &&
+        game.mode === "playing" &&
+        (game.activeDialogue || game.dialogQueue.length > 0)
+      ) {
+        advanceDialogue(game);
+      }
+      if (code === CONTROL_CODES.start && game.mode === "stageClear") {
+        if (game.stageIndex >= STAGES.length - 1) {
+          game.mode = "victory";
+        } else {
+          advanceToNextStage(game);
+        }
+      }
+      if (code === CONTROL_CODES.fullscreen) {
         event.preventDefault();
         void toggleFullscreen();
-      }
-      if ((key === " " || key === "b") && game.mode === "playing") {
-        interactWithTile(game);
       }
     };
 
     const handleKeyUp = (event: KeyboardEvent) => {
-      keysRef.current.delete(event.key.toLowerCase());
+      const code = normalizeInputCode(event);
+      if (BLOCK_BROWSER_CODES.has(code) && !isEditableTarget(event.target)) {
+        event.preventDefault();
+      }
+      keysRef.current.delete(code);
+    };
+
+    const handleWindowBlur = () => {
+      keysRef.current.clear();
+      upHeld = false;
+      slashHeld = false;
+      shotHeld = false;
+      dashHeld = false;
     };
 
     const handleFullscreenChange = () => {
       gameRef.current.fullscreen = Boolean(document.fullscreenElement);
     };
 
-    window.render_game_to_text = toText;
+    window.render_game_to_text = () => toTextState(gameRef.current);
     window.advanceTime = (ms: number) => {
       const safeMs = Math.max(0, ms);
       const steps = Math.max(1, Math.round(safeMs / (FIXED_DT * 1000)));
       manualStepUntil = performance.now() + 250;
-      for (let step = 0; step < steps; step += 1) {
+      for (let i = 0; i < steps; i += 1) {
         update(FIXED_DT);
       }
       draw();
@@ -652,6 +2486,7 @@ export function CanonGameCanvas() {
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
+    window.addEventListener("blur", handleWindowBlur);
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     animationFrameId = window.requestAnimationFrame(frame);
 
@@ -659,6 +2494,7 @@ export function CanonGameCanvas() {
       window.cancelAnimationFrame(animationFrameId);
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
+      window.removeEventListener("blur", handleWindowBlur);
       document.removeEventListener("fullscreenchange", handleFullscreenChange);
       delete window.render_game_to_text;
       delete window.advanceTime;
@@ -671,7 +2507,8 @@ export function CanonGameCanvas() {
       width={WIDTH}
       height={HEIGHT}
       className="w-full h-auto border border-[#2D4A3E]/40 bg-[#081220] shadow-[0_22px_90px_rgba(0,0,0,0.55)]"
-      aria-label="Canon Harvest game canvas"
+      style={{ imageRendering: "pixelated" }}
+      aria-label="Canon Blade myth-action game canvas"
     />
   );
 }

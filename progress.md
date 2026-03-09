@@ -20,3 +20,86 @@ Original prompt: I want to make an HTML5 game to have on the website which takes
 - Failure and restart behavior verified with a direct Playwright script:
   - `output/web-game/canon-trial-restart-verify.png`
 - Note: no open TODOs for this initial playable version; next iteration can tune difficulty curves and add audio.
+
+## 2026-03-09 (Graphics Upgrade: Canon Blade 16-bit Action)
+- Replaced farming implementation with a full side-scrolling action game in:
+  - `components/CanonGameCanvas.tsx`
+- Implemented requested graphics upgrades:
+  - Sprite-style frame animation system:
+    - player frame sets (`idle`, `run`, `jump`, `slash`, `dash`, `hurt`)
+    - enemy/boss frame sets per type
+    - state-driven frame selection
+  - Lush multi-layer environments:
+    - stage-specific palettes for all four epochs
+    - parallax layers (mountains, haze, forest, foreground vegetation)
+    - atmospheric overlays and patterned ground treatment
+  - Flashy action/camera polish:
+    - hit-stop on impact
+    - screen shake
+    - enemy hit flash
+    - dash trail effects
+    - spark/burst effects and floating damage text
+    - boss-intro stinger overlay and boss HP bar
+- Preserved required automation hooks:
+  - `window.render_game_to_text`
+  - `window.advanceTime(ms)`
+- Updated game page and canon card copy for the new genre:
+  - `app/canon/game/page.tsx`
+  - `app/canon/page.tsx`
+- Validation:
+  - `npm run lint` passed
+  - `npm run build` passed
+  - Playwright action/graphics runs:
+    - `output/web-game/canon-blade-gfx-run1/`
+    - `output/web-game/canon-blade-gfx-run2/`
+  - Boss-state verification run (`bossSpawned: true`, boss HUD visible):
+    - `output/web-game/canon-blade-boss-run3/`
+  - No Playwright error artifacts in these runs.
+
+## 2026-03-09 (Narrative + Character Speech Pass)
+- Applied `japanese-jesus-editorial-authoring` + `japanese-jesus-brand-ui` patterns to the in-game story layer.
+- Added a structured narrative system to `components/CanonGameCanvas.tsx`:
+  - speaker-based dialogue lines with tone (`ally`, `warning`, `myth`)
+  - per-epoch scripts for `intro`, `midpoint`, `boss`, and `clear` beats
+  - on-screen dialogue panel with speaker tag and text wrapping
+  - Enter key support to skip/advance dialogue during gameplay
+- Introduced overarching story element:
+  - `THE MEMORY THREAD` arc tracked with `threadFragments` (`0/4` to `4/4`)
+  - fragment progression tied to stage boss clears
+  - in-game `chronicle` log for major milestones (epoch open, midpoint, boss encounter, fragment secured)
+- Updated HUD + telemetry:
+  - thread and chronicle counters in HUD
+  - narrative state exposed in `render_game_to_text` (`narrative` object with active dialogue and queue)
+- Updated public copy to reflect story-forward gameplay:
+  - `app/canon/game/page.tsx`
+  - `app/canon/page.tsx`
+- Validation:
+  - `npm run lint` passed
+  - `npm run build` passed
+  - Narrative intro + skip verification:
+    - `output/web-game/canon-blade-narrative-run3/`
+  - Midpoint/boss narrative trigger verification (chronicle + active dialogue):
+    - `output/web-game/canon-blade-narrative-run2/`
+  - No Playwright error artifacts in these runs.
+
+## 2026-03-09 (Controls + Epoch Boss Relevance + Visual Pass)
+- Updated `components/CanonGameCanvas.tsx` input handling:
+  - switched control tracking to normalized keyboard codes (`Space`, `Arrow*`, `KeyA`, `KeyB`)
+  - added browser-default blocking for gameplay navigation/fire keys so Space/Arrow keys do not trigger page scroll behavior while playing
+  - removed duplicate direct action triggers from `keydown` and kept edge-triggered actions in the fixed update loop
+  - added blur handling to clear stuck keys when window focus changes
+- Made boss encounters explicitly epoch-relevant:
+  - added per-stage boss metadata (`bossName`, `bossTitle`, `bossThreatLine`)
+  - wired this metadata into boss spawn chronicle entries, `lastEvent`, intro overlays, HUD boss bar labels, and `render_game_to_text` boss payload
+  - aligned boss dialogue speakers to new epoch boss identities (Akakaze, Sun Court Serpent, Kuroyuki, Ryujin)
+- Graphics pass:
+  - rebuilt enemy/boss sprite frames with more distinct silhouettes and per-type detailing
+  - added stage motif rendering layer per epoch (cedar gate, river pillars, snow pass, shrine village) to strengthen environmental identity
+- Validation:
+  - `npm run lint` passed
+  - `npm run build` passed
+  - Playwright verification runs:
+    - `output/web-game/canon-blade-controls-run1/`
+    - `output/web-game/canon-blade-epoch-boss-run2/`
+  - Visual inspection performed on both latest screenshots and state snapshots.
+  - Note: both Playwright runs reported one console `404` resource error artifact (`errors-0.json`), likely unrelated to the game-loop changes.

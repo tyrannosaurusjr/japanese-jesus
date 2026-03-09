@@ -6,22 +6,78 @@ import { Sigil } from "@/components/Sigil";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { TransmissionForm } from "@/components/TransmissionForm";
 import { DonationSection } from "@/components/DonationSection";
+import { StructuredData } from "@/components/StructuredData";
 import { CANON_SERIES_BY_EPOCH, CONDUIT_NOTES } from "@/lib/site-content";
+import type { Metadata } from "next";
+import { SITE_URL, buildPageMetadata } from "@/lib/metadata";
+
+export const metadata: Metadata = buildPageMetadata({
+  title: "Japanese Jesus: The Jesus Tomb Legend of Shingo Village, Japan",
+  description:
+    "The legend holds that Jesus survived the crucifixion and died in a Japanese village called Shingo. The tomb still exists. Read the canon, then go north.",
+  path: "/",
+  keywords: [
+    "Japanese Jesus",
+    "Jesus tomb Japan",
+    "Shingo Village",
+    "Aomori Jesus legend",
+    "Christ tomb Shingo",
+  ],
+  image: "/images/og/home-sigil.jpg",
+  imageWidth: 1200,
+  imageHeight: 630,
+  imageAlt: "The Japanese Jesus sigil centered in a gray field",
+});
 
 export default function Home() {
   const wanderingSeries = CANON_SERIES_BY_EPOCH["wandering-spirit"] ?? [];
   const featuredCanon = wanderingSeries[0];
   const featuredConduit = CONDUIT_NOTES.find((note) => note.slug === "primary-node");
+  const hasDirectDonatePath = Boolean(
+    process.env.NEXT_PUBLIC_DONATION_URL || process.env.STRIPE_SECRET_KEY,
+  );
+  const heroDonateHref = hasDirectDonatePath ? "/donate?amount=108&source=hero" : "#fund-the-ascent";
+  const heroDonateLabel = hasDirectDonatePath ? "Donate Now" : "Fund The Ascent";
+  const homeStructuredData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${SITE_URL}/#organization`,
+        name: "Japanese Jesus",
+        url: SITE_URL,
+        description:
+          "Public-facing canon, field notes, and journey planning around the Japanese Jesus legend in Shingo Village, Aomori.",
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${SITE_URL}/#website`,
+        name: "Japanese Jesus",
+        url: SITE_URL,
+        description:
+          "The Japanese Jesus legend of Shingo Village, Japan: canon, conduit notes, journey planning, and relics.",
+        publisher: {
+          "@id": `${SITE_URL}/#organization`,
+        },
+        potentialAction: {
+          "@type": "SearchAction",
+          target: `${SITE_URL}/canon?query={search_term_string}`,
+          "query-input": "required name=search_term_string",
+        },
+      },
+    ],
+  };
 
   return (
     <main className="min-h-screen bg-[#0D1B2A]">
       <Nav />
+      <StructuredData id="home-structured-data" data={homeStructuredData} />
 
       <section className="relative min-h-screen overflow-hidden">
         <div className="absolute inset-0 bg-[#0D1B2A]">
           <Image
             src="/images/home-hero-gateway.svg"
-            alt="A gateway monument in an open northern field beneath a charged sky"
+            alt="A gateway monument in Shingo Village, Aomori, beneath a charged sky"
             fill
             priority
             className="object-cover opacity-60"
@@ -44,8 +100,14 @@ export default function Home() {
                   textShadow: "0 2px 60px rgba(13,27,42,0.9)",
                 }}
               >
-                The Portal<br />Never Closes.
+                The Portal<br />Never Closes in Shingo.
               </h1>
+              <p
+                className="label text-[#E8D44D]/90 mb-6 max-w-3xl"
+                style={{ letterSpacing: "0.08em" }}
+              >
+                The Japanese Jesus Legend of Shingo Village, Japan
+              </p>
 
               <p
                 className="text-base md:text-lg text-[#F5F2EB]/72 mb-8 max-w-3xl"
@@ -63,12 +125,12 @@ export default function Home() {
                 >
                   Open The Map
                 </a>
-                <a
-                  href="#fund-the-ascent"
+                <Link
+                  href={heroDonateHref}
                   className="label inline-block border border-[#F5F2EB]/30 text-[#F5F2EB] px-8 py-4 hover:border-[#C0392B] hover:text-[#C0392B] transition-all duration-300"
                 >
-                  Fund The Ascent
-                </a>
+                  {heroDonateLabel}
+                </Link>
                 <Link
                   href="/journey"
                   className="label inline-block border border-[#E8D44D]/30 text-[#E8D44D] px-8 py-4 hover:border-[#E8D44D] hover:bg-[#E8D44D]/10 transition-all duration-300"
@@ -97,7 +159,7 @@ export default function Home() {
             <div className="flex items-start gap-5">
               <Sigil variant="vermilion" size={54} className="opacity-75 shrink-0 mt-1" />
               <div>
-                <p className="label text-[#E8D44D] mb-4">Node Reading</p>
+                <p className="label text-[#E8D44D] mb-4">About the Mythology</p>
                 <h2
                   className="text-3xl md:text-4xl text-[#F5F2EB] mb-5 leading-tight"
                   style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
@@ -256,7 +318,7 @@ export default function Home() {
 
       <section className="px-6 md:px-10 pb-28">
         <div className="max-w-6xl mx-auto">
-          <p className="label text-[#E8D44D] mb-6">Live Reads</p>
+          <p className="label text-[#E8D44D] mb-6">Featured Reading</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[#2D4A3E]/20">
             {featuredCanon ? (
               <Link

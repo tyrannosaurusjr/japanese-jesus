@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     const params = new URLSearchParams();
     params.set("mode", "payment");
     params.set("success_url", `${siteUrl}/?donation=success`);
-    params.set("cancel_url", `${siteUrl}/#below-fold`);
+    params.set("cancel_url", `${siteUrl}/#fund-the-ascent`);
     params.set("line_items[0][quantity]", "1");
     params.set("line_items[0][price_data][currency]", "usd");
     params.set("line_items[0][price_data][unit_amount]", String(amount * 100));

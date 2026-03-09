@@ -174,15 +174,15 @@ export function DonationSection() {
           <div className="rounded-3xl border border-[#C0392B]/20 bg-[#C0392B]/[0.06] p-6">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="label text-[#F5F2EB]/45 mb-2">Current Signal</p>
+                <p className="label text-[#F5F2EB]/45 mb-2">Current Progress</p>
                 <p
                   className="text-2xl text-[#F5F2EB]"
                   style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
                 >
-                  $1,680 raised toward a $4,400 field budget
+                  Goal: $4,400 field budget
                 </p>
               </div>
-              <p className="label text-[#E8D44D]">{goalProgress}% of the gate supplied</p>
+              <p className="label text-[#E8D44D]">{goalProgress}% of goal reached</p>
             </div>
 
             <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#F5F2EB]/8">
@@ -191,6 +191,9 @@ export function DonationSection() {
                 style={{ width: `${goalProgress}%` }}
               />
             </div>
+            <p className="label mt-4 text-[#F5F2EB]/42">
+              Progress updates as verified Stripe offerings clear.
+            </p>
           </div>
         </div>
 
@@ -263,7 +266,7 @@ export function DonationSection() {
                 className="text-sm text-[#F5F2EB]/74"
                 style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
               >
-                The direct payment portal is being prepared. Leave your address below and the route will be sent privately.
+                Direct payment coming soon. Leave your address to receive the private route now.
               </p>
             </div>
           )}
@@ -322,7 +325,7 @@ export function DonationSection() {
                 disabled={submitting}
                 className="label w-full rounded-2xl border border-[#F5F2EB]/12 px-6 py-4 text-[#F5F2EB]/80 transition-all duration-300 hover:border-[#E8D44D] hover:text-[#E8D44D] disabled:opacity-50"
               >
-                {submitting ? "Opening..." : "Send Me The Hidden Route"}
+                {submitting ? "Opening..." : "Send Me the Route & Field Dispatches"}
               </button>
             </form>
           )}

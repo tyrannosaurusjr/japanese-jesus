@@ -31,9 +31,9 @@ export const OBJECTS: CatalogObject[] = [
   },
   {
     id: "gate-tee",
-    name: "Unisex Organic Cotton Pilgrimage T-shirt",
+    name: "Pilgrimage T-shirt",
     description:
-      "Organic cotton. Minimal front — Japanese Jesus in small white type above the left chest. The back carries the full record: Shingo Village in kanji and coordinates, the walk out of the desert and into the rice fields, the Tomb of Christ, EST. 33 AD. The portal is opening.",
+      "Unisex organic cotton build. Minimal front — Japanese Jesus in small white type above the left chest. The back carries the full record: Shingo Village in kanji and coordinates, the walk out of the desert and into the rice fields, the Tomb of Christ, EST. 33 AD. The portal is opening.",
     material: "Organic cotton · unisex fit · preshrunk",
     price: 54,
     variant: "white",
@@ -43,10 +43,10 @@ export const OBJECTS: CatalogObject[] = [
   },
   {
     id: "herai-hoodie",
-    name: "Unisex Cotton Portal Lantern Sweatshirt",
+    name: "Portal Lantern Sweatshirt",
     description:
-      "Heavyweight cotton layer for night crossings, platform drafts, and the cold edge of signal weather. Clean chest mark in front, HERAI spread across the back as a location code instead of a slogan. Dense, structured, and made to wear like archive uniform gear rather than seasonal merch.",
-    material: "100% cotton · unisex · preshrunk",
+      "Unisex organic cotton layer for night crossings, platform drafts, and the cold edge of signal weather. Clean chest mark in front, HERAI spread across the back as a location code instead of a slogan. Dense, structured, and made to wear like archive uniform gear rather than seasonal merch.",
+    material: "Organic cotton · unisex fit · preshrunk",
     price: 118,
     variant: "citrine",
     printfulSyncProductId: "422747921",

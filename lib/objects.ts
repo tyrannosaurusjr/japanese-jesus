@@ -104,5 +104,7 @@ export const OBJECTS: CatalogObject[] = [
     price: null,
     variant: "citrine",
     notForSale: true,
+    imageSrc: "/images/keeper-card-placeholder.svg",
+    imageAlt: "Keeper Card placeholder image marked as private issue",
   },
 ];

@@ -1,0 +1,38 @@
+<svg width="1400" height="1400" viewBox="0 0 1400 1400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1400" y2="1400" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0A1320"/>
+      <stop offset="0.55" stop-color="#111D2B"/>
+      <stop offset="1" stop-color="#05090F"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(700 700) rotate(90) scale(420)">
+      <stop stop-color="#E8D44D" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#E8D44D" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1400" height="1400" fill="url(#bg)"/>
+  <rect x="96" y="96" width="1208" height="1208" rx="10" stroke="#2D4A3E" stroke-opacity="0.6" stroke-width="2"/>
+  <circle cx="700" cy="700" r="420" fill="url(#halo)"/>
+
+  <g opacity="0.32">
+    <path d="M700 312V1088" stroke="#2D4A3E" stroke-width="1"/>
+    <path d="M312 700H1088" stroke="#2D4A3E" stroke-width="1"/>
+    <circle cx="700" cy="700" r="310" stroke="#2D4A3E" stroke-width="1"/>
+    <circle cx="700" cy="700" r="230" stroke="#2D4A3E" stroke-width="1"/>
+  </g>
+
+  <g>
+    <path d="M640 525C640 472 689 432 746 448C777 457 801 479 810 511" stroke="#E8D44D" stroke-width="11" stroke-linecap="round"/>
+    <path d="M598 586C557 540 561 478 603 440C649 399 728 397 779 437" stroke="#E8D44D" stroke-width="11" stroke-linecap="round"/>
+    <path d="M726 528L726 862" stroke="#E8D44D" stroke-width="11" stroke-linecap="round"/>
+    <path d="M672 611C697 607 724 599 751 586" stroke="#E8D44D" stroke-width="11" stroke-linecap="round"/>
+  </g>
+
+  <text x="700" y="236" fill="#F5F2EB" fill-opacity="0.88" font-family="Georgia, serif" font-size="42" font-weight="700" text-anchor="middle" letter-spacing="7">
+    KEEPER CARD
+  </text>
+  <text x="700" y="1168" fill="#F5F2EB" fill-opacity="0.72" font-family="Arial, sans-serif" font-size="24" text-anchor="middle" letter-spacing="4">
+    PRIVATE ISSUE // NOT FOR PUBLIC CATALOG
+  </text>
+</svg>

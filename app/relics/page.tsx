@@ -4,7 +4,6 @@ import { Sigil } from "@/components/Sigil";
 import { ProductCheckout } from "@/components/ProductCheckout";
 import { OBJECTS } from "@/lib/objects";
 import type { Metadata } from "next";
-import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "Relics — Japanese Jesus",
@@ -45,18 +44,6 @@ export default function RelicsPage() {
               key={obj.id}
               className="bg-[#0D1B2A] border border-[#2D4A3E]/30 p-8 flex flex-col"
             >
-              {obj.primaryImageUrl || obj.imageSrc ? (
-                <div className="relative mb-6 aspect-square w-full overflow-hidden border border-[#2D4A3E]/30 bg-[#0B1724]">
-                  <Image
-                    src={obj.primaryImageUrl || obj.imageSrc || ""}
-                    alt={obj.imageAlt || obj.name}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, 40vw"
-                  />
-                </div>
-              ) : null}
-
               <div className="mb-6 flex items-center justify-between">
                 <Sigil variant={obj.variant} size={56} className="opacity-70" />
                 {obj.notForSale ? (

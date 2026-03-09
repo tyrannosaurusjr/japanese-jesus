@@ -20,7 +20,7 @@ export const OBJECTS: CatalogObject[] = [
     id: "carrier-cap",
     name: "Rift Sigil Bucket Hat",
     description:
-      "Lightweight organic cotton bucket hat for ridge light and static rain. Rift sigil embroidery in conduit green. Packable, breathable, and built as everyday field gear, not merch.",
+      "Organic cotton bucket hat built for long station walks, wind off the cedar ridge, and sudden static rain. Front embroidery carries the Rift sigil in conduit green with no slogan, no back print, and no decorative noise. Packable field gear made to look issued, not branded.",
     material: "100% cotton · unstructured · one size",
     price: 48,
     variant: "vermilion",
@@ -45,7 +45,7 @@ export const OBJECTS: CatalogObject[] = [
     id: "herai-hoodie",
     name: "Unisex Cotton Portal Lantern Sweatshirt",
     description:
-      "Heavyweight cotton built for cedar wind and late static. Sigil at the chest. HERAI on the back like a place-name passed forward instead of explained.",
+      "Heavyweight cotton layer for night crossings, platform drafts, and the cold edge of signal weather. Clean chest mark in front, HERAI spread across the back as a location code instead of a slogan. Dense, structured, and made to wear like archive uniform gear rather than seasonal merch.",
     material: "100% cotton · unisex · preshrunk",
     price: 118,
     variant: "citrine",
@@ -55,7 +55,7 @@ export const OBJECTS: CatalogObject[] = [
     id: "thin-place-print",
     name: "Japanese Jesus Poster",
     description:
-      "A flagship wall piece: Japanese Jesus seated at the seam, radiating static through the northern myth field. Direct, confrontational, and built to hold the room on its own.",
+      "Enhanced matte wall print of the Japanese Jesus figure seated at the seam line, with field static radiating through the northern myth map. Composed for long viewing at full size, with deep contrast and deliberate negative space. Built to read like evidence on a wall, not decoration above a couch.",
     material: "Enhanced matte paper · print-on-demand",
     price: 35,
     variant: "vermilion",
@@ -65,7 +65,7 @@ export const OBJECTS: CatalogObject[] = [
     id: "framed-poster",
     name: "Japanese Jesus Framed Poster",
     description:
-      "The flagship wall piece in a black wooden frame. Ready to hang. Same confrontational image — now fully enclosed, like a relic behind glass at the edge of a myth the museum won't acknowledge.",
+      "The same flagship print enclosed in a black wood frame with hanging hardware pre-installed and sightlines set for immediate display. The image holds the same confrontational field energy, but the frame shifts it toward archive-object territory. Reads like a documented relic under glass, not poster merch.",
     material: "Enhanced matte paper · black wood frame · ready to hang",
     price: 89,
     variant: "vermilion",
@@ -75,7 +75,7 @@ export const OBJECTS: CatalogObject[] = [
     id: "frequency-patch-red",
     name: "Static Conduit Patch — Red",
     description:
-      "A woven conduit mark with velcro backing. Cosmic vermilion field. Built like a recovered unit patch from a system that does not admit it exists.",
+      "Embroidered conduit mark in cosmic vermilion with hook backing for jackets, packs, and field cases that rotate often. Stitching is intentionally high contrast so the symbol reads clearly at distance and under low light. Made to resemble recovered unit insignia from a network that never files public records.",
     material: "Embroidered woven · velcro backing · approx 3″",
     price: 18,
     variant: "vermilion",
@@ -85,7 +85,7 @@ export const OBJECTS: CatalogObject[] = [
     id: "frequency-patch-blue",
     name: "Static Conduit Patch — Blue",
     description:
-      "A woven conduit mark with velcro backing. Deep cedar field. The same mark, shifted frequency. Same system, different channel.",
+      "Companion conduit patch in deep cedar blue with hook backing and dense embroidery tuned for clean edge definition. Uses the same core mark as the red channel, but with a cooler frequency profile for alternate kits and signal sets. Designed as functional insignia first, visual branding second.",
     material: "Embroidered woven · velcro backing · approx 3″",
     price: 18,
     variant: "citrine",
@@ -95,7 +95,7 @@ export const OBJECTS: CatalogObject[] = [
     id: "keeper-card",
     name: "Keeper Card",
     description:
-      "Not for sale. Sent only to those who have crossed. A private marker in thick stock with a unique sigil variation and no public explanation.",
+      "Not for sale. Issued privately to confirmed participants only, on thick stock with a unique sigil variant and no storefront metadata. No reorder link, no open listing, and no public batch schedule. This card functions as a closed-channel marker inside the project, not a retail product.",
     material: "350gsm duplex board · letterpress · not available",
     price: null,
     variant: "citrine",

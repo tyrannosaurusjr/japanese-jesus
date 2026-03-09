@@ -25,8 +25,7 @@ export const OBJECTS: CatalogObject[] = [
     price: 118,
     variant: "citrine",
     printfulSyncProductId: "422747921",
-    primaryImageUrl: "https://files.cdn.printful.com/files/27a/27a94fe4efa3981d4d60e289adb8290e_preview.png",
-    altImageUrl: "https://files.cdn.printful.com/files/83b/83b78b386ecf91b1664ec8b17a636374_preview.png",
+    primaryImageUrl: "https://files.cdn.printful.com/files/ed3/ed34ca040484adea282b79d6b9babbda_preview.png",
   },
   {
     id: "gate-tee",
@@ -37,8 +36,7 @@ export const OBJECTS: CatalogObject[] = [
     price: 54,
     variant: "white",
     printfulSyncProductId: "422792119",
-    primaryImageUrl: "https://files.cdn.printful.com/files/3ca/3ca54f37e32ccdc9bd23b54cec057455_preview.png",
-    altImageUrl: "https://files.cdn.printful.com/files/5a3/5a3c30323be3cf630d163cb6ab77533f_preview.png",
+    primaryImageUrl: "https://files.cdn.printful.com/files/cd3/cd3d6057b6cfde239ec20b3c2e7a6f94_preview.png",
   },
   {
     id: "thin-place-print",
@@ -49,8 +47,7 @@ export const OBJECTS: CatalogObject[] = [
     price: 35,
     variant: "vermilion",
     printfulSyncProductId: "422563554",
-    primaryImageUrl: "https://files.cdn.printful.com/files/849/8494d7f430fa95e82d550dd5e1ede11d_preview.png",
-    altImageUrl: "https://files.cdn.printful.com/files/3c9/3c93379d68cf9246a8a39ec94f51bcd9_preview.png",
+    primaryImageUrl: "https://files.cdn.printful.com/files/3c9/3c93379d68cf9246a8a39ec94f51bcd9_preview.png",
   },
   {
     id: "framed-poster",
@@ -94,9 +91,8 @@ export const OBJECTS: CatalogObject[] = [
     price: 48,
     variant: "vermilion",
     printfulSyncProductId: "422702408",
-    primaryImageUrl: "https://files.cdn.printful.com/files/e25/e259b2682eabcb9657fcbb7fa42c88c0_preview.png",
-    altImageUrl: "https://files.cdn.printful.com/files/2e2/2e2afcf7b6d7af68ad936c72e11c647d_preview.png",
-    imageSrc: "https://files.cdn.printful.com/files/e25/e259b2682eabcb9657fcbb7fa42c88c0_preview.png", // fallback slot if card renderer uses legacy imageSrc
+    primaryImageUrl: "https://files.cdn.printful.com/files/2e2/2e2afcf7b6d7af68ad936c72e11c647d_preview.png",
+    imageSrc: "https://files.cdn.printful.com/files/2e2/2e2afcf7b6d7af68ad936c72e11c647d_preview.png", // fallback slot if card renderer uses legacy imageSrc
     imageAlt: "Rift Sigil Bucket Hat in black with conduit green embroidery",
   },
   {

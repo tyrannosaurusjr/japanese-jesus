@@ -28,7 +28,6 @@ export function ProductCheckout({ printfulSyncProductId, productName, primaryIma
   const [variants, setVariants] = useState<Variant[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
-  const [apiAltImageUrl, setApiAltImageUrl] = useState<string | null>(null);
   const [loadingVariants, setLoadingVariants] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +36,7 @@ export function ProductCheckout({ printfulSyncProductId, productName, primaryIma
   useEffect(() => {
     fetch(`/api/shop/variants/${printfulSyncProductId}`)
       .then((r) => r.json())
-      .then((data: { variants?: Variant[]; thumbnailUrl?: string; altThumbnailUrl?: string; error?: string }) => {
+      .then((data: { variants?: Variant[]; thumbnailUrl?: string; error?: string }) => {
         if (data.variants && data.variants.length > 0) {
           setVariants(data.variants);
           setSelectedId(data.variants[0].id);
@@ -45,7 +44,6 @@ export function ProductCheckout({ printfulSyncProductId, productName, primaryIma
           setError(data.error ?? "No variants available.");
         }
         if (data.thumbnailUrl) setThumbnailUrl(data.thumbnailUrl);
-        if (data.altThumbnailUrl) setApiAltImageUrl(data.altThumbnailUrl);
       })
       .catch(() => setError("Could not load product options."))
       .finally(() => setLoadingVariants(false));
@@ -102,7 +100,7 @@ export function ProductCheckout({ printfulSyncProductId, productName, primaryIma
   }
 
   const mainImageUrl = primaryImageUrl || thumbnailUrl;
-  const alternateImageUrl = altImageUrl || apiAltImageUrl;
+  const alternateImageUrl = altImageUrl;
 
   return (
     <div className="space-y-4">

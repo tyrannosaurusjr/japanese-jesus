@@ -32,6 +32,9 @@ export function ProductCheckout({ printfulSyncProductId, productName, primaryIma
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hovered, setHovered] = useState(false);
+  const [zoomEnabled, setZoomEnabled] = useState(false);
+  const [zoomed, setZoomed] = useState(false);
+  const [zoomOrigin, setZoomOrigin] = useState({ x: 50, y: 50 });
 
   useEffect(() => {
     fetch(`/api/shop/variants/${printfulSyncProductId}`)
@@ -101,33 +104,77 @@ export function ProductCheckout({ printfulSyncProductId, productName, primaryIma
 
   const mainImageUrl = primaryImageUrl || thumbnailUrl;
   const alternateImageUrl = altImageUrl;
+  const zoomScale = zoomEnabled && zoomed ? 2.2 : 1;
+  const imageTransform = `scale(${zoomScale})`;
+  const imageTransformOrigin = `${zoomOrigin.x}% ${zoomOrigin.y}%`;
 
   return (
     <div className="space-y-4">
       {mainImageUrl && (
-        <div
-          className="relative w-full aspect-square bg-[#111D2B] border border-[#2D4A3E]/40 overflow-hidden"
-          onMouseEnter={() => alternateImageUrl && setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-        >
-          <Image
-            src={mainImageUrl}
-            alt={productName}
-            fill
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-contain p-2 transition-opacity duration-300"
-            style={{ opacity: hovered && alternateImageUrl ? 0 : 1 }}
-          />
-          {alternateImageUrl && (
+        <div className="space-y-2">
+          <div
+            className={`relative w-full aspect-square bg-[#111D2B] border border-[#2D4A3E]/40 overflow-hidden ${
+              zoomEnabled ? "cursor-zoom-in" : ""
+            }`}
+            onMouseEnter={() => {
+              if (alternateImageUrl) setHovered(true);
+              if (zoomEnabled) setZoomed(true);
+            }}
+            onMouseLeave={() => {
+              setHovered(false);
+              setZoomed(false);
+              setZoomOrigin({ x: 50, y: 50 });
+            }}
+            onMouseMove={(event) => {
+              if (!zoomEnabled) return;
+              const rect = event.currentTarget.getBoundingClientRect();
+              const x = ((event.clientX - rect.left) / rect.width) * 100;
+              const y = ((event.clientY - rect.top) / rect.height) * 100;
+              setZoomOrigin({
+                x: Math.max(0, Math.min(100, x)),
+                y: Math.max(0, Math.min(100, y)),
+              });
+            }}
+          >
             <Image
-              src={alternateImageUrl}
-              alt={`${productName} — alternate view`}
+              src={mainImageUrl}
+              alt={productName}
               fill
               sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-contain p-2 transition-opacity duration-300"
-              style={{ opacity: hovered ? 1 : 0 }}
+              className="object-contain p-2 transition-all duration-200"
+              style={{
+                opacity: hovered && alternateImageUrl ? 0 : 1,
+                transform: imageTransform,
+                transformOrigin: imageTransformOrigin,
+              }}
             />
-          )}
+            {alternateImageUrl && (
+              <Image
+                src={alternateImageUrl}
+                alt={`${productName} — alternate view`}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-contain p-2 transition-all duration-200"
+                style={{
+                  opacity: hovered ? 1 : 0,
+                  transform: imageTransform,
+                  transformOrigin: imageTransformOrigin,
+                }}
+              />
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setZoomEnabled((value) => !value);
+              setZoomed(false);
+              setZoomOrigin({ x: 50, y: 50 });
+            }}
+            className="label border border-[#2D4A3E]/60 text-[#F5F2EB]/70 px-3 py-2 hover:border-[#E8D44D]/60 hover:text-[#E8D44D] transition-colors duration-200 text-left"
+            aria-label={`${zoomEnabled ? "Disable" : "Enable"} zoom for ${productName}`}
+          >
+            {zoomEnabled ? "Zoom: On (hover image)" : "Zoom: Off"}
+          </button>
         </div>
       )}
 

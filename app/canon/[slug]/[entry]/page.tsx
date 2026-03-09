@@ -76,6 +76,23 @@ const CANON_REFERENCES_BY_EPOCH: Record<string, CanonReference[]> = {
       note: "Municipal context for destination-level factual grounding.",
     },
   ],
+  "herai-years": [
+    {
+      label: "Shingo Village Municipal Site",
+      href: "https://www.vill.shingo.aomori.jp/",
+      note: "Primary civic source for local geography and municipal framing during the Herai years.",
+    },
+    {
+      label: "Christ Park - Amazing AOMORI",
+      href: "https://aomori-tourism.com/en/spot/detail_62.html",
+      note: "Official tourism source for the Shingo legend location and public interpretation.",
+    },
+    {
+      label: "Shingo, Aomori (Wikipedia)",
+      href: "https://en.wikipedia.org/wiki/Shing%C5%8D%2C_Aomori",
+      note: "Secondary orientation source for timeline and place context.",
+    },
+  ],
   "the-conduit-unseals": [
     {
       label: "Shingo Village Municipal Site",

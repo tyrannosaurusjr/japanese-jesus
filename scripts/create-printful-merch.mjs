@@ -14,6 +14,11 @@ const ITEMS = [
     variantExternalId: "japanese-jesus-carrier-cap-variant",
     variantIdEnvKey: "PRINTFUL_VARIANT_ID_CARRIER_CAP",
     fileUrlEnvKey: "PRINTFUL_FILE_URL_CARRIER_CAP",
+    rules: {
+      requireAny: ["snapback", "structured", "trucker", "flexfit"],
+      requireAll: ["cap"],
+      forbid: ["dad hat", "all-over print"],
+    },
   },
   {
     id: "gate-tee",
@@ -23,6 +28,11 @@ const ITEMS = [
     variantExternalId: "japanese-jesus-gate-tee-variant",
     variantIdEnvKey: "PRINTFUL_VARIANT_ID_GATE_TEE",
     fileUrlEnvKey: "PRINTFUL_FILE_URL_GATE_TEE",
+    rules: {
+      requireAny: ["oversized", "garment-dyed", "heavyweight", "heavy weight"],
+      requireAll: ["t-shirt"],
+      forbid: ["all-over print", "performance", "athletic"],
+    },
   },
   {
     id: "herai-hoodie",
@@ -32,6 +42,11 @@ const ITEMS = [
     variantExternalId: "japanese-jesus-herai-hoodie-variant",
     variantIdEnvKey: "PRINTFUL_VARIANT_ID_HERAI_HOODIE",
     fileUrlEnvKey: "PRINTFUL_FILE_URL_HERAI_HOODIE",
+    rules: {
+      requireAny: ["pullover", "bella", "3719"],
+      requireAll: ["hoodie"],
+      forbid: ["all-over print", "zip hoodie", "quarter zip"],
+    },
   },
   {
     id: "thin-place-print",
@@ -41,6 +56,11 @@ const ITEMS = [
     variantExternalId: "japanese-jesus-thin-place-print-variant",
     variantIdEnvKey: "PRINTFUL_VARIANT_ID_THIN_PLACE_PRINT",
     fileUrlEnvKey: "PRINTFUL_FILE_URL_THIN_PLACE_PRINT",
+    rules: {
+      requireAny: ["50×70", "50x70", "20″×28″", "20x28"],
+      requireAll: ["poster"],
+      forbid: ["framed"],
+    },
   },
 ];
 
@@ -84,6 +104,7 @@ function parseArgs(argv) {
   const selectedIds = [];
   let dryRun = false;
   let includePoster = false;
+  let strict = true;
 
   for (const arg of argv) {
     if (arg === "--dry-run") {
@@ -93,6 +114,11 @@ function parseArgs(argv) {
 
     if (arg === "--include-poster") {
       includePoster = true;
+      continue;
+    }
+
+    if (arg === "--allow-mismatch") {
+      strict = false;
       continue;
     }
 
@@ -106,7 +132,7 @@ function parseArgs(argv) {
     }
   }
 
-  return { selectedIds, dryRun, includePoster };
+  return { selectedIds, dryRun, includePoster, strict };
 }
 
 function getConfiguredItem(item) {
@@ -162,10 +188,63 @@ async function createProduct(token, payload) {
   return json?.result;
 }
 
+async function getVariantMetadata(token, variantId) {
+  const response = await fetch(`${PRINTFUL_API_BASE}/products/variant/${variantId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  const json = await response.json();
+
+  if (!response.ok) {
+    const message = json?.error?.message || `Variant lookup failed with status ${response.status}.`;
+    throw new Error(message);
+  }
+
+  const variant = json?.result?.variant;
+  const product = json?.result?.product;
+
+  return {
+    descriptor: `${variant?.name || ""} ${variant?.size || ""} ${variant?.color || ""} ${product?.title || ""} ${product?.type || ""} ${product?.type_name || ""}`.toLowerCase(),
+    variantName: variant?.name || "Unknown variant",
+  };
+}
+
+function validateRules(descriptor, rules) {
+  const missingRequiredAll = rules.requireAll.filter((term) => !descriptor.includes(term));
+
+  if (missingRequiredAll.length > 0) {
+    return {
+      ok: false,
+      reason: `Missing required terms: ${missingRequiredAll.join(", ")}.`,
+    };
+  }
+
+  if (rules.requireAny.length > 0 && !rules.requireAny.some((term) => descriptor.includes(term))) {
+    return {
+      ok: false,
+      reason: `Must include one of: ${rules.requireAny.join(", ")}.`,
+    };
+  }
+
+  const forbidden = rules.forbid.find((term) => descriptor.includes(term));
+
+  if (forbidden) {
+    return {
+      ok: false,
+      reason: `Contains forbidden term: ${forbidden}.`,
+    };
+  }
+
+  return { ok: true };
+}
+
 async function main() {
   loadDotEnvIfPresent(ENV_PATH);
 
-  const { selectedIds, dryRun, includePoster } = parseArgs(process.argv.slice(2));
+  const { selectedIds, dryRun, includePoster, strict } = parseArgs(process.argv.slice(2));
   const token = process.env.PRINTFUL_API_TOKEN;
 
   if (!token) {
@@ -192,8 +271,29 @@ async function main() {
       continue;
     }
 
+    let variantMetadata;
+    try {
+      variantMetadata = await getVariantMetadata(token, configured.payload.sync_variants[0].variant_id);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      console.log(`[skip] ${item.id}: could not verify variant metadata (${message})`);
+      continue;
+    }
+
+    if (strict) {
+      const validation = validateRules(variantMetadata.descriptor, item.rules);
+      if (!validation.ok) {
+        console.log(
+          `[skip] ${item.id}: variant mismatch (${validation.reason}) variant="${variantMetadata.variantName}"`,
+        );
+        continue;
+      }
+    }
+
     if (dryRun) {
-      console.log(`[dry-run] ${item.id}: ready (variant ${configured.payload.sync_variants[0].variant_id}, $${configured.payload.sync_variants[0].retail_price})`);
+      console.log(
+        `[dry-run] ${item.id}: ready (variant ${configured.payload.sync_variants[0].variant_id}, $${configured.payload.sync_variants[0].retail_price})`,
+      );
       continue;
     }
 

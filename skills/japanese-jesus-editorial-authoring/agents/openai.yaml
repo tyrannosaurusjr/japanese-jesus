@@ -1,0 +1,5 @@
+version: 1
+interface:
+  display_name: Japanese Jesus Editorial
+  short_description: Writes and revises public-facing Japanese Jesus copy while preserving route roles, mythic tone, and factual guardrails.
+  default_prompt: Draft or revise public-facing Japanese Jesus site copy using the project’s route-specific editorial rules, fact-versus-canon boundaries, and approved tone.

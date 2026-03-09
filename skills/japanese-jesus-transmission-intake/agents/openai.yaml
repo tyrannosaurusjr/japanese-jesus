@@ -1,0 +1,5 @@
+version: 1
+interface:
+  display_name: Japanese Jesus Transmissions
+  short_description: Maintains the signup form, popup flow, and transmissions API with safer backend behavior.
+  default_prompt: Update the Japanese Jesus transmission intake flow while preserving smooth frontend UX and making backend outcomes more truthful and reliable.

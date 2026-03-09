@@ -1,0 +1,5 @@
+version: 1
+interface:
+  display_name: Japanese Jesus Routes
+  short_description: Guides route additions, redirects, and hub-aligned structural changes.
+  default_prompt: Update Japanese Jesus routes carefully, preserving the documented hub structure, legacy aliases, and the intended purpose of each destination.

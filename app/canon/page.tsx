@@ -96,6 +96,28 @@ export default function CanonPage() {
         </div>
       </section>
 
+      <section className="px-6 md:px-10 pb-16 max-w-5xl mx-auto">
+        <Link
+          href="/canon/game"
+          className="static-panel block border border-[#2D4A3E]/30 p-7 bg-[linear-gradient(130deg,rgba(232,212,77,0.07),rgba(192,57,43,0.07))] hover:border-[#C0392B]/60 transition-colors duration-300"
+        >
+          <p className="label text-[#E8D44D] mb-3">Interactive Canon</p>
+          <h2
+            className="text-2xl md:text-3xl text-[#F5F2EB] mb-4"
+            style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
+          >
+            Canon Harvest Game
+          </h2>
+          <p
+            className="text-[#F5F2EB]/68 text-sm md:text-base leading-relaxed"
+            style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+          >
+            Farm the Shingo field node: plant, water, harvest, and use temporary buffs to hit the
+            seasonal target before winter lock.
+          </p>
+        </Link>
+      </section>
+
       <section className="px-6 md:px-10 pb-24 max-w-3xl mx-auto">
         <blockquote className="border-l-2 border-[#C0392B] pl-6">
           <p

@@ -1,0 +1,5 @@
+version: 1
+interface:
+  display_name: Japanese Jesus Printful
+  short_description: Handles relic catalog product mapping, Printful routes, env vars, and poster export workflow.
+  default_prompt: Update the Japanese Jesus Printful catalog carefully, keeping SKU mappings, env vars, API route behavior, and the poster export/check pipeline aligned.

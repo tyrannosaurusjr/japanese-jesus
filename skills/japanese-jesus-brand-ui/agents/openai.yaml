@@ -1,0 +1,5 @@
+version: 1
+interface:
+  display_name: Japanese Jesus Brand UI
+  short_description: Keeps frontend and visual changes aligned with the site’s severe, atmospheric visual identity.
+  default_prompt: Update the Japanese Jesus UI while preserving its specific visual language, readable atmosphere, and non-generic presentation.

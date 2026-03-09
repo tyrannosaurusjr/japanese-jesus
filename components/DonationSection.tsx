@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Sigil } from "@/components/Sigil";
 
 const suggestedAmounts = [33, 72, 108, 216];
@@ -16,11 +16,25 @@ export function DonationSection() {
   const [submitted, setSubmitted] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
+  const [checkoutStatus, setCheckoutStatus] = useState<"success" | "cancel" | null>(null);
 
   const goalProgress = useMemo(() => {
     const target = 4400;
     const committed = 1680;
     return Math.min(100, Math.round((committed / target) * 100));
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const donation = params.get("donation");
+
+    if (donation === "success" || donation === "cancel") {
+      setCheckoutStatus(donation);
+      params.delete("donation");
+      const nextQuery = params.toString();
+      const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`;
+      window.history.replaceState({}, "", nextUrl);
+    }
   }, []);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -83,10 +97,37 @@ export function DonationSection() {
   };
 
   return (
-    <section className="relative overflow-hidden border-y border-[#2D4A3E]/30 py-24 px-6 md:px-10">
+    <section
+      id="fund-the-ascent"
+      className="relative overflow-hidden border-y border-[#2D4A3E]/30 py-24 px-6 md:px-10"
+    >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(232,212,77,0.12),transparent_36%),radial-gradient(circle_at_15%_70%,rgba(192,57,43,0.14),transparent_30%),linear-gradient(180deg,rgba(245,242,235,0.02),rgba(13,27,42,0.18))]" />
 
       <div className="relative max-w-6xl mx-auto grid grid-cols-1 gap-10 lg:grid-cols-[1.15fr_0.85fr]">
+        {checkoutStatus === "success" ? (
+          <div className="lg:col-span-2 rounded-3xl border border-[#E8D44D]/40 bg-[#E8D44D]/[0.08] px-6 py-5">
+            <p className="label text-[#E8D44D] mb-2">Offering Received</p>
+            <p
+              className="text-[#F5F2EB] text-base md:text-lg"
+              style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+            >
+              Thank you. Your support crossed the threshold and is now fueling the Shingo field expedition.
+            </p>
+          </div>
+        ) : null}
+
+        {checkoutStatus === "cancel" ? (
+          <div className="lg:col-span-2 rounded-3xl border border-[#F5F2EB]/15 bg-[#F5F2EB]/[0.04] px-6 py-5">
+            <p className="label text-[#F5F2EB]/55 mb-2">Path Paused</p>
+            <p
+              className="text-[#F5F2EB]/80 text-base"
+              style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+            >
+              No charge was made. You can choose another amount and reopen checkout whenever you are ready.
+            </p>
+          </div>
+        ) : null}
+
         <div className="rounded-[2rem] border border-[#F5F2EB]/10 bg-[#0D1B2A]/70 p-8 md:p-10 backdrop-blur-sm">
           <div className="flex items-center gap-4 mb-6">
             <Sigil variant="citrine" size={34} className="opacity-80" />

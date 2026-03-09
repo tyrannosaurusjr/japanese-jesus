@@ -1,0 +1,5 @@
+version: 1
+interface:
+  display_name: Japanese Jesus Launch Audit
+  short_description: Runs release-readiness checks across runtime, assets, content, integrations, and docs.
+  default_prompt: Audit the Japanese Jesus project for launch readiness, prioritizing concrete findings on runtime health, missing assets, content risk, integration gaps, and documentation drift.

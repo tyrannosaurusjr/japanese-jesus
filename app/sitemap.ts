@@ -3,7 +3,7 @@ import { CANON_EPOCHS, CANON_SERIES_BY_EPOCH, CONDUIT_NOTES } from "@/lib/site-c
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://japanesejesus.com";
 
-const CORE_ROUTES = ["/", "/canon", "/conduit", "/journey", "/relics", "/signal"];
+const CORE_ROUTES = ["/", "/canon", "/canon/game", "/conduit", "/journey", "/relics", "/signal"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();

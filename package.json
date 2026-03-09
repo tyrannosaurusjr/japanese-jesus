@@ -10,7 +10,8 @@
     "export:printful-poster": "node scripts/export-printful-poster.mjs",
     "check:printful-poster": "node scripts/check-printful-poster.mjs",
     "create:printful-merch": "node scripts/create-printful-merch.mjs",
-    "find:printful-variants": "node scripts/find-printful-variants.mjs"
+    "find:printful-variants": "node scripts/find-printful-variants.mjs",
+    "printful:inspect": "node scripts/printful-inspect.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^1.6.1",
@@ -25,6 +26,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "playwright": "^1.58.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

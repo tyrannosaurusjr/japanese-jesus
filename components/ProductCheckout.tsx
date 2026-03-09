@@ -102,13 +102,14 @@ export function ProductCheckout({ printfulSyncProductId, productName, primaryIma
   }
 
   const mainImageUrl = primaryImageUrl || thumbnailUrl;
+  const alternateImageUrl = altImageUrl || apiAltImageUrl;
 
   return (
     <div className="space-y-4">
       {mainImageUrl && (
         <div
           className="relative w-full aspect-square bg-[#111D2B] border border-[#2D4A3E]/40 overflow-hidden"
-          onMouseEnter={() => altImageUrl && setHovered(true)}
+          onMouseEnter={() => alternateImageUrl && setHovered(true)}
           onMouseLeave={() => setHovered(false)}
         >
           <Image
@@ -117,11 +118,11 @@ export function ProductCheckout({ printfulSyncProductId, productName, primaryIma
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
             className="object-contain p-2 transition-opacity duration-300"
-            style={{ opacity: hovered && altImageUrl ? 0 : 1 }}
+            style={{ opacity: hovered && alternateImageUrl ? 0 : 1 }}
           />
-          {altImageUrl && (
+          {alternateImageUrl && (
             <Image
-              src={altImageUrl}
+              src={alternateImageUrl}
               alt={`${productName} — alternate view`}
               fill
               sizes="(max-width: 768px) 100vw, 50vw"

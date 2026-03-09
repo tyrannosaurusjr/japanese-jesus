@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { Sigil } from "@/components/Sigil";
 import { AudioPlayer } from "@/components/AudioPlayer";
 import { TransmissionForm } from "@/components/TransmissionForm";
+import { DonationSection } from "@/components/DonationSection";
 import { CANON_SERIES_BY_EPOCH, CONDUIT_NOTES } from "@/lib/site-content";
 
 export default function Home() {
@@ -62,6 +63,12 @@ export default function Home() {
                 >
                   Open The Map
                 </a>
+                <a
+                  href="#fund-the-ascent"
+                  className="label inline-block border border-[#F5F2EB]/30 text-[#F5F2EB] px-8 py-4 hover:border-[#C0392B] hover:text-[#C0392B] transition-all duration-300"
+                >
+                  Fund The Ascent
+                </a>
                 <Link
                   href="/journey"
                   className="label inline-block border border-[#E8D44D]/30 text-[#E8D44D] px-8 py-4 hover:border-[#E8D44D] hover:bg-[#E8D44D]/10 transition-all duration-300"
@@ -81,6 +88,8 @@ export default function Home() {
           <div className="w-px h-12 bg-[#F5F2EB]/20" style={{ animation: "pulse 2s infinite" }} />
         </div>
       </section>
+
+      <DonationSection />
 
       <section id="system-map" className="px-6 md:px-10 py-28">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-[0.9fr_1.1fr] gap-10 items-start">

@@ -21,6 +21,7 @@ npm run dev
 npm run lint
 npm run export:printful-poster
 npm run check:printful-poster
+npm run printful:inspect -- catalog
 npm run build
 npm run start
 ```
@@ -42,6 +43,7 @@ Public routes:
 
 - `/`
 - `/canon`
+- `/canon/game`
 - `/conduit`
 - `/journey`
 - `/relics`
@@ -101,6 +103,8 @@ Optional environment variables for API-based Printful catalog creation:
 - `PRINTFUL_POSTER_ASSET_PATH`
 
 These are used by `POST /api/printful/catalog` with a JSON body like `{ "id": "carrier-cap" }` to create configured Printful products for the ready catalog items.
+
+Important: `npm run create:printful-merch` now validates the actual Printful variant metadata against SKU rules and skips mismatches by default. Use `npm run printful:inspect -- catalog` and `npm run printful:inspect -- catalog-variants <productId>` to source correct variant IDs first.
 
 Poster-specific route notes for `POST /api/printful/japanese-jesus-poster`:
 

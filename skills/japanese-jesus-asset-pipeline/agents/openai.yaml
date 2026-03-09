@@ -1,0 +1,5 @@
+version: 1
+interface:
+  display_name: Japanese Jesus Assets
+  short_description: Handles placeholder swaps, public media placement, file triage, and asset reference validation.
+  default_prompt: Update Japanese Jesus media assets carefully, keeping public paths, placeholder replacements, and any clue-sensitive files handled safely.

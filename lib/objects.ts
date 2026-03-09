@@ -11,6 +11,8 @@ export interface CatalogObject {
   notForSale?: boolean;
   primaryImageUrl?: string; // overrides Printful thumbnail as main image
   altImageUrl?: string; // optional back/alt product image shown on hover
+  imageSrc?: string;
+  imageAlt?: string;
 }
 
 export const OBJECTS: CatalogObject[] = [
@@ -18,11 +20,14 @@ export const OBJECTS: CatalogObject[] = [
     id: "carrier-cap",
     name: "Rift Sigil Bucket Hat",
     description:
-      "A black bucket hat for cold roads and signal weather. Marked only with the conduit sigil in embroidered thread. Built to read like issued gear from a system that never officially existed.",
+      "Lightweight organic cotton bucket hat for ridge light and static rain. Rift sigil embroidery in conduit green. Packable, breathable, and built as everyday field gear, not merch.",
     material: "100% cotton · unstructured · one size",
     price: 48,
     variant: "vermilion",
     printfulSyncProductId: "422702408",
+    primaryImageUrl: "/images/rift-sigil-bucket-hat.jpg",
+    imageSrc: "/images/rift-sigil-bucket-hat.jpg", // fallback slot if card renderer uses legacy imageSrc
+    imageAlt: "Rift Sigil Bucket Hat in black with conduit green embroidery",
   },
   {
     id: "gate-tee",

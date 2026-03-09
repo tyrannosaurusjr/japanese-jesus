@@ -17,17 +17,16 @@ export interface CatalogObject {
 
 export const OBJECTS: CatalogObject[] = [
   {
-    id: "carrier-cap",
-    name: "Rift Sigil Bucket Hat",
+    id: "herai-hoodie",
+    name: "Portal Lantern Sweatshirt",
     description:
-      "Organic cotton bucket hat built for long station walks, wind off the cedar ridge, and sudden static rain. Front embroidery carries the Rift sigil in conduit green with no slogan, no back print, and no decorative noise. Packable field gear made to look issued, not branded.",
-    material: "100% cotton · unstructured · one size",
-    price: 48,
-    variant: "vermilion",
-    printfulSyncProductId: "422702408",
-    primaryImageUrl: "/images/rift-sigil-bucket-hat.jpg",
-    imageSrc: "/images/rift-sigil-bucket-hat.jpg", // fallback slot if card renderer uses legacy imageSrc
-    imageAlt: "Rift Sigil Bucket Hat in black with conduit green embroidery",
+      "Unisex organic cotton layer for night crossings, platform drafts, and the cold edge of signal weather. Clean chest mark in front, HERAI spread across the back as a location code instead of a slogan. Dense, structured, and made to wear like archive uniform gear rather than seasonal merch.",
+    material: "Organic cotton · unisex fit · preshrunk",
+    price: 118,
+    variant: "citrine",
+    printfulSyncProductId: "422747921",
+    primaryImageUrl: "https://files.cdn.printful.com/files/27a/27a94fe4efa3981d4d60e289adb8290e_preview.png",
+    altImageUrl: "https://files.cdn.printful.com/files/83b/83b78b386ecf91b1664ec8b17a636374_preview.png",
   },
   {
     id: "gate-tee",
@@ -38,18 +37,8 @@ export const OBJECTS: CatalogObject[] = [
     price: 54,
     variant: "white",
     printfulSyncProductId: "422792119",
-    primaryImageUrl: "/images/pilgrimage-tee-front.jpg",
-    altImageUrl: "/images/pilgrimage-tee-back.jpg",
-  },
-  {
-    id: "herai-hoodie",
-    name: "Portal Lantern Sweatshirt",
-    description:
-      "Unisex organic cotton layer for night crossings, platform drafts, and the cold edge of signal weather. Clean chest mark in front, HERAI spread across the back as a location code instead of a slogan. Dense, structured, and made to wear like archive uniform gear rather than seasonal merch.",
-    material: "Organic cotton · unisex fit · preshrunk",
-    price: 118,
-    variant: "citrine",
-    printfulSyncProductId: "422747921",
+    primaryImageUrl: "https://files.cdn.printful.com/files/3ca/3ca54f37e32ccdc9bd23b54cec057455_preview.png",
+    altImageUrl: "https://files.cdn.printful.com/files/5a3/5a3c30323be3cf630d163cb6ab77533f_preview.png",
   },
   {
     id: "thin-place-print",
@@ -60,6 +49,8 @@ export const OBJECTS: CatalogObject[] = [
     price: 35,
     variant: "vermilion",
     printfulSyncProductId: "422563554",
+    primaryImageUrl: "https://files.cdn.printful.com/files/849/8494d7f430fa95e82d550dd5e1ede11d_preview.png",
+    altImageUrl: "https://files.cdn.printful.com/files/3c9/3c93379d68cf9246a8a39ec94f51bcd9_preview.png",
   },
   {
     id: "framed-poster",
@@ -70,6 +61,7 @@ export const OBJECTS: CatalogObject[] = [
     price: 89,
     variant: "vermilion",
     printfulSyncProductId: "422563382",
+    primaryImageUrl: "https://files.cdn.printful.com/files/a50/a508298000d9f689c14f3ad737abdfed_preview.png",
   },
   {
     id: "frequency-patch-red",
@@ -80,6 +72,7 @@ export const OBJECTS: CatalogObject[] = [
     price: 18,
     variant: "vermilion",
     printfulSyncProductId: "422788293",
+    primaryImageUrl: "https://files.cdn.printful.com/files/db7/db7bc51b4766e01b6c3a2f70932c9f5b_preview.png",
   },
   {
     id: "frequency-patch-blue",
@@ -90,6 +83,21 @@ export const OBJECTS: CatalogObject[] = [
     price: 18,
     variant: "citrine",
     printfulSyncProductId: "422781829",
+    primaryImageUrl: "https://files.cdn.printful.com/files/632/632fc07e4424d8937c51cc0610749d71_preview.png",
+  },
+  {
+    id: "carrier-cap",
+    name: "Rift Sigil Bucket Hat",
+    description:
+      "Organic cotton bucket hat built for long station walks, wind off the cedar ridge, and sudden static rain. Front embroidery carries the Rift sigil in conduit green with no slogan, no back print, and no decorative noise. Packable field gear made to look issued, not branded.",
+    material: "100% cotton · unstructured · one size",
+    price: 48,
+    variant: "vermilion",
+    printfulSyncProductId: "422702408",
+    primaryImageUrl: "https://files.cdn.printful.com/files/e25/e259b2682eabcb9657fcbb7fa42c88c0_preview.png",
+    altImageUrl: "https://files.cdn.printful.com/files/2e2/2e2afcf7b6d7af68ad936c72e11c647d_preview.png",
+    imageSrc: "https://files.cdn.printful.com/files/e25/e259b2682eabcb9657fcbb7fa42c88c0_preview.png", // fallback slot if card renderer uses legacy imageSrc
+    imageAlt: "Rift Sigil Bucket Hat in black with conduit green embroidery",
   },
   {
     id: "keeper-card",

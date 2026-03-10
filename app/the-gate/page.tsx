@@ -47,7 +47,7 @@ export default async function TheGate() {
         {/* Coordinate overlay */}
         <div className="absolute inset-0 flex flex-col items-center justify-end pb-16 px-6">
           <div className="font-mono text-[#F5F2EB]/60 text-sm tracking-widest text-center">
-            <span>40.65419° N, 141.13889° E</span>
+            <span>40.46577° N, 141.17350° E</span>
           </div>
         </div>
 

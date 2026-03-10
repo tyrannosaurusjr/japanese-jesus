@@ -33,8 +33,8 @@ export default function Home() {
   const wanderingSeries = CANON_SERIES_BY_EPOCH["wandering-spirit"] ?? [];
   const featuredCanon = wanderingSeries[0];
   const featuredConduit = CONDUIT_NOTES.find((note) => note.slug === "primary-node");
-  const shingoVillageMapUrl = "https://www.google.com/maps/search/?api=1&query=40.654194,141.138889";
-  const onsenkanMapUrl = "https://www.google.com/maps/search/?api=1&query=Shingo+Onsenkan";
+  const shingoVillageMapUrl = "https://maps.app.goo.gl/WPf7Q3aJWcwdznSRA";
+  const onsenkanMapUrl = "https://maps.app.goo.gl/WPf7Q3aJWcwdznSRA";
   const hasDirectDonatePath = Boolean(
     process.env.NEXT_PUBLIC_DONATION_URL || process.env.STRIPE_SECRET_KEY,
   );
@@ -298,7 +298,7 @@ export default function Home() {
                 rel="noopener noreferrer"
                 className="label inline-block border border-[#EFE4CF] text-[#EFE4CF]/70 px-6 py-3 hover:border-[#C44A32] hover:text-[#C44A32] transition-all duration-300"
               >
-                Onsenkan Map ↗
+                Shingo Village Map ↗
               </a>
             </div>
           </div>

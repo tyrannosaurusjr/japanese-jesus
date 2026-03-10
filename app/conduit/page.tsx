@@ -27,7 +27,7 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 export default function ConduitPage() {
-  const shingoVillageMapUrl = "https://www.google.com/maps/search/?api=1&query=40.654194,141.138889";
+  const shingoVillageMapUrl = "https://maps.app.goo.gl/WPf7Q3aJWcwdznSRA";
   const conduitStructuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -40,8 +40,8 @@ export default function ConduitPage() {
         url: "https://www.vill.shingo.aomori.jp/",
         geo: {
           "@type": "GeoCoordinates",
-          latitude: 40.654194,
-          longitude: 141.138889,
+          latitude: 40.465766,
+          longitude: 141.173496,
         },
         address: {
           "@type": "PostalAddress",
@@ -66,8 +66,8 @@ export default function ConduitPage() {
         },
         geo: {
           "@type": "GeoCoordinates",
-          latitude: 40.654194,
-          longitude: 141.138889,
+          latitude: 40.465766,
+          longitude: 141.173496,
         },
       },
     ],
@@ -162,7 +162,7 @@ export default function ConduitPage() {
                   <p
                     className="font-mono tracking-[0.05em] text-2xl md:text-3xl text-[#C44A32]"
                   >
-                    40.65419° N, 141.13889° E
+                    40.46577° N, 141.17350° E
                   </p>
                 </div>
               </div>
@@ -188,15 +188,15 @@ export default function ConduitPage() {
           <div className="static-panel border border-[#EFE4CF]/30 p-3 md:p-4 bg-[#070B14]">
             <div className="relative aspect-[16/9] overflow-hidden border border-[#EFE4CF]/20">
               <iframe
-                title="Google Maps pin for the Shingo conduit coordinates"
-                src="https://maps.google.com/maps?q=40.654194,141.138889&z=14&output=embed"
+                title="Google Maps view for Shingo Village, Aomori"
+                src="https://maps.google.com/maps?q=40.465766,141.173496&z=13&output=embed"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 className="h-full w-full border-0"
               />
             </div>
             <div className="flex flex-wrap items-center justify-between gap-3 mt-3 px-1">
-              <p className="label text-[#EFE4CF]/35">Live map view · 40.65419° N, 141.13889° E</p>
+              <p className="label text-[#EFE4CF]/35">Live map view · 40.46577° N, 141.17350° E</p>
               <a
                 href={shingoVillageMapUrl}
                 target="_blank"

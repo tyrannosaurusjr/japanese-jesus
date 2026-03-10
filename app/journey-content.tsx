@@ -23,7 +23,7 @@ export const journeyMetadata: Metadata = buildPageMetadata({
 });
 
 export function JourneyContent() {
-  const onsenkanMapUrl = "https://www.google.com/maps/search/?api=1&query=Shingo+Onsenkan";
+  const onsenkanMapUrl = "https://maps.app.goo.gl/WPf7Q3aJWcwdznSRA";
   const hachinoheHotelsUrl = "https://www.booking.com/searchresults.html?ss=Hachinohe%2C+Japan";
   const towadaHotelsUrl = "https://www.booking.com/searchresults.html?ss=Towada%2C+Aomori%2C+Japan";
   const journeyStructuredData = {
@@ -124,7 +124,7 @@ export function JourneyContent() {
               rel="noopener noreferrer"
               className="label inline-block border border-[#EFE4CF] text-[#EFE4CF]/70 px-6 py-3 hover:border-[#C44A32] hover:text-[#C44A32] transition-all duration-300"
             >
-              Onsenkan on Google Maps ↗
+              Shingo Village on Google Maps ↗
             </a>
           </div>
         </div>
@@ -245,7 +245,7 @@ export function JourneyContent() {
               <p
                 className="text-[#EFE4CF]/62 text-sm leading-relaxed"
               >
-                Direct Google Maps location for Onsenkan in Shingo.
+                Direct Google Maps location for Shingo Village.
               </p>
             </a>
           </div>

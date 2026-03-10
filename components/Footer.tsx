@@ -34,7 +34,7 @@ export function Footer() {
         </div>
 
         <div className="flex flex-col gap-2">
-          <p className="label text-[#EFE4CF]/30">40.65419° N, 141.13889° E</p>
+          <p className="label text-[#EFE4CF]/30">40.46577° N, 141.17350° E</p>
           <p className="label text-[#EFE4CF]/20">The conduit remains active.</p>
         </div>
       </div>

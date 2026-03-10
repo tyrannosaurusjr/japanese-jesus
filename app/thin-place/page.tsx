@@ -1,17 +1,24 @@
 import type { Metadata } from "next";
 import { Sigil } from "@/components/Sigil";
+import { buildPageMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: "Thin Place",
+  description: "A private threshold route where the membrane is described as permeable.",
+  path: "/thin-place",
+  image: "/images/og/thin-place.png",
+  imageWidth: 1200,
+  imageHeight: 630,
+  imageAlt: "Distressed print treatment for the Thin Place mark",
   robots: {
     index: false,
     follow: false,
   },
-};
+});
 
 // Thin places — locations where boundary between physical and spirit world is permeable
 const THIN_PLACES = [
-  { name: "Shingo Village", location: "Aomori Prefecture, Japan", detail: "40.6542° N, 141.1389° E" },
+  { name: "Shingo Village", location: "Aomori Prefecture, Japan", detail: "40.65419° N, 141.13889° E" },
   { name: "Lake Titicaca", location: "Bolivia / Peru border", detail: "16.0° S, 69.2° W" },
   { name: "Tunguska Basin", location: "Siberia, Russia", detail: "60.917° N, 101.950° E" },
   { name: "Room 811", location: "Osaka, Japan", detail: "Hotel Shin-Osaka. No longer exists." },

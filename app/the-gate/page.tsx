@@ -1,14 +1,21 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { headers } from "next/headers";
+import { buildPageMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = buildPageMetadata({
   title: "门",
+  description: "A threshold route outside the indexed public map.",
+  path: "/the-gate",
+  image: "/images/og/signal.jpg",
+  imageWidth: 1200,
+  imageHeight: 630,
+  imageAlt: "Rural mountain fields near Shingo, Aomori under an open sky",
   robots: {
     index: false,
     follow: false,
   },
-};
+});
 
 // Pixel color map — each brand palette pixel encodes a letter via A1Z26
 // (x,y) coordinates spell letters: I=9, S=19, U=21, K=11, I=9, R=18, I=9
@@ -40,7 +47,7 @@ export default async function TheGate() {
         {/* Coordinate overlay */}
         <div className="absolute inset-0 flex flex-col items-center justify-end pb-16 px-6">
           <div className="font-mono text-[#F5F2EB]/60 text-sm tracking-widest text-center">
-            <span>40.6542° N, 141.1389° E</span>
+            <span>40.65419° N, 141.13889° E</span>
           </div>
         </div>
 

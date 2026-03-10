@@ -252,7 +252,7 @@ export const CONDUIT_NOTES: ConduitNote[] = [
     label: "Field Note 01",
     title: "Primary Node",
     body: "Shingo is small enough to miss if you come looking for spectacle. That is part of the mechanism. The conduit hides inside ordinary geography: fields, cedar, mountain air, and a silence that feels charged rather than empty.",
-    coord: "40.6542° N, 141.1389° E",
+    coord: "40.65419° N, 141.13889° E",
     image: "/images/shingo-village-photo.jpg",
     imageAlt: "Open fields in Aomori with distant mountain ridges",
     sections: [

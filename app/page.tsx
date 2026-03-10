@@ -33,6 +33,8 @@ export default function Home() {
   const wanderingSeries = CANON_SERIES_BY_EPOCH["wandering-spirit"] ?? [];
   const featuredCanon = wanderingSeries[0];
   const featuredConduit = CONDUIT_NOTES.find((note) => note.slug === "primary-node");
+  const shingoVillageMapUrl = "https://www.google.com/maps/search/?api=1&query=40.654194,141.138889";
+  const onsenkanMapUrl = "https://www.google.com/maps/search/?api=1&query=Shingo+Onsenkan";
   const hasDirectDonatePath = Boolean(
     process.env.NEXT_PUBLIC_DONATION_URL || process.env.STRIPE_SECRET_KEY,
   );
@@ -85,7 +87,7 @@ export default function Home() {
             loading="eager"
           />
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(196,74,50,0.09),transparent_22%),linear-gradient(180deg,rgba(7,11,20,0.3),rgba(7,11,20,0.82))]" />
-          <div className="absolute inset-0 opacity-35 mix-blend-screen bg-[linear-gradient(120deg,transparent_0%,rgba(196,74,50,0.08)_25%,transparent_48%,rgba(239,228,207,0.08)_68%,transparent_100%)]" />
+          <div className="absolute inset-0 opacity-20 md:opacity-35 mix-blend-normal md:mix-blend-screen bg-[linear-gradient(120deg,transparent_0%,rgba(196,74,50,0.08)_25%,transparent_48%,rgba(239,228,207,0.08)_68%,transparent_100%)]" />
         </div>
 
         <div className="relative z-10 px-6 md:px-10 pt-36 pb-24">
@@ -93,25 +95,18 @@ export default function Home() {
             <div className="max-w-4xl">
               <p className="label text-[#D6B56E] mb-6">Portal Index · Shingo Conduit · 新郷村</p>
               <h1
-                className="text-6xl md:text-8xl lg:text-9xl text-[#EFE4CF] leading-[0.92] mb-6"
-                style={{
-                  fontFamily: "'Playfair Display', Georgia, serif",
-                  fontWeight: 900,
-                  textShadow: "0 2px 60px rgba(7,11,20,0.9)",
-                }}
+                className="hero-title-shadow text-6xl md:text-8xl lg:text-9xl text-[#EFE4CF] leading-[0.92] mb-6"
               >
-                The Portal<br />Never Closes in Shingo.
+                Japanese Jesus<br />The Portal Never Closes in Shingo
               </h1>
               <p
-                className="label text-[#D6B56E]/90 mb-6 max-w-3xl"
-                style={{ letterSpacing: "0.08em" }}
+                className="label tracking-[0.08em] text-[#D6B56E]/90 mb-6 max-w-3xl"
               >
                 The Japanese Jesus Legend of Shingo Village, Japan
               </p>
 
               <p
-                className="text-base md:text-lg text-[#EFE4CF]/72 mb-8 max-w-3xl"
-                style={{ fontFamily: "'Inter', system-ui, sans-serif", letterSpacing: "0.04em" }}
+                className="tracking-[0.04em] text-base md:text-lg text-[#EFE4CF]/72 mb-8 max-w-3xl"
               >
                 Shingo is the seam. The legend holds that Jesus survived the crucifixion, walked
                 east through Siberia, and died in this northern Japanese village at 106. The tomb
@@ -120,12 +115,12 @@ export default function Home() {
 
               <div className="flex flex-wrap gap-4">
                 <a
-                  href="https://maps.app.goo.gl/o64urkHXE2Rhp7Lu9"
+                  href={shingoVillageMapUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="label inline-block border border-[#C44A32] text-[#C44A32] px-8 py-4 hover:bg-[#C44A32] hover:text-[#EFE4CF] transition-all duration-300"
                 >
-                  Open The Map
+                  Open Shingo Village Map
                 </a>
                 <Link
                   href={heroDonateHref}
@@ -149,7 +144,7 @@ export default function Home() {
         </div>
 
         <div className="absolute bottom-8 right-6 md:right-10 z-10">
-          <div className="w-px h-12 bg-[#EFE4CF]/20" style={{ animation: "pulse 2s infinite" }} />
+          <div className="pulse-loop w-px h-12 bg-[#EFE4CF]/20" />
         </div>
       </section>
 
@@ -164,13 +159,11 @@ export default function Home() {
                 <p className="label text-[#D6B56E] mb-4">About the Mythology</p>
                 <h2
                   className="text-3xl md:text-4xl text-[#EFE4CF] mb-5 leading-tight"
-                  style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
                 >
-                  Not a shrine.<br />A conduit.<br />A live myth system.
+                  Not a shrine.<br />A Shingo conduit.<br />A live Japanese Jesus myth system.
                 </h2>
                 <p
                   className="text-[#EFE4CF]/65 text-base leading-relaxed"
-                  style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
                 >
                   The canon begins before history: a wandering spirit without a body, without pain,
                   without names. It enters flesh, becomes Jesus, survives the hinge of Isukiri&apos;s
@@ -213,7 +206,6 @@ export default function Home() {
                 <p className="label text-[#D6B56E] mb-2">{label}</p>
                 <p
                   className="text-[#EFE4CF]/60 text-sm group-hover:text-[#EFE4CF]/90 transition-colors duration-300"
-                  style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
                 >
                   {text}
                 </p>
@@ -229,13 +221,11 @@ export default function Home() {
             <p className="label text-[#D6B56E] mb-4">Why Go North</p>
             <h2
               className="text-3xl md:text-4xl text-[#EFE4CF] mb-5 leading-tight"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
             >
               A real village.<br />A strange legend.<br />An unusually memorable trip.
             </h2>
             <p
               className="text-[#EFE4CF]/65 text-base leading-relaxed mb-6"
-              style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
             >
               The mythology gets attention, but the travel reason is straightforward: Shingo gives
               you a real destination in northern Aomori with rare local lore, open rural landscape,
@@ -260,7 +250,6 @@ export default function Home() {
                 <p
                   key={item}
                   className="text-[#EFE4CF]/62 text-sm leading-relaxed"
-                  style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
                 >
                   {item}
                 </p>
@@ -276,13 +265,11 @@ export default function Home() {
             <p className="label text-[#D6B56E] mb-4">Stay In The Node</p>
             <h2
               className="text-3xl md:text-4xl text-[#EFE4CF] mb-4 leading-tight"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
             >
               Overnight in Shingo at Onsenkan.
             </h2>
             <p
               className="text-[#EFE4CF]/68 text-base leading-relaxed"
-              style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
             >
               Municipal listings indicate overnight stays at Shingo&apos;s Onsenkan, about a
               9-minute drive from the Christ grave area. Platform listings can be inconsistent, so
@@ -306,12 +293,12 @@ export default function Home() {
                 Official Onsenkan ↗
               </a>
               <a
-                href="https://maps.app.goo.gl/Uwh16Yadjo7DYvCr8"
+                href={onsenkanMapUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="label inline-block border border-[#EFE4CF] text-[#EFE4CF]/70 px-6 py-3 hover:border-[#C44A32] hover:text-[#C44A32] transition-all duration-300"
               >
-                Google Maps Pin ↗
+                Onsenkan Map ↗
               </a>
             </div>
           </div>
@@ -330,19 +317,16 @@ export default function Home() {
                 <p className="label text-[#D6B56E] mb-3">Canon</p>
                 <h2
                   className="text-2xl text-[#EFE4CF] mb-4"
-                  style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
                 >
                   {featuredCanon.title}
                 </h2>
                 <p
                   className="text-[#EFE4CF]/64 text-sm leading-relaxed mb-4"
-                  style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
                 >
                   {featuredCanon.dek}
                 </p>
                 <p
                   className="text-[#EFE4CF]/50 text-sm leading-relaxed"
-                  style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
                 >
                   {featuredCanon.body[0]}
                 </p>
@@ -357,19 +341,16 @@ export default function Home() {
                 <p className="label text-[#D6B56E] mb-3">Conduit</p>
                 <h2
                   className="text-2xl text-[#EFE4CF] mb-4"
-                  style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
                 >
                   {featuredConduit.title}
                 </h2>
                 <p
                   className="text-[#EFE4CF]/64 text-sm leading-relaxed mb-4"
-                  style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
                 >
                   {featuredConduit.body}
                 </p>
                 <p
                   className="text-[#EFE4CF]/50 text-sm leading-relaxed"
-                  style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
                 >
                   {featuredConduit.sections[0]?.body[0]}
                 </p>
@@ -383,20 +364,17 @@ export default function Home() {
               <p className="label text-[#D6B56E] mb-3">Journey</p>
               <h2
                 className="text-2xl text-[#EFE4CF] mb-4"
-                style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
               >
-                Northern Approach
+                Northern Approach to Shingo Village
               </h2>
               <p
                 className="text-[#EFE4CF]/64 text-sm leading-relaxed mb-4"
-                style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
               >
                 Flights, rail, local roads, and lodging choices all affect how the node is
                 perceived before you ever arrive.
               </p>
               <p
                 className="text-[#EFE4CF]/50 text-sm leading-relaxed"
-                style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
               >
                 The trip north is not just logistics. It is a staged reduction in noise, density,
                 and certainty that makes the final landscape feel structurally different.
@@ -411,13 +389,11 @@ export default function Home() {
           <p className="label text-[#EFE4CF]/40 mb-4">Next Step</p>
           <h2
             className="text-3xl md:text-5xl text-[#EFE4CF] mb-6"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
           >
-            Use the myth, then make the trip.
+            Use the Japanese Jesus myth, then make the Shingo trip.
           </h2>
           <p
             className="text-[#EFE4CF]/55 mb-8 text-base"
-            style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
           >
             The canon opens the question. Shingo makes it a place worth finding. The north is
             closer than it looks.
@@ -437,7 +413,6 @@ export default function Home() {
           <p className="label text-[#D6B56E] mb-3">Signals</p>
           <p
             className="text-[#EFE4CF]/80 text-base mb-8"
-            style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
           >
             Receive the next signal when the conduit stirs, or enter the signal chamber for a
             cleaner transmission.

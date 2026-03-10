@@ -4,6 +4,22 @@ export const revalidate = 0;
 import { headers } from "next/headers";
 import { Sigil } from "@/components/Sigil";
 import type { CSSProperties } from "react";
+import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/metadata";
+
+export const metadata: Metadata = buildPageMetadata({
+  title: "Axis",
+  description: "A private route that rotates through request-level variants.",
+  path: "/axis",
+  image: "/images/og/axis.png",
+  imageWidth: 1200,
+  imageHeight: 630,
+  imageAlt: "Hand-drawn sigil mark on a transparent background",
+  robots: {
+    index: false,
+    follow: false,
+  },
+});
 
 // 15 variant content pools
 const VARIANT_TEXTS = [

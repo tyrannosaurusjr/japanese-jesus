@@ -103,3 +103,97 @@ Original prompt: I want to make an HTML5 game to have on the website which takes
     - `output/web-game/canon-blade-epoch-boss-run2/`
   - Visual inspection performed on both latest screenshots and state snapshots.
   - Note: both Playwright runs reported one console `404` resource error artifact (`errors-0.json`), likely unrelated to the game-loop changes.
+
+## 2026-03-09 (Duck + Sublevel Structure + Dialogue UI Pass)
+- Updated player controls and movement in `components/CanonGameCanvas.tsx`:
+  - added duck/crouch support with `ArrowDown` and `S`
+  - duck uses a reduced hitbox (`PLAYER_DUCK_HEIGHT`) and crouch sprite frames
+  - prevents dashing while ducking; duck state resets automatically when conditions end
+- Reworked stage flow into five sublevels per epoch:
+  - added stage sublevel metadata (`sublevels`) for all four epochs
+  - added runtime sublevel tracking (`sublevelIndex`) and chronicle progression logs (`LV 1/5 ... LV 5/5`)
+  - regular enemy pressure now scales through LV1-LV4 (spawn pool + HP/speed/contact scaling)
+  - LV5 is now the dedicated boss lane (boss spawns at sublevel transition, non-boss crowd cleared)
+- Added progression feedback for gameplay escalation:
+  - weapon tier progression by sublevel (`Pilgrim Edge` -> `Mythbreaker`)
+  - slash/shot damage and shot cadence scale with tier
+  - HUD now shows current sublevel and weapon tier
+  - `render_game_to_text` now includes sublevel payload and duck/weapon state
+- Reduced dialogue obstruction:
+  - replaced the full-width bottom dialogue block with a compact top-right panel
+  - trimmed dialogue text wrap to two lines and kept quick-skip hint visible
+- Updated canon game page copy:
+  - `app/canon/game/page.tsx` now documents duck control and the LV1-LV5 structure.
+- Validation:
+  - `npm run lint` passed
+  - `npm run build` passed
+
+## 2026-03-09 (Shield + Deflect + Trajectory + Enhancement Pass)
+- Expanded action depth in `components/CanonGameCanvas.tsx`:
+  - added shield mechanic (`D`) with energy drain, break timer, mitigation, and on-character visual effect
+  - added projectile deflection: slashing enemy missiles now reflects them back as player-owned projectiles
+  - added variable enemy projectile trajectories across wraith/guardian/serpent/oni/dragon patterns
+- Extended level pacing:
+  - significantly increased epoch lengths (all four stages now much longer)
+  - preserved 5-sublevel structure with LV5 boss lane trigger
+- Added enhancement/leveling options:
+  - new `upgrade` mode appears on sublevel transitions (LV2-LV4)
+  - player chooses 1 of 3 upgrades (HP, energy/regen, slash, shot, dash, shield)
+  - upgrades persist through the run and are reflected in combat behavior + HUD
+- Updated public game copy:
+  - `app/canon/game/page.tsx` now mentions shield, deflection, and upgrade lanes
+- Validation:
+  - `npm run lint` passed
+  - `npm run build` passed
+
+## 2026-03-09 (Control Remap: WASD + Arrow Actions)
+- Remapped gameplay inputs in `components/CanonGameCanvas.tsx`:
+  - movement now uses `WASD` (`W` jump, `A/D` move, `S` duck)
+  - actions now use arrow keys:
+    - `ArrowLeft` slash
+    - `ArrowUp` shot
+    - `ArrowRight` dash
+    - `ArrowDown` shield
+- Updated browser default-key blocking to cover arrow-action keys (prevents page scroll/input conflicts during action input).
+- Updated in-game overlay and route copy to match the new scheme:
+  - `components/CanonGameCanvas.tsx`
+  - `app/canon/game/page.tsx`
+- Validation:
+  - `npm run lint` passed
+  - `npm run build` passed
+
+## 2026-03-09 (XP Progression + Timed Sublevels Pass)
+- Reworked enhancement flow in `components/CanonGameCanvas.tsx`:
+  - removed random sublevel-based enhancement pops
+  - added true XP-based leveling from enemy kills and item pickups
+  - level-ups now queue enhancement choices deterministically (`RANK` progression), including multi-level queue handling
+- Reworked sublevel pacing:
+  - each stage now has explicit per-sublevel duration targets (`sublevelDurations`)
+  - sublevel advancement is time-based (LV1-LV4), not distance-triggered
+  - boss lane now has a minimum duration gate before boss spawn (`BOSS_LANE_MIN_SEC`)
+- Slowed gameplay flow:
+  - reduced auto-scroll and movement pressure
+  - lowered effective enemy pacing and adjusted spawn cadence
+  - retained 5-sublevel structure with longer lane time
+- Updated telemetry/HUD:
+  - added XP and rank display (`XP current/next`, `RANK`)
+  - text-state now includes sublevel elapsed/duration and XP progression fields
+- Updated game page copy in `app/canon/game/page.tsx` to describe XP-driven leveling.
+- Validation:
+  - `npm run lint` passed
+  - `npm run build` passed
+
+## 2026-03-10 (XP-Driven Rank Clarity Pass)
+- Tightened XP/rank clarity in `components/CanonGameCanvas.tsx`:
+  - added `totalExperience` to persistent game state
+  - XP gains now emit on-screen `+XP` floating text at enemy/pickup location
+  - HUD now shows both segmented rank XP (`XP current/next`) and cumulative XP (`TOTAL`)
+- Removed sublevel-vs-rank ambiguity:
+  - renamed timed sublevel labels from `LV x/5` to `LANE x/5` in HUD, chronicle, and transition messaging
+  - rank-up copy now consistently says `Rank` (not `Level`)
+- Validation:
+  - `npm run lint` passed
+  - `npm run build` passed
+  - Playwright deterministic checks:
+    - idle run (`output/web-game/xp-idle-postfix/state-0.json`) stayed at `level: 1`, `experience: 0`, `totalExperience: 0`
+    - kill run (`output/web-game/xp-kill-check/state-0.json`) advanced to `experience: 23`, `totalExperience: 23` only after an enemy kill

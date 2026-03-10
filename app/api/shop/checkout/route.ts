@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSyncVariant } from "@/lib/printful";
+import { sanitizeImpactClickId } from "@/lib/impact-click";
 
 // Stripe zero-decimal currencies (amount is in the smallest unit = the main unit)
 const ZERO_DECIMAL = new Set(["BIF","CLP","DJF","GNF","JPY","KMF","KRW","MGA","PYG","RWF","UGX","VND","VUV","XAF","XOF","XPF"]);
@@ -10,6 +11,7 @@ function toStripeAmount(price: number, currency: string): number {
 
 type CheckoutRequest = {
   syncVariantId?: string;
+  impactClickId?: string;
 };
 
 const SHIPPING_COUNTRIES = ["US", "CA", "GB", "AU", "JP", "DE", "FR", "NL", "SE", "NO", "DK"];
@@ -99,6 +101,11 @@ export async function POST(req: NextRequest) {
   // Metadata for webhook → Printful order
   params.set("metadata[printful_sync_variant_id]", body.syncVariantId);
   params.set("metadata[product_name]", variantName);
+
+  const impactClickId = sanitizeImpactClickId(body.impactClickId);
+  if (impactClickId) {
+    params.set("metadata[impact_click_id]", impactClickId);
+  }
 
   const response = await fetch("https://api.stripe.com/v1/checkout/sessions", {
     method: "POST",

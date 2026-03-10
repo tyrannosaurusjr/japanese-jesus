@@ -11,40 +11,61 @@ interface SigilProps {
   className?: string;
   withSpiral?: boolean;
   spiralText?: string;
+  alt?: string;
 }
 
 const VARIANT_COLORS: Record<SigilVariant, string> = {
-  vermilion: "#C0392B",
-  citrine:   "#E8D44D",
-  white:     "#F5F2EB",
-  dark:      "#0D1B2A",
+  vermilion: "#C44A32",
+  citrine:   "#D6B56E",
+  white:     "#EFE4CF",
+  dark:      "#070B14",
 };
 
-// CSS filter values to tint the white-on-transparent PNG to each brand color
-// Generated via: https://codepen.io/sosuke/pen/Pjoqqp
-const VARIANT_FILTERS: Record<SigilVariant, string> = {
-  vermilion: "brightness(0) saturate(100%) invert(22%) sepia(72%) saturate(1200%) hue-rotate(340deg) brightness(90%)",
-  citrine:   "brightness(0) saturate(100%) invert(85%) sepia(40%) saturate(800%) hue-rotate(10deg) brightness(105%)",
-  white:     "brightness(0) invert(1)",
-  dark:      "brightness(0)",
+const VARIANT_FILTER_CLASSES: Record<SigilVariant, string> = {
+  vermilion: "sigil-filter-vermilion",
+  citrine: "sigil-filter-citrine",
+  white: "sigil-filter-white",
+  dark: "sigil-filter-dark",
 };
 
-export function Sigil({ variant = "vermilion", size = 64, className = "", withSpiral = false, spiralText = "" }: SigilProps) {
+const SIZE_CLASSES: Record<number, string> = {
+  28: "sigil-size-28",
+  30: "sigil-size-30",
+  34: "sigil-size-34",
+  36: "sigil-size-36",
+  40: "sigil-size-40",
+  54: "sigil-size-54",
+  56: "sigil-size-56",
+  64: "sigil-size-64",
+};
+
+export function Sigil({
+  variant = "vermilion",
+  size = 64,
+  className = "",
+  withSpiral = false,
+  spiralText = "",
+  alt = "Japanese Jesus sigil symbol",
+}: SigilProps) {
   const stroke = VARIANT_COLORS[variant];
-  const filter = VARIANT_FILTERS[variant];
+  const filterClass = VARIANT_FILTER_CLASSES[variant];
+  const sizeClass = SIZE_CLASSES[size] ?? "";
+  const wrapperStyle = sizeClass ? undefined : { width: size, height: size };
   const id = `sigil-${variant}-${size}`;
 
   const spiralTextContent = spiralText || "HERAI IS NOT A PLACE THE CONSCIOUSNESS THAT PASSED THROUGH SHINGO WAS NOT THE FIRST AND NOT THE LAST EACH PASSAGE LEAVES A RESIDUE THE RESIDUE ACCUMULATES ENOUGH RESIDUE AND THE MEMBRANE THINS READ THE SPIRAL INWARD EVERY THIRD CHARACTER YIELDS THE DESTINATION THINPLACE THE GATE DOES NOT CLOSE BEHIND YOU ISUKIRI MADE THE PASSAGE POSSIBLE HE IS STRUCTURAL HE IS NOT PROTAGONIST THE FORM WAS TEMPORARY THE FREQUENCY IS 7 83 HZ HERAI IS NOT A PLACE THE CONSCIOUSNESS THAT PASSED THROUGH SHINGO WAS NOT THE FIRST AND NOT THE LAST EACH PASSAGE LEAVES A RESIDUE THE RESIDUE ACCUMULATES ENOUGH RESIDUE AND THE MEMBRANE THINS READ THE SPIRAL INWARD EVERY THIRD CHARACTER YIELDS THE DESTINATION THINPLACE THE GATE DOES NOT CLOSE BEHIND YOU";
 
   return (
-    <span className={`relative inline-block ${className}`} style={{ width: size, height: size }}>
+    <span
+      className={`relative inline-block ${sizeClass} ${className}`.trim()}
+      style={wrapperStyle}
+    >
       <Image
         src="/images/sigil-handdrawn.png"
-        alt=""
+        alt={alt}
         width={size}
         height={size}
-        aria-hidden="true"
-        style={{ filter, display: "block" }}
+        className={filterClass}
         unoptimized
       />
 

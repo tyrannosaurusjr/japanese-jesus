@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Sigil } from "@/components/Sigil";
 
 const suggestedAmounts = [33, 72, 108, 216];
@@ -18,11 +18,7 @@ export function DonationSection() {
   const [checkoutError, setCheckoutError] = useState("");
   const [checkoutStatus, setCheckoutStatus] = useState<"success" | "cancel" | null>(null);
 
-  const goalProgress = useMemo(() => {
-    const target = 4400;
-    const committed = 1680;
-    return Math.min(100, Math.round((committed / target) * 100));
-  }, []);
+  const goalProgress = 38;
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -99,17 +95,16 @@ export function DonationSection() {
   return (
     <section
       id="fund-the-ascent"
-      className="relative overflow-hidden border-y border-[#2D4A3E]/30 py-24 px-6 md:px-10"
+      className="relative overflow-hidden border-y border-[#EFE4CF]/30 py-24 px-6 md:px-10"
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(232,212,77,0.12),transparent_36%),radial-gradient(circle_at_15%_70%,rgba(192,57,43,0.14),transparent_30%),linear-gradient(180deg,rgba(245,242,235,0.02),rgba(13,27,42,0.18))]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(239,228,207,0.08),transparent_36%),radial-gradient(circle_at_15%_70%,rgba(196,74,50,0.14),transparent_30%),linear-gradient(180deg,rgba(239,228,207,0.02),rgba(7,11,20,0.18))]" />
 
       <div className="relative max-w-6xl mx-auto grid grid-cols-1 gap-10 lg:grid-cols-[1.15fr_0.85fr]">
         {checkoutStatus === "success" ? (
-          <div className="lg:col-span-2 rounded-3xl border border-[#E8D44D]/40 bg-[#E8D44D]/[0.08] px-6 py-5">
-            <p className="label text-[#E8D44D] mb-2">Offering Received</p>
+          <div className="lg:col-span-2 rounded-3xl border border-[#C44A32]/40 bg-[#C44A32]/[0.08] px-6 py-5">
+            <p className="label text-[#D6B56E] mb-2">Offering Received</p>
             <p
-              className="text-[#F5F2EB] text-base md:text-lg"
-              style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+              className="text-[#EFE4CF] text-base md:text-lg"
             >
               Thank you. Your support crossed the threshold and is now fueling the Shingo field expedition.
             </p>
@@ -117,33 +112,30 @@ export function DonationSection() {
         ) : null}
 
         {checkoutStatus === "cancel" ? (
-          <div className="lg:col-span-2 rounded-3xl border border-[#F5F2EB]/15 bg-[#F5F2EB]/[0.04] px-6 py-5">
-            <p className="label text-[#F5F2EB]/55 mb-2">Path Paused</p>
+          <div className="lg:col-span-2 rounded-3xl border border-[#EFE4CF]/15 bg-[#EFE4CF]/[0.04] px-6 py-5">
+            <p className="label text-[#EFE4CF]/55 mb-2">Path Paused</p>
             <p
-              className="text-[#F5F2EB]/80 text-base"
-              style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+              className="text-[#EFE4CF]/80 text-base"
             >
               No charge was made. You can choose another amount and reopen checkout whenever you are ready.
             </p>
           </div>
         ) : null}
 
-        <div className="rounded-[2rem] border border-[#F5F2EB]/10 bg-[#0D1B2A]/70 p-8 md:p-10 backdrop-blur-sm">
+        <div className="rounded-[2rem] border border-[#EFE4CF]/10 bg-[#070B14]/70 p-8 md:p-10 backdrop-blur-sm">
           <div className="flex items-center gap-4 mb-6">
             <Sigil variant="citrine" size={34} className="opacity-80" />
-            <p className="label text-[#E8D44D]">Fund The Ascent</p>
+            <p className="label text-[#D6B56E]">Fund The Ascent</p>
           </div>
 
           <h2
-            className="max-w-2xl text-4xl md:text-6xl text-[#F5F2EB] leading-[0.95] mb-6"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
+            className="max-w-2xl text-4xl md:text-6xl text-[#EFE4CF] leading-[0.95] mb-6"
           >
             Help us walk into the thin place with cameras on, microphones open, and no guarantee of what answers back.
           </h2>
 
           <p
-            className="max-w-2xl text-base md:text-lg text-[#F5F2EB]/68 leading-relaxed mb-8"
-            style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+            className="max-w-2xl text-base md:text-lg text-[#EFE4CF]/68 leading-relaxed mb-8"
           >
             This expedition funds the trip to Shingo and the surrounding ground: train lines north,
             rural lodging, field audio, documentary video, archival scans, and the strange paper trail
@@ -158,12 +150,11 @@ export function DonationSection() {
             ].map((item) => (
               <div
                 key={item}
-                className="rounded-3xl border border-[#F5F2EB]/8 bg-[#F5F2EB]/[0.03] p-5"
+                className="rounded-3xl border border-[#EFE4CF]/8 bg-[#EFE4CF]/[0.03] p-5"
               >
-                <p className="label text-[#F5F2EB]/35 mb-2">Supports</p>
+                <p className="label text-[#EFE4CF]/35 mb-2">Supports</p>
                 <p
-                  className="text-sm text-[#F5F2EB]/70"
-                  style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+                  className="text-sm text-[#EFE4CF]/70"
                 >
                   {item}
                 </p>
@@ -171,34 +162,32 @@ export function DonationSection() {
             ))}
           </div>
 
-          <div className="rounded-3xl border border-[#C0392B]/20 bg-[#C0392B]/[0.06] p-6">
+          <div className="rounded-3xl border border-[#C44A32]/20 bg-[#C44A32]/[0.06] p-6">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="label text-[#F5F2EB]/45 mb-2">Current Progress</p>
+                <p className="label text-[#EFE4CF]/45 mb-2">Current Progress</p>
                 <p
-                  className="text-2xl text-[#F5F2EB]"
-                  style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
+                  className="text-2xl text-[#EFE4CF]"
                 >
                   Goal: $4,400 field budget
                 </p>
               </div>
-              <p className="label text-[#E8D44D]">{goalProgress}% of goal reached</p>
+              <p className="label text-[#D6B56E]">{goalProgress}% of goal reached</p>
             </div>
 
-            <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#F5F2EB]/8">
+            <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#EFE4CF]/8">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-[#C0392B] via-[#E8D44D] to-[#F5F2EB]"
-                style={{ width: `${goalProgress}%` }}
+                className="h-full w-[38%] rounded-full bg-gradient-to-r from-[#C44A32] via-[#C44A32] to-[#EFE4CF]"
               />
             </div>
-            <p className="label mt-4 text-[#F5F2EB]/42">
+            <p className="label mt-4 text-[#EFE4CF]/42">
               Progress updates as verified Stripe offerings clear.
             </p>
           </div>
         </div>
 
-        <div className="rounded-[2rem] border border-[#E8D44D]/15 bg-[#09131F]/90 p-8 md:p-10 shadow-[0_0_80px_rgba(13,27,42,0.45)]">
-          <p className="label text-[#E8D44D] mb-4">Open The Path</p>
+        <div className="rounded-[2rem] border border-[#C44A32]/15 bg-[#070B14]/90 p-8 md:p-10 shadow-[0_0_80px_rgba(7,11,20,0.45)]">
+          <p className="label text-[#D6B56E] mb-4">Open The Path</p>
 
           <div className="grid grid-cols-2 gap-3 mb-6">
             {suggestedAmounts.map((amount) => (
@@ -208,8 +197,8 @@ export function DonationSection() {
                 onClick={() => setSelectedAmount(amount)}
                 className={`rounded-2xl border px-4 py-4 text-left transition-all duration-300 ${
                   selectedAmount === amount
-                    ? "border-[#E8D44D] bg-[#E8D44D]/10 text-[#F5F2EB]"
-                    : "border-[#F5F2EB]/10 bg-[#F5F2EB]/[0.02] text-[#F5F2EB]/70 hover:border-[#C0392B]/50"
+                    ? "border-[#C44A32] bg-[#C44A32]/10 text-[#EFE4CF]"
+                    : "border-[#EFE4CF]/10 bg-[#EFE4CF]/[0.02] text-[#EFE4CF]/70 hover:border-[#C44A32]/50"
                 }`}
               >
                 <span className="label block mb-1">
@@ -217,7 +206,6 @@ export function DonationSection() {
                 </span>
                 <span
                   className="text-2xl"
-                  style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
                 >
                   ${amount}
                 </span>
@@ -225,17 +213,15 @@ export function DonationSection() {
             ))}
           </div>
 
-          <div className="rounded-3xl border border-[#F5F2EB]/8 bg-[#F5F2EB]/[0.03] p-5 mb-6">
-            <p className="label text-[#F5F2EB]/35 mb-2">Chosen Offering</p>
+          <div className="rounded-3xl border border-[#EFE4CF]/8 bg-[#EFE4CF]/[0.03] p-5 mb-6">
+            <p className="label text-[#EFE4CF]/35 mb-2">Chosen Offering</p>
             <p
-              className="text-4xl text-[#F5F2EB]"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
+              className="text-4xl text-[#EFE4CF]"
             >
               ${selectedAmount}
             </p>
             <p
-              className="mt-3 text-sm text-[#F5F2EB]/58"
-              style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+              className="mt-3 text-sm text-[#EFE4CF]/58"
             >
               Select an amount, then either step directly into the donation portal or leave your address
               to receive the private route and future field dispatches.
@@ -247,7 +233,7 @@ export function DonationSection() {
               href={donationUrl}
               target="_blank"
               rel="noreferrer"
-              className="label mb-4 flex w-full items-center justify-center rounded-2xl bg-[#C0392B] px-6 py-4 text-[#F5F2EB] transition-colors duration-300 hover:bg-[#a93226]"
+              className="label mb-4 flex w-full items-center justify-center rounded-2xl bg-[#C44A32] px-6 py-4 text-[#EFE4CF] transition-colors duration-300 hover:bg-[#A73523]"
             >
               Give ${selectedAmount} To The Expedition
             </a>
@@ -256,15 +242,14 @@ export function DonationSection() {
               type="button"
               onClick={startStripeCheckout}
               disabled={checkoutLoading}
-              className="label mb-4 flex w-full items-center justify-center rounded-2xl bg-[#C0392B] px-6 py-4 text-[#F5F2EB] transition-colors duration-300 hover:bg-[#a93226] disabled:opacity-50"
+              className="label mb-4 flex w-full items-center justify-center rounded-2xl bg-[#C44A32] px-6 py-4 text-[#EFE4CF] transition-colors duration-300 hover:bg-[#A73523] disabled:opacity-50"
             >
               {checkoutLoading ? "Opening Checkout..." : `Give $${selectedAmount} With Stripe`}
             </button>
           ) : (
-            <div className="mb-4 rounded-2xl border border-[#C0392B]/20 bg-[#C0392B]/[0.06] px-4 py-4">
+            <div className="mb-4 rounded-2xl border border-[#C44A32]/20 bg-[#C44A32]/[0.06] px-4 py-4">
               <p
-                className="text-sm text-[#F5F2EB]/74"
-                style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+                className="text-sm text-[#EFE4CF]/74"
               >
                 Direct payment coming soon. Leave your address to receive the private route now.
               </p>
@@ -273,19 +258,17 @@ export function DonationSection() {
 
           {checkoutError ? (
             <p
-              className="mb-4 text-sm text-[#E8D44D]"
-              style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+              className="mb-4 text-sm text-[#C44A32]"
             >
               {checkoutError}
             </p>
           ) : null}
 
           {submitted ? (
-            <div className="rounded-2xl border border-[#2D4A3E] bg-[#2D4A3E]/10 px-5 py-4">
-              <p className="label text-[#E8D44D] mb-2">Signal Received</p>
+            <div className="rounded-2xl border border-[#EFE4CF] bg-[#EFE4CF]/10 px-5 py-4">
+              <p className="label text-[#D6B56E] mb-2">Signal Received</p>
               <p
-                className="text-sm text-[#F5F2EB]/70"
-                style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+                className="text-sm text-[#EFE4CF]/70"
               >
                 The route details are queued. Watch your inbox for the next transmission.
               </p>
@@ -297,8 +280,7 @@ export function DonationSection() {
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 placeholder="Name (optional)"
-                className="w-full rounded-2xl border border-[#F5F2EB]/10 bg-transparent px-4 py-3 text-sm text-[#F5F2EB] outline-none transition-colors duration-300 placeholder:text-[#F5F2EB]/25 focus:border-[#C0392B]"
-                style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+                className="w-full rounded-2xl border border-[#EFE4CF]/10 bg-transparent px-4 py-3 text-sm text-[#EFE4CF] outline-none transition-colors duration-300 placeholder:text-[#EFE4CF]/25 focus:border-[#C44A32]"
               />
 
               <input
@@ -307,8 +289,7 @@ export function DonationSection() {
                 onChange={(event) => setEmail(event.target.value)}
                 placeholder="your@address.com"
                 required
-                className="w-full rounded-2xl border border-[#F5F2EB]/10 bg-transparent px-4 py-3 text-sm text-[#F5F2EB] outline-none transition-colors duration-300 placeholder:text-[#F5F2EB]/25 focus:border-[#C0392B]"
-                style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+                className="w-full rounded-2xl border border-[#EFE4CF]/10 bg-transparent px-4 py-3 text-sm text-[#EFE4CF] outline-none transition-colors duration-300 placeholder:text-[#EFE4CF]/25 focus:border-[#C44A32]"
               />
 
               <textarea
@@ -316,14 +297,13 @@ export function DonationSection() {
                 onChange={(event) => setNote(event.target.value)}
                 rows={4}
                 placeholder="If you want a note back, a question pursued, or a document hunted down, leave a trace."
-                className="w-full rounded-2xl border border-[#F5F2EB]/10 bg-transparent px-4 py-3 text-sm text-[#F5F2EB] outline-none transition-colors duration-300 placeholder:text-[#F5F2EB]/25 focus:border-[#C0392B]"
-                style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+                className="w-full rounded-2xl border border-[#EFE4CF]/10 bg-transparent px-4 py-3 text-sm text-[#EFE4CF] outline-none transition-colors duration-300 placeholder:text-[#EFE4CF]/25 focus:border-[#C44A32]"
               />
 
               <button
                 type="submit"
                 disabled={submitting}
-                className="label w-full rounded-2xl border border-[#F5F2EB]/12 px-6 py-4 text-[#F5F2EB]/80 transition-all duration-300 hover:border-[#E8D44D] hover:text-[#E8D44D] disabled:opacity-50"
+                className="label w-full rounded-2xl border border-[#EFE4CF]/12 px-6 py-4 text-[#EFE4CF]/80 transition-all duration-300 hover:border-[#C44A32] hover:text-[#C44A32] disabled:opacity-50"
               >
                 {submitting ? "Opening..." : "Send Me the Route & Field Dispatches"}
               </button>

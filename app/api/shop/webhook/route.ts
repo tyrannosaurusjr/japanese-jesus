@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { createPrintfulOrder, type PrintfulOrderRecipient } from "@/lib/printful";
+import {
+  isDuplicateImpactOrderError,
+  sendImpactConversion,
+  type ImpactConversionResult,
+} from "@/lib/impact-conversions";
+import { sanitizeImpactClickId } from "@/lib/impact-click";
 
 interface StripeAddress {
   city: string | null;
@@ -15,6 +21,9 @@ interface StripeCheckoutSession {
   id: string;
   payment_status: string;
   metadata: Record<string, string>;
+  amount_total: number | null;
+  currency: string | null;
+  created: number;
   shipping_details: {
     name: string | null;
     address: StripeAddress;
@@ -218,6 +227,42 @@ function buildRecipient(session: StripeCheckoutSession): PrintfulOrderRecipient 
   };
 }
 
+async function reportImpactConversion(session: StripeCheckoutSession): Promise<ImpactConversionResult> {
+  const impactClickId = sanitizeImpactClickId(session.metadata?.impact_click_id);
+  if (!impactClickId) {
+    return { sent: false, reason: "missing_click_id" };
+  }
+
+  if (!session.currency || typeof session.amount_total !== "number") {
+    return { sent: false, reason: "missing_amount_details" };
+  }
+
+  try {
+    return await sendImpactConversion({
+      orderId: session.id,
+      clickId: impactClickId,
+      amountMinor: session.amount_total,
+      currency: session.currency,
+      customerId: session.customer_details?.email ?? undefined,
+      eventDateIso: Number.isFinite(session.created)
+        ? new Date(session.created * 1000).toISOString()
+        : undefined,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown Impact conversion error";
+    if (isDuplicateImpactOrderError(message)) {
+      console.warn(
+        "[shop/webhook] Duplicate Impact OrderId; conversion likely already tracked for session",
+        session.id,
+      );
+      return { sent: false, reason: "duplicate_order_id" };
+    }
+
+    console.error("[shop/webhook] Impact conversion failed:", message, "for session", session.id);
+    return { sent: false, reason: "request_failed" };
+  }
+}
+
 export async function POST(req: NextRequest) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -272,11 +317,13 @@ export async function POST(req: NextRequest) {
       confirm: true,
     });
 
+    const impact = await reportImpactConversion(session);
     console.log("[shop/webhook] Printful order created", order.id, "for session", session.id);
-    return NextResponse.json({ ok: true, printfulOrderId: order.id });
+    return NextResponse.json({ ok: true, printfulOrderId: order.id, impactTracked: impact.sent });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     if (isDuplicateExternalIdError(message)) {
+      const impact = await reportImpactConversion(session);
       console.warn(
         "[shop/webhook] Duplicate external_id; assuming order already exists",
         externalOrderId,
@@ -288,6 +335,7 @@ export async function POST(req: NextRequest) {
         skipped: true,
         reason: "duplicate external_id",
         externalOrderId,
+        impactTracked: impact.sent,
       });
     }
 

@@ -23,6 +23,9 @@ export const journeyMetadata: Metadata = buildPageMetadata({
 });
 
 export function JourneyContent() {
+  const onsenkanMapUrl = "https://www.google.com/maps/search/?api=1&query=Shingo+Onsenkan";
+  const hachinoheHotelsUrl = "https://www.booking.com/searchresults.html?ss=Hachinohe%2C+Japan";
+  const towadaHotelsUrl = "https://www.booking.com/searchresults.html?ss=Towada%2C+Aomori%2C+Japan";
   const journeyStructuredData = {
     "@context": "https://schema.org",
     "@type": "HowTo",
@@ -56,28 +59,26 @@ export function JourneyContent() {
   };
 
   return (
-    <main className="min-h-screen bg-[#0D1B2A]">
+    <main className="min-h-screen bg-[#070B14]">
       <Nav />
       <StructuredData id="journey-structured-data" data={journeyStructuredData} />
 
       <section className="pt-40 pb-16 px-6 md:px-10 max-w-4xl mx-auto">
-        <p className="label text-[#E8D44D] mb-6">Journey</p>
+        <p className="label text-[#D6B56E] mb-6">Journey</p>
         <h1
-          className="text-5xl md:text-7xl text-[#F5F2EB] leading-none mb-8"
-          style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
+          className="text-5xl md:text-7xl text-[#EFE4CF] leading-none mb-8"
         >
-          Visit Shingo.
+          Visit Shingo Village and the Jesus Tomb.
         </h1>
-        <p className="label text-[#E8D44D]/85 mb-8">
+        <p className="label text-[#D6B56E]/85 mb-8">
           How to Visit Shingo Village &amp; the Jesus Tomb in Aomori, Japan
         </p>
-        <div className="w-16 h-px bg-[#C0392B]" />
+        <div className="w-16 h-px bg-[#C44A32]" />
       </section>
 
       <section className="px-6 md:px-10 pb-12 max-w-3xl mx-auto">
         <p
-          className="text-[#F5F2EB]/70 text-base leading-relaxed mb-4"
-          style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+          className="text-[#EFE4CF]/70 text-base leading-relaxed mb-4"
         >
           Shingo sits in the Sannohe District of Aomori Prefecture, far from the cities that prefer
           their myths polished and convenient. The route is practical, but the distance matters.
@@ -87,25 +88,22 @@ export function JourneyContent() {
       </section>
 
       <section className="px-6 md:px-10 pb-20">
-        <div className="max-w-5xl mx-auto static-panel border border-[#C0392B]/50 bg-[#0D1B2A] p-8 md:p-10">
-          <p className="label text-[#E8D44D] mb-4">Priority Stay</p>
+        <div className="max-w-5xl mx-auto static-panel border border-[#C44A32]/50 bg-[#070B14] p-8 md:p-10">
+          <p className="label text-[#D6B56E] mb-4">Priority Stay</p>
           <h2
-            className="text-3xl md:text-4xl text-[#F5F2EB] mb-4 leading-tight"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
+            className="text-3xl md:text-4xl text-[#EFE4CF] mb-4 leading-tight"
           >
-            Stay inside Shingo: Onsenkan (温泉館)
+            Stay inside Shingo Village: Onsenkan (温泉館)
           </h2>
           <p
-            className="text-[#F5F2EB]/72 text-base leading-relaxed mb-4"
-            style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+            className="text-[#EFE4CF]/72 text-base leading-relaxed mb-4"
           >
             This is the strongest on-site stay option in the current journey stack: an onsen in
             Shingo listed with overnight pricing on the municipal page, roughly a 9-minute drive
             from the Christ grave area.
           </p>
           <p
-            className="text-[#F5F2EB]/55 text-sm leading-relaxed mb-6"
-            style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+            className="text-[#EFE4CF]/55 text-sm leading-relaxed mb-6"
           >
             Booking visibility appears inconsistent across platforms. Some map listings read as
             day-use only, so use the official village page as source of truth and confirm overnight
@@ -116,24 +114,24 @@ export function JourneyContent() {
               href="https://www.vill.shingo.aomori.jp/sight/onsensyukuhaku/onsenkan/"
               target="_blank"
               rel="noopener noreferrer"
-              className="label inline-block border border-[#C0392B]/60 text-[#C0392B] px-6 py-3 hover:bg-[#C0392B] hover:text-[#F5F2EB] transition-all duration-300"
+              className="label inline-block border border-[#C44A32]/60 text-[#C44A32] px-6 py-3 hover:bg-[#C44A32] hover:text-[#EFE4CF] transition-all duration-300"
             >
               Official Onsenkan Page ↗
             </a>
             <a
-              href="https://maps.app.goo.gl/Uwh16Yadjo7DYvCr8"
+              href={onsenkanMapUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="label inline-block border border-[#2D4A3E] text-[#F5F2EB]/70 px-6 py-3 hover:border-[#E8D44D] hover:text-[#E8D44D] transition-all duration-300"
+              className="label inline-block border border-[#EFE4CF] text-[#EFE4CF]/70 px-6 py-3 hover:border-[#C44A32] hover:text-[#C44A32] transition-all duration-300"
             >
-              Google Maps Pin ↗
+              Onsenkan on Google Maps ↗
             </a>
           </div>
         </div>
       </section>
 
       <section className="px-6 md:px-10 pb-20">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-px bg-[#2D4A3E]/20">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-px bg-[#EFE4CF]/20">
           {[
             [
               "Day Trip",
@@ -148,11 +146,10 @@ export function JourneyContent() {
               "Best if you want the trip to feel intentional rather than efficient, especially if you split time between Hachinohe and Towada.",
             ],
           ].map(([title, body]) => (
-            <div key={title} className="static-panel bg-[#0D1B2A] border border-[#2D4A3E]/30 p-6">
-              <p className="label text-[#E8D44D] mb-3">{title}</p>
+            <div key={title} className="static-panel bg-[#070B14] border border-[#EFE4CF]/30 p-6">
+              <p className="label text-[#D6B56E] mb-3">{title}</p>
               <p
-                className="text-[#F5F2EB]/62 text-sm leading-relaxed"
-                style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+                className="text-[#EFE4CF]/62 text-sm leading-relaxed"
               >
                 {body}
               </p>
@@ -163,7 +160,7 @@ export function JourneyContent() {
 
       <section className="px-6 md:px-10 pb-16">
         <div className="max-w-4xl mx-auto">
-          <div className="relative aspect-[16/9] overflow-hidden border border-[#2D4A3E]/30">
+          <div className="relative aspect-[16/9] overflow-hidden border border-[#EFE4CF]/30">
             <Image
               src="/images/get-there-station.jpg"
               alt="A small railway station building in northern Aomori beneath a bright sky"
@@ -171,9 +168,9 @@ export function JourneyContent() {
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 80vw"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0D1B2A]/50 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#070B14]/50 via-transparent to-transparent" />
           </div>
-          <p className="label text-[#F5F2EB]/30 mt-3">
+          <p className="label text-[#EFE4CF]/30 mt-3">
             Rail gets you close. Local roads take you the rest of the way.
           </p>
         </div>
@@ -181,18 +178,17 @@ export function JourneyContent() {
 
       <section className="px-6 md:px-10 pb-24">
         <div className="max-w-4xl mx-auto">
-          <p className="label text-[#F5F2EB]/40 mb-6">Journey Sources</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-px bg-[#2D4A3E]/20">
+          <p className="label text-[#EFE4CF]/40 mb-6">Journey Sources</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-px bg-[#EFE4CF]/20">
             <a
               href="https://www.aomori-airport.co.jp/en"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-[#0D1B2A] border border-[#2D4A3E]/30 p-6 hover:border-[#C0392B]/60 transition-colors duration-300"
+              className="bg-[#070B14] border border-[#EFE4CF]/30 p-6 hover:border-[#C44A32]/60 transition-colors duration-300"
             >
-              <p className="label text-[#E8D44D] mb-2">Airport</p>
+              <p className="label text-[#D6B56E] mb-2">Airport</p>
               <p
-                className="text-[#F5F2EB]/62 text-sm leading-relaxed"
-                style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+                className="text-[#EFE4CF]/62 text-sm leading-relaxed"
               >
                 Aomori Airport is the cleanest official source for flight-side access into the
                 region.
@@ -202,12 +198,11 @@ export function JourneyContent() {
               href="https://www.jreast.co.jp/en/multi/routemaps/tohokushinkansen.html"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-[#0D1B2A] border border-[#2D4A3E]/30 p-6 hover:border-[#C0392B]/60 transition-colors duration-300"
+              className="bg-[#070B14] border border-[#EFE4CF]/30 p-6 hover:border-[#C44A32]/60 transition-colors duration-300"
             >
-              <p className="label text-[#E8D44D] mb-2">Rail</p>
+              <p className="label text-[#D6B56E] mb-2">Rail</p>
               <p
-                className="text-[#F5F2EB]/62 text-sm leading-relaxed"
-                style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+                className="text-[#EFE4CF]/62 text-sm leading-relaxed"
               >
                 JR East&apos;s Tohoku Shinkansen route map anchors the northbound rail logic in the
                 factual layer.
@@ -217,12 +212,11 @@ export function JourneyContent() {
               href="https://aomori-tourism.com/en/spot/detail_62.html"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-[#0D1B2A] border border-[#2D4A3E]/30 p-6 hover:border-[#C0392B]/60 transition-colors duration-300"
+              className="bg-[#070B14] border border-[#EFE4CF]/30 p-6 hover:border-[#C44A32]/60 transition-colors duration-300"
             >
-              <p className="label text-[#E8D44D] mb-2">Destination</p>
+              <p className="label text-[#D6B56E] mb-2">Destination</p>
               <p
-                className="text-[#F5F2EB]/62 text-sm leading-relaxed"
-                style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+                className="text-[#EFE4CF]/62 text-sm leading-relaxed"
               >
                 Amazing AOMORI gives the official tourism-facing entry point for the Christ Park
                 area and broader visitor context.
@@ -232,26 +226,24 @@ export function JourneyContent() {
               href="https://www.vill.shingo.aomori.jp/sight/onsensyukuhaku/onsenkan/"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-[#0D1B2A] border border-[#2D4A3E]/30 p-6 hover:border-[#C0392B]/60 transition-colors duration-300"
+              className="bg-[#070B14] border border-[#EFE4CF]/30 p-6 hover:border-[#C44A32]/60 transition-colors duration-300"
             >
-              <p className="label text-[#E8D44D] mb-2">Stay In Shingo</p>
+              <p className="label text-[#D6B56E] mb-2">Stay In Shingo</p>
               <p
-                className="text-[#F5F2EB]/62 text-sm leading-relaxed"
-                style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+                className="text-[#EFE4CF]/62 text-sm leading-relaxed"
               >
                 Shingo municipal Onsenkan listing with overnight stay details and pricing.
               </p>
             </a>
             <a
-              href="https://maps.app.goo.gl/Uwh16Yadjo7DYvCr8"
+              href={onsenkanMapUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-[#0D1B2A] border border-[#2D4A3E]/30 p-6 hover:border-[#C0392B]/60 transition-colors duration-300"
+              className="bg-[#070B14] border border-[#EFE4CF]/30 p-6 hover:border-[#C44A32]/60 transition-colors duration-300"
             >
-              <p className="label text-[#E8D44D] mb-2">Map Pin</p>
+              <p className="label text-[#D6B56E] mb-2">Map Pin</p>
               <p
-                className="text-[#F5F2EB]/62 text-sm leading-relaxed"
-                style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+                className="text-[#EFE4CF]/62 text-sm leading-relaxed"
               >
                 Direct Google Maps location for Onsenkan in Shingo.
               </p>
@@ -262,16 +254,14 @@ export function JourneyContent() {
 
       <section className="px-6 md:px-10 pb-24 max-w-4xl mx-auto">
         <div className="space-y-px">
-          <div className="bg-[#0D1B2A] border border-[#2D4A3E]/40 p-8">
+          <div className="bg-[#070B14] border border-[#EFE4CF]/40 p-8">
             <h2
-              className="text-xl md:text-2xl text-[#F5F2EB] mb-3"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
+              className="text-xl md:text-2xl text-[#EFE4CF] mb-3"
             >
-              Reach Aomori
+              Reach Aomori for the Shingo Village route
             </h2>
             <p
-              className="text-[#F5F2EB]/65 text-sm leading-relaxed mb-4"
-              style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+              className="text-[#EFE4CF]/65 text-sm leading-relaxed mb-4"
             >
               Fly into Aomori Airport (AOJ) if you want the fastest regional entry, or take the
               Tohoku Shinkansen north if you want the overland version of the trip. Either way, the
@@ -283,7 +273,7 @@ export function JourneyContent() {
                 href="https://www.aomori-airport.co.jp/en"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="label border border-[#2D4A3E] text-[#F5F2EB]/60 px-4 py-2 hover:border-[#C0392B] hover:text-[#C0392B] transition-all duration-300"
+                className="label border border-[#EFE4CF] text-[#EFE4CF]/60 px-4 py-2 hover:border-[#C44A32] hover:text-[#C44A32] transition-all duration-300"
               >
                 Aomori Airport ↗
               </a>
@@ -291,14 +281,14 @@ export function JourneyContent() {
                 href="https://www.jreast.co.jp/en/multi/routemaps/tohokushinkansen.html"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="label border border-[#2D4A3E] text-[#F5F2EB]/60 px-4 py-2 hover:border-[#C0392B] hover:text-[#C0392B] transition-all duration-300"
+                className="label border border-[#EFE4CF] text-[#EFE4CF]/60 px-4 py-2 hover:border-[#C44A32] hover:text-[#C44A32] transition-all duration-300"
               >
                 Shinkansen Route ↗
               </a>
             </div>
           </div>
 
-          <div className="bg-[#0D1B2A] border border-[#2D4A3E]/40 p-4 md:p-5">
+          <div className="bg-[#070B14] border border-[#EFE4CF]/40 p-4 md:p-5">
             <div className="relative aspect-[16/9] overflow-hidden">
               <Image
                 src="/images/get-there-road.jpg"
@@ -308,21 +298,19 @@ export function JourneyContent() {
                 sizes="(max-width: 768px) 100vw, 80vw"
               />
             </div>
-            <p className="label text-[#F5F2EB]/30 mt-3">
+            <p className="label text-[#EFE4CF]/30 mt-3">
               The final leg is by road. Weather and season change how the approach feels.
             </p>
           </div>
 
-          <div className="bg-[#0D1B2A] border border-[#2D4A3E]/40 p-8">
+          <div className="bg-[#070B14] border border-[#EFE4CF]/40 p-8">
             <h2
-              className="text-xl md:text-2xl text-[#F5F2EB] mb-3"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
+              className="text-xl md:text-2xl text-[#EFE4CF] mb-3"
             >
               Base In Hachinohe Or Towada
             </h2>
             <p
-              className="text-[#F5F2EB]/65 text-sm leading-relaxed mb-4"
-              style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+              className="text-[#EFE4CF]/65 text-sm leading-relaxed mb-4"
             >
               Hachinohe is the most practical base for transport and car rental. Towada works if
               you want a quieter overnight before or after the village. Shingo itself is small
@@ -330,26 +318,25 @@ export function JourneyContent() {
               the trip simpler from a booking perspective.
             </p>
             <p
-              className="text-[#F5F2EB]/50 text-sm leading-relaxed"
-              style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+              className="text-[#EFE4CF]/50 text-sm leading-relaxed"
             >
               Use the airport and rail resources above to plan your regional transport first, then
               choose lodging by how much road time you want before and after the visit.
             </p>
             <div className="flex flex-wrap gap-3 mt-5">
               <a
-                href="https://www.booking.com/searchresults.html?ss=Hachinohe&dest_type=city&group_adults=2&no_rooms=1&group_children=0"
+                href={hachinoheHotelsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="label border border-[#2D4A3E] text-[#F5F2EB]/60 px-4 py-2 hover:border-[#C0392B] hover:text-[#C0392B] transition-all duration-300"
+                className="label border border-[#EFE4CF] text-[#EFE4CF]/60 px-4 py-2 hover:border-[#C44A32] hover:text-[#C44A32] transition-all duration-300"
               >
                 Hotels in Hachinohe ↗
               </a>
               <a
-                href="https://www.booking.com/searchresults.html?ss=Towada%2C%20Aomori&group_adults=2&no_rooms=1&group_children=0"
+                href={towadaHotelsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="label border border-[#2D4A3E] text-[#F5F2EB]/60 px-4 py-2 hover:border-[#C0392B] hover:text-[#C0392B] transition-all duration-300"
+                className="label border border-[#EFE4CF] text-[#EFE4CF]/60 px-4 py-2 hover:border-[#C44A32] hover:text-[#C44A32] transition-all duration-300"
               >
                 Ryokan near Towada ↗
               </a>
@@ -360,7 +347,7 @@ export function JourneyContent() {
 
       <section className="px-6 md:px-10 pb-16">
         <div className="max-w-4xl mx-auto">
-          <div className="relative aspect-[16/9] overflow-hidden border border-[#2D4A3E]/30">
+          <div className="relative aspect-[16/9] overflow-hidden border border-[#EFE4CF]/30">
             <Image
               src="/images/get-there-coast.jpg"
               alt="A weathered signpost beside the cold blue sea at the northern edge of Aomori"
@@ -369,7 +356,7 @@ export function JourneyContent() {
               sizes="(max-width: 768px) 100vw, 80vw"
             />
           </div>
-          <p className="label text-[#F5F2EB]/30 mt-3">
+          <p className="label text-[#EFE4CF]/30 mt-3">
             Northern Honshu feels different before the village ever comes into view.
           </p>
         </div>

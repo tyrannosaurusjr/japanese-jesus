@@ -25,23 +25,23 @@ export const metadata: Metadata = buildPageMetadata({
 
 export default function CanonPage() {
   return (
-    <main className="min-h-screen bg-[#0D1B2A]">
+    <main className="min-h-screen bg-[#070B14]">
       <Nav />
 
       <section className="pt-40 pb-16 px-6 md:px-10 max-w-4xl mx-auto">
-        <p className="label text-[#E8D44D] mb-6">Canon</p>
+        <p className="label text-[#D6B56E] mb-6">Canon</p>
         <h1
-          className="text-5xl md:text-7xl text-[#F5F2EB] leading-none mb-8"
+          className="text-5xl md:text-7xl text-[#EFE4CF] leading-none mb-8"
           style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
         >
           Five Epochs<br />of Japanese Jesus.
         </h1>
-        <p className="label text-[#E8D44D]/85 mb-8">The Japanese Jesus Canon</p>
-        <div className="w-16 h-px bg-[#C0392B]" />
+        <p className="label text-[#D6B56E]/85 mb-8">The Japanese Jesus Canon</p>
+        <div className="w-16 h-px bg-[#C44A32]" />
       </section>
 
       <section className="px-6 md:px-10 pb-24 max-w-5xl mx-auto">
-        <p className="label text-[#E8D44D] mb-6">Epoch Index</p>
+        <p className="label text-[#D6B56E] mb-6">Epoch Index</p>
         <div className="space-y-px">
           {CANON_EPOCHS.map((epoch) => {
             const featuredEntry = (CANON_SERIES_BY_EPOCH[epoch.slug] ?? [])[0];
@@ -49,25 +49,25 @@ export default function CanonPage() {
             return (
               <article
                 key={epoch.slug}
-                className="grid grid-cols-1 md:grid-cols-[0.25fr_0.45fr_0.3fr] bg-[#0D1B2A] border border-[#2D4A3E]/30"
+                className="grid grid-cols-1 md:grid-cols-[0.25fr_0.45fr_0.3fr] bg-[#070B14] border border-[#EFE4CF]/30"
               >
-                <div className="p-6 border-b md:border-b-0 md:border-r border-[#2D4A3E]/30">
-                  <p className="label text-[#E8D44D] mb-2">{epoch.step}</p>
+                <div className="p-6 border-b md:border-b-0 md:border-r border-[#EFE4CF]/30">
+                  <p className="label text-[#D6B56E] mb-2">{epoch.step}</p>
                   <h2
-                    className="text-xl text-[#F5F2EB] mb-3"
+                    className="text-xl text-[#EFE4CF] mb-3"
                     style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
                   >
                     {epoch.title}
                   </h2>
                   <p
-                    className="text-[#F5F2EB]/62 text-sm leading-relaxed"
+                    className="text-[#EFE4CF]/62 text-sm leading-relaxed"
                     style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
                   >
                     {epoch.summary}
                   </p>
                 </div>
 
-                <div className="relative min-h-[220px] border-b md:border-b-0 md:border-r border-[#2D4A3E]/30">
+                <div className="relative min-h-[220px] border-b md:border-b-0 md:border-r border-[#EFE4CF]/30">
                   <Image
                     src={epoch.image}
                     alt={epoch.imageAlt}
@@ -75,28 +75,28 @@ export default function CanonPage() {
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 45vw"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0D1B2A]/30 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#070B14]/30 to-transparent" />
                 </div>
 
                 <div className="p-6">
-                  <p className="label text-[#F5F2EB]/35 mb-2">Read</p>
+                  <p className="label text-[#EFE4CF]/35 mb-2">Read</p>
                   <Link
                     href={`/canon/${epoch.slug}`}
-                    className="label inline-block mb-5 border border-[#C0392B]/40 px-4 py-2 text-[#C0392B] hover:bg-[#C0392B] hover:text-[#F5F2EB] transition-all duration-300"
+                    className="label inline-block mb-5 border border-[#C44A32]/40 px-4 py-2 text-[#C44A32] hover:bg-[#C44A32] hover:text-[#EFE4CF] transition-all duration-300"
                   >
                     Open Epoch
                   </Link>
 
                   {featuredEntry ? (
                     <div>
-                      <p className="label text-[#F5F2EB]/35 mb-2">Featured Article</p>
+                      <p className="label text-[#EFE4CF]/35 mb-2">Featured Article</p>
                       <Link
                         href={`/canon/${epoch.slug}/${featuredEntry.slug}`}
-                        className="block hover:text-[#F5F2EB] text-[#F5F2EB]/80 transition-colors duration-300"
+                        className="block hover:text-[#EFE4CF] text-[#EFE4CF]/80 transition-colors duration-300"
                         style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
                       >
                         <p className="text-sm font-semibold mb-1">{featuredEntry.title}</p>
-                        <p className="text-xs text-[#F5F2EB]/55 leading-relaxed">
+                        <p className="text-xs text-[#EFE4CF]/55 leading-relaxed">
                           {featuredEntry.dek}
                         </p>
                       </Link>
@@ -112,17 +112,17 @@ export default function CanonPage() {
       <section className="px-6 md:px-10 pb-16 max-w-5xl mx-auto">
         <Link
           href="/canon/game"
-          className="static-panel block border border-[#2D4A3E]/30 p-7 bg-[linear-gradient(130deg,rgba(232,212,77,0.07),rgba(192,57,43,0.07))] hover:border-[#C0392B]/60 transition-colors duration-300"
+          className="static-panel block border border-[#EFE4CF]/30 p-7 bg-[linear-gradient(130deg,rgba(239,228,207,0.07),rgba(196,74,50,0.07))] hover:border-[#C44A32]/60 transition-colors duration-300"
         >
-          <p className="label text-[#E8D44D] mb-3">Interactive Canon</p>
+          <p className="label text-[#D6B56E] mb-3">Interactive Canon</p>
           <h2
-            className="text-2xl md:text-3xl text-[#F5F2EB] mb-4"
+            className="text-2xl md:text-3xl text-[#EFE4CF] mb-4"
             style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
           >
             Canon Blade Game
           </h2>
           <p
-            className="text-[#F5F2EB]/68 text-sm md:text-base leading-relaxed"
+            className="text-[#EFE4CF]/68 text-sm md:text-base leading-relaxed"
             style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
           >
             Play through the first four canon epochs in a 16-bit side-scrolling myth-action run.
@@ -134,9 +134,9 @@ export default function CanonPage() {
       </section>
 
       <section className="px-6 md:px-10 pb-24 max-w-3xl mx-auto">
-        <blockquote className="border-l-2 border-[#C0392B] pl-6">
+        <blockquote className="border-l-2 border-[#C44A32] pl-6">
           <p
-            className="text-xl md:text-2xl text-[#F5F2EB] italic leading-relaxed"
+            className="text-xl md:text-2xl text-[#EFE4CF] italic leading-relaxed"
             style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
           >
             &ldquo;The portal never closes. It only waits for perception to catch up.&rdquo;

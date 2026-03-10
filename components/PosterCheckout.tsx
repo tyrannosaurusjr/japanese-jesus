@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { POSTER_VARIANTS } from "@/lib/shop";
+import { getImpactClickIdFromCookieString } from "@/lib/impact-click";
 
 export function PosterCheckout() {
   const [selectedId, setSelectedId] = useState<string>(POSTER_VARIANTS[2].printfulSyncVariantId);
@@ -18,7 +19,10 @@ export function PosterCheckout() {
       const res = await fetch("/api/shop/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ variantId: selectedId }),
+        body: JSON.stringify({
+          syncVariantId: selectedId,
+          impactClickId: getImpactClickIdFromCookieString(document.cookie),
+        }),
       });
 
       const data = (await res.json()) as { url?: string; error?: string };
@@ -46,15 +50,15 @@ export function PosterCheckout() {
             style={{
               borderColor:
                 selectedId === v.printfulSyncVariantId
-                  ? "#C0392B"
-                  : "rgba(245,242,235,0.2)",
+                  ? "#C44A32"
+                  : "rgba(239,228,207,0.2)",
               color:
                 selectedId === v.printfulSyncVariantId
-                  ? "#C0392B"
-                  : "rgba(245,242,235,0.5)",
+                  ? "#C44A32"
+                  : "rgba(239,228,207,0.5)",
               background:
                 selectedId === v.printfulSyncVariantId
-                  ? "rgba(192,57,43,0.08)"
+                  ? "rgba(196,74,50,0.08)"
                   : "transparent",
             }}
           >
@@ -66,7 +70,7 @@ export function PosterCheckout() {
       <button
         onClick={handleCheckout}
         disabled={loading}
-        className="label border border-[#C0392B]/60 text-[#C0392B] py-3 px-4 hover:bg-[#C0392B] hover:text-[#F5F2EB] transition-all duration-300 text-left w-full disabled:opacity-50 disabled:cursor-not-allowed"
+        className="label border border-[#C44A32]/60 text-[#C44A32] py-3 px-4 hover:bg-[#C44A32] hover:text-[#EFE4CF] transition-all duration-300 text-left w-full disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading
           ? "Opening checkout…"
@@ -75,7 +79,7 @@ export function PosterCheckout() {
 
       {error && (
         <p
-          className="text-xs text-[#FF4D6D]"
+          className="text-xs text-[#C44A32]"
           style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
         >
           {error}

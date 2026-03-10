@@ -113,29 +113,29 @@ export default async function ConduitSpokePage({
   };
 
   return (
-    <main className="min-h-screen bg-[#0D1B2A]">
+    <main className="min-h-screen bg-[#070B14]">
       <Nav />
       <StructuredData id="conduit-note-structured-data" data={conduitArticleStructuredData} />
 
       <section className="pt-40 pb-16 px-6 md:px-10 max-w-4xl mx-auto">
         <Link
           href="/conduit"
-          className="label text-[#F5F2EB]/40 hover:text-[#F5F2EB] transition-colors duration-300"
+          className="label text-[#EFE4CF]/40 hover:text-[#EFE4CF] transition-colors duration-300"
         >
           Conduit
         </Link>
-        <p className="label text-[#E8D44D] mt-6 mb-4">{note.label}</p>
+        <p className="label text-[#D6B56E] mt-6 mb-4">{note.label}</p>
         <h1
-          className="text-5xl md:text-7xl text-[#F5F2EB] leading-none mb-8"
+          className="text-5xl md:text-7xl text-[#EFE4CF] leading-none mb-8"
           style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
         >
           {note.title}
         </h1>
-        <div className="w-16 h-px bg-[#C0392B]" />
+        <div className="w-16 h-px bg-[#C44A32]" />
       </section>
 
       <section className="px-6 md:px-10 pb-16 max-w-4xl mx-auto">
-        <div className="relative aspect-[16/9] overflow-hidden border border-[#2D4A3E]/30">
+        <div className="relative aspect-[16/9] overflow-hidden border border-[#EFE4CF]/30">
           <Image
             src={note.image}
             alt={note.imageAlt}
@@ -147,9 +147,9 @@ export default async function ConduitSpokePage({
       </section>
 
       <section className="px-6 md:px-10 pb-24 max-w-3xl mx-auto">
-        <p className="label text-[#F5F2EB]/35 mb-4">{note.coord}</p>
+        <p className="label text-[#EFE4CF]/35 mb-4">{note.coord}</p>
         <p
-          className="text-[#F5F2EB]/75 text-base leading-relaxed mb-6"
+          className="text-[#EFE4CF]/75 text-base leading-relaxed mb-6"
           style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
         >
           {note.body}
@@ -157,7 +157,7 @@ export default async function ConduitSpokePage({
         <div className="space-y-8">
           {note.sections.map((section) => (
             <section key={section.heading}>
-              <p className="label text-[#E8D44D] mb-3">
+              <p className="label text-[#D6B56E] mb-3">
                 {section.mode === "fact"
                   ? "Field Fact"
                   : section.mode === "reading"
@@ -165,7 +165,7 @@ export default async function ConduitSpokePage({
                     : "Site Context"}
               </p>
               <h2
-                className="text-2xl text-[#F5F2EB] mb-4"
+                className="text-2xl text-[#EFE4CF] mb-4"
                 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
               >
                 {section.heading}
@@ -173,7 +173,7 @@ export default async function ConduitSpokePage({
               {section.body.map((paragraph) => (
                 <p
                   key={paragraph}
-                  className="text-[#F5F2EB]/72 text-base leading-relaxed mb-4 last:mb-0"
+                  className="text-[#EFE4CF]/72 text-base leading-relaxed mb-4 last:mb-0"
                   style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
                 >
                   {paragraph}
@@ -196,7 +196,7 @@ export default async function ConduitSpokePage({
       </section>
 
       <section className="px-6 md:px-10 pb-24 max-w-4xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[#2D4A3E]/20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[#EFE4CF]/20">
           {[
             [
               "Site Conditions",
@@ -211,10 +211,10 @@ export default async function ConduitSpokePage({
               "Each field note should eventually expand into an 800 to 1,600 word article with local references, images, and outbound links.",
             ],
           ].map(([title, body]) => (
-            <div key={title} className="bg-[#0D1B2A] border border-[#2D4A3E]/30 p-6">
-              <p className="label text-[#E8D44D] mb-2">{title}</p>
+            <div key={title} className="bg-[#070B14] border border-[#EFE4CF]/30 p-6">
+              <p className="label text-[#D6B56E] mb-2">{title}</p>
               <p
-                className="text-[#F5F2EB]/62 text-sm leading-relaxed"
+                className="text-[#EFE4CF]/62 text-sm leading-relaxed"
                 style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
               >
                 {body}
@@ -225,19 +225,19 @@ export default async function ConduitSpokePage({
       </section>
 
       <section className="px-6 md:px-10 pb-24 max-w-4xl mx-auto">
-        <p className="label text-[#F5F2EB]/40 mb-6">Sources</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-[#2D4A3E]/20">
+        <p className="label text-[#EFE4CF]/40 mb-6">Sources</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-[#EFE4CF]/20">
           {note.sources.map((source) => (
             <a
               key={source.href}
               href={source.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-[#0D1B2A] border border-[#2D4A3E]/30 p-6 hover:border-[#C0392B]/60 transition-colors duration-300"
+              className="bg-[#070B14] border border-[#EFE4CF]/30 p-6 hover:border-[#C44A32]/60 transition-colors duration-300"
             >
-              <p className="label text-[#E8D44D] mb-2">{source.label}</p>
+              <p className="label text-[#D6B56E] mb-2">{source.label}</p>
               <p
-                className="text-[#F5F2EB]/62 text-sm leading-relaxed"
+                className="text-[#EFE4CF]/62 text-sm leading-relaxed"
                 style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
               >
                 {source.note}

@@ -14,29 +14,7 @@ export function AudioPlayer() {
     audio.volume = 0.08;
     audio.muted = true;
     audio.loop = true;
-
-    const tryPlay = () => {
-      audio.play().then(() => {
-        setPlaying(true);
-      }).catch(() => {
-        // Autoplay blocked — wait for user interaction
-      });
-    };
-
-    tryPlay();
-
-    const handleInteraction = () => {
-      if (!playing) tryPlay();
-    };
-
-    document.addEventListener("click", handleInteraction, { once: true });
-    document.addEventListener("scroll", handleInteraction, { once: true });
-
-    return () => {
-      document.removeEventListener("click", handleInteraction);
-      document.removeEventListener("scroll", handleInteraction);
-    };
-  }, [playing]);
+  }, []);
 
   const toggle = () => {
     const audio = audioRef.current;
@@ -57,14 +35,14 @@ export function AudioPlayer() {
   return (
     <>
       {/* The audio element — drone tone */}
-      <audio ref={audioRef} preload="auto" loop muted>
+      <audio ref={audioRef} preload="none" loop muted>
         <source src="/audio/drone.mp3" type="audio/mpeg" />
       </audio>
 
       {/* Unmute button */}
       <button
         onClick={toggle}
-        className="flex items-center gap-2 label text-[#F5F2EB]/50 hover:text-[#F5F2EB]/90 transition-colors duration-300"
+        className="flex items-center gap-2 label text-[#EFE4CF]/50 hover:text-[#EFE4CF]/90 transition-colors duration-300"
         aria-label={muted ? "Unmute ambient audio" : "Mute ambient audio"}
       >
         {muted ? (

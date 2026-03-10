@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { getImpactClickIdFromCookieString } from "@/lib/impact-click";
 
 function formatPrice(price: number, currency: string): string {
   return new Intl.NumberFormat(
@@ -61,7 +62,10 @@ export function ProductCheckout({ printfulSyncProductId, productName, primaryIma
       const res = await fetch("/api/shop/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ syncVariantId: selectedId }),
+        body: JSON.stringify({
+          syncVariantId: selectedId,
+          impactClickId: getImpactClickIdFromCookieString(document.cookie),
+        }),
       });
 
       const data = (await res.json()) as { url?: string; error?: string };
@@ -83,7 +87,7 @@ export function ProductCheckout({ printfulSyncProductId, productName, primaryIma
   if (loadingVariants) {
     return (
       <div
-        className="label text-[#F5F2EB]/30 py-3"
+        className="label text-[#EFE4CF]/30 py-3"
         style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
       >
         Loading options…
@@ -94,7 +98,7 @@ export function ProductCheckout({ printfulSyncProductId, productName, primaryIma
   if (error && variants.length === 0) {
     return (
       <p
-        className="text-xs text-[#FF4D6D]"
+        className="text-xs text-[#C44A32]"
         style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
       >
         {error}
@@ -113,7 +117,7 @@ export function ProductCheckout({ printfulSyncProductId, productName, primaryIma
       {mainImageUrl && (
         <div className="space-y-2">
           <div
-            className={`relative w-full aspect-square bg-[#111D2B] border border-[#2D4A3E]/40 overflow-hidden ${
+            className={`relative w-full aspect-square bg-[#070B14] border border-[#EFE4CF]/40 overflow-hidden ${
               zoomEnabled ? "cursor-zoom-in" : ""
             }`}
             onMouseEnter={() => {
@@ -138,7 +142,7 @@ export function ProductCheckout({ printfulSyncProductId, productName, primaryIma
           >
             <Image
               src={mainImageUrl}
-              alt={productName}
+              alt={`Japanese Jesus ${productName} product photo`}
               fill
               sizes="(max-width: 768px) 100vw, 50vw"
               className="object-contain p-2 transition-all duration-200"
@@ -151,7 +155,7 @@ export function ProductCheckout({ printfulSyncProductId, productName, primaryIma
             {alternateImageUrl && (
               <Image
                 src={alternateImageUrl}
-                alt={`${productName} — alternate view`}
+                alt={`Japanese Jesus ${productName} alternate product photo`}
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
                 className="object-contain p-2 transition-all duration-200"
@@ -170,7 +174,7 @@ export function ProductCheckout({ printfulSyncProductId, productName, primaryIma
               setZoomed(false);
               setZoomOrigin({ x: 50, y: 50 });
             }}
-            className="label border border-[#2D4A3E]/60 text-[#F5F2EB]/70 px-3 py-2 hover:border-[#E8D44D]/60 hover:text-[#E8D44D] transition-colors duration-200 text-left"
+            className="label border border-[#EFE4CF]/60 text-[#EFE4CF]/70 px-3 py-2 hover:border-[#C44A32]/60 hover:text-[#C44A32] transition-colors duration-200 text-left"
             aria-label={`${zoomEnabled ? "Disable" : "Enable"} zoom for ${productName}`}
           >
             {zoomEnabled ? "Zoom: On (hover image)" : "Zoom: Off"}
@@ -187,11 +191,11 @@ export function ProductCheckout({ printfulSyncProductId, productName, primaryIma
               className="label py-2 px-3 border transition-all duration-200"
               style={{
                 borderColor:
-                  selectedId === v.id ? "#C0392B" : "rgba(245,242,235,0.4)",
+                  selectedId === v.id ? "#C44A32" : "rgba(239,228,207,0.4)",
                 color:
-                  selectedId === v.id ? "#E8D44D" : "#F5F2EB",
+                  selectedId === v.id ? "#C44A32" : "#EFE4CF",
                 background:
-                  selectedId === v.id ? "rgba(192,57,43,0.15)" : "transparent",
+                  selectedId === v.id ? "rgba(196,74,50,0.15)" : "transparent",
               }}
             >
               {v.label}
@@ -203,17 +207,17 @@ export function ProductCheckout({ printfulSyncProductId, productName, primaryIma
       <button
         onClick={handleCheckout}
         disabled={checkoutLoading || !selectedId}
-        className="label border border-[#C0392B] text-[#F5F2EB] py-3 px-4 hover:bg-[#C0392B] transition-all duration-300 text-left w-full disabled:opacity-50 disabled:cursor-not-allowed"
+        className="label border border-[#C44A32] text-[#EFE4CF] py-3 px-4 hover:bg-[#C44A32] transition-all duration-300 text-left w-full disabled:opacity-50 disabled:cursor-not-allowed"
         aria-label={`Order ${productName}`}
       >
         {checkoutLoading
           ? "Opening checkout…"
-          : `Carry This Object${selected ? ` — ${formatPrice(selected.price, selected.currency)}` : ""} →`}
+          : `Order Item${selected ? ` — ${formatPrice(selected.price, selected.currency)}` : ""} →`}
       </button>
 
       {error && (
         <p
-          className="text-xs text-[#FF4D6D]"
+          className="text-xs text-[#C44A32]"
           style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
         >
           {error}

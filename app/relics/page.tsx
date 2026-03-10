@@ -58,24 +58,24 @@ export default function RelicsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#0D1B2A]">
+    <main className="min-h-screen bg-[#070B14]">
       <Nav />
       <StructuredData id="relics-structured-data" data={relicsStructuredData} />
 
       <section className="pt-40 pb-16 px-6 md:px-10 max-w-4xl mx-auto">
-        <p className="label text-[#E8D44D] mb-6">Relics</p>
+        <p className="label text-[#D6B56E] mb-6">Relics</p>
         <h1
-          className="text-5xl md:text-7xl text-[#F5F2EB] leading-none mb-8"
+          className="text-5xl md:text-7xl text-[#EFE4CF] leading-none mb-8"
           style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
         >
           Relics &amp; Prints from the Japanese Jesus Conduit
         </h1>
-        <div className="w-16 h-px bg-[#C0392B]" />
+        <div className="w-16 h-px bg-[#C44A32]" />
       </section>
 
       <section className="px-6 md:px-10 pb-8 max-w-3xl mx-auto">
         <p
-          className="text-[#F5F2EB]/60 text-sm leading-relaxed"
+          className="text-[#EFE4CF]/60 text-sm leading-relaxed"
           style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
         >
           These are not lifestyle products. They are public-facing relics from the conduit system:
@@ -85,34 +85,34 @@ export default function RelicsPage() {
       </section>
 
       <section className="px-6 md:px-10 pb-32 max-w-4xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-[#2D4A3E]/20">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-[#EFE4CF]/20">
           {OBJECTS.map((obj) => (
             <article
               key={obj.id}
-              className="bg-[#0D1B2A] border border-[#2D4A3E]/30 p-8 flex flex-col"
+              className="bg-[#070B14] border border-[#EFE4CF]/30 p-8 flex flex-col"
             >
               <div className="mb-6 flex items-center justify-between">
                 <Sigil variant={obj.variant} size={56} className="opacity-70" />
                 {obj.notForSale ? (
-                  <span className="label text-[#FF4D6D]">Not For Sale</span>
+                  <span className="label text-[#D6B56E]">Not For Sale</span>
                 ) : null}
               </div>
 
               <h2
-                className="text-xl md:text-2xl text-[#F5F2EB] mb-3"
+                className="text-xl md:text-2xl text-[#EFE4CF] mb-3"
                 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
               >
                 {obj.name}
               </h2>
 
               <p
-                className="text-[#F5F2EB]/65 text-sm leading-relaxed mb-4"
+                className="text-[#EFE4CF]/65 text-sm leading-relaxed mb-4"
                 style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
               >
                 {obj.description}
               </p>
 
-              <p className="label text-[#F5F2EB]/30 mb-6">{obj.material}</p>
+              <p className="label text-[#EFE4CF]/30 mb-6">{obj.material}</p>
 
               {obj.printfulSyncProductId ? (
                 <ProductCheckout
@@ -122,7 +122,7 @@ export default function RelicsPage() {
                   altImageUrl={obj.altImageUrl}
                 />
               ) : obj.imageSrc ? (
-                <div className="relative w-full aspect-square bg-[#111D2B] border border-[#2D4A3E]/40 overflow-hidden">
+                <div className="relative w-full aspect-square bg-[#070B14] border border-[#EFE4CF]/40 overflow-hidden">
                   <Image
                     src={obj.imageSrc}
                     alt={obj.imageAlt || obj.name}
@@ -139,7 +139,7 @@ export default function RelicsPage() {
 
       <section className="px-6 md:px-10 pb-24 max-w-3xl mx-auto">
         <p
-          className="text-[#F5F2EB]/35 text-xs leading-relaxed"
+          className="text-[#EFE4CF]/35 text-xs leading-relaxed"
           style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
         >
           Keeper Card is not available for purchase. Delivery is determined by other means. Not

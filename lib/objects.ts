@@ -42,7 +42,7 @@ export const OBJECTS: CatalogObject[] = [
     id: "thin-place-print",
     name: "Japanese Jesus Poster",
     description:
-      "Enhanced matte wall print of the Japanese Jesus figure seated at the seam line, with field static radiating through the northern myth map. Composed for long viewing at full size, with deep contrast and deliberate negative space. Built to read like evidence on a wall, not decoration above a couch.",
+      "Enhanced matte wall print of the Japanese Jesus figure seated at the seam line, with field static radiating across a northern myth map of Japan. Composed for long viewing at full size, with deep contrast and deliberate negative space. Built to read like evidence on a wall, not decoration above a couch.",
     material: "Enhanced matte paper · print-on-demand",
     price: 35,
     variant: "vermilion",

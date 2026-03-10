@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-type GameMode = "menu" | "playing" | "stageClear" | "victory" | "failed";
+type GameMode = "menu" | "playing" | "upgrade" | "stageClear" | "victory" | "failed";
 type EnemyType =
   | "deer"
   | "boar"
@@ -16,11 +16,13 @@ type PickupType = "health" | "energy" | "relic";
 type EffectType = "spark" | "burst" | "trail" | "damageText";
 type DialogueBeat = "intro" | "midpoint" | "boss" | "clear";
 type StageMotif = "cedarGate" | "riverPillars" | "snowPass" | "shrineVillage";
+type UpgradeId = "vital" | "capacitor" | "edge" | "flux" | "phase" | "aegis";
 
 interface StageConfig {
   title: string;
   subtitle: string;
   length: number;
+  sublevelDurations: [number, number, number, number, number];
   skyA: string;
   skyB: string;
   haze: string;
@@ -35,6 +37,7 @@ interface StageConfig {
   bossTitle: string;
   bossThreatLine: string;
   motif: StageMotif;
+  sublevels: [string, string, string, string, string];
 }
 
 interface Player {
@@ -46,16 +49,25 @@ interface Player {
   h: number;
   facing: -1 | 1;
   onGround: boolean;
+  isDucking: boolean;
   hp: number;
   maxHp: number;
   energy: number;
   maxEnergy: number;
   invuln: number;
+  shieldActive: boolean;
+  shieldBreakTimer: number;
   slashCooldown: number;
   slashTimer: number;
   shotCooldown: number;
   dashCooldown: number;
   dashTimer: number;
+  slashPowerMult: number;
+  shotPowerMult: number;
+  shotSpeedMult: number;
+  energyRegenMult: number;
+  dashCooldownMult: number;
+  shieldEfficiency: number;
   combo: number;
   comboTimer: number;
   score: number;
@@ -143,9 +155,16 @@ interface NarrativeFlags {
 interface GameState {
   mode: GameMode;
   stageIndex: number;
+  sublevelIndex: number;
+  sublevelElapsed: number;
   stageDistance: number;
   totalDistance: number;
   elapsedSec: number;
+  totalExperience: number;
+  experience: number;
+  level: number;
+  xpToNextLevel: number;
+  pendingUpgradeCount: number;
   relics: number;
   threadFragments: number;
   narrativeTitle: string;
@@ -159,6 +178,7 @@ interface GameState {
   bossSpawned: boolean;
   bossDefeated: boolean;
   bossIntroTimer: number;
+  pendingUpgrades: UpgradeOption[];
   narrativeFlags: NarrativeFlags;
   dialogQueue: DialogueLine[];
   activeDialogue: DialogueLine | null;
@@ -172,6 +192,12 @@ interface GameState {
   nextProjectileId: number;
   nextPickupId: number;
   nextEffectId: number;
+}
+
+interface UpgradeOption {
+  id: UpgradeId;
+  title: string;
+  description: string;
 }
 
 interface EnemyTemplate {
@@ -188,6 +214,7 @@ interface SpriteSet {
   idle: HTMLCanvasElement[];
   run: HTMLCanvasElement[];
   jump: HTMLCanvasElement[];
+  crouch: HTMLCanvasElement[];
   slash: HTMLCanvasElement[];
   dash: HTMLCanvasElement[];
   hurt: HTMLCanvasElement[];
@@ -210,27 +237,28 @@ const HEIGHT = 540;
 const FIXED_DT = 1 / 60;
 const GROUND_Y = 430;
 const GRAVITY = 1800;
-const PLAYER_MOVE_SPEED = 262;
-const PLAYER_JUMP_SPEED = 702;
-const PLAYER_DASH_SPEED = 590;
-const AUTO_SCROLL_SPEED = 92;
+const PLAYER_MOVE_SPEED = 226;
+const PLAYER_JUMP_SPEED = 680;
+const PLAYER_DASH_SPEED = 520;
+const AUTO_SCROLL_SPEED = 34;
 const CONTROL_CODES = {
-  left: "ArrowLeft",
-  right: "ArrowRight",
-  jump: "ArrowUp",
-  slash: "KeyB",
-  shot: "Space",
-  dash: "KeyA",
+  left: "KeyA",
+  right: "KeyD",
+  jump: "KeyW",
+  duck: "KeyS",
+  shield: "ArrowDown",
+  slash: "ArrowLeft",
+  shot: "ArrowUp",
+  dash: "ArrowRight",
   start: "Enter",
   retry: "KeyR",
   fullscreen: "KeyF",
 } as const;
 const BLOCK_BROWSER_CODES = new Set<string>([
+  CONTROL_CODES.slash,
   CONTROL_CODES.shot,
-  CONTROL_CODES.left,
-  CONTROL_CODES.right,
-  CONTROL_CODES.jump,
-  "ArrowDown",
+  CONTROL_CODES.dash,
+  CONTROL_CODES.shield,
 ]);
 
 function normalizeInputCode(event: KeyboardEvent): string {
@@ -257,6 +285,15 @@ function normalizeInputCode(event: KeyboardEvent): string {
   if (key === "a") {
     return "KeyA";
   }
+  if (key === "w") {
+    return "KeyW";
+  }
+  if (key === "d") {
+    return "KeyD";
+  }
+  if (key === "s") {
+    return "KeyS";
+  }
   if (key === "b") {
     return "KeyB";
   }
@@ -281,11 +318,170 @@ function isEditableTarget(target: EventTarget | null): boolean {
   return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || target.isContentEditable;
 }
 
+const SUBLEVEL_COUNT = 5;
+const BOSS_SUBLEVEL_INDEX = SUBLEVEL_COUNT - 1;
+const BOSS_LANE_MIN_SEC = 60;
+const PLAYER_STAND_HEIGHT = 84;
+const PLAYER_DUCK_HEIGHT = 58;
+const WEAPON_TIERS = ["Pilgrim Edge", "Cedar Edge", "Sun Conduit", "Frost Arc", "Mythbreaker"];
+const SHOT_COLORS = ["#9ee8ff", "#b3f3ff", "#ffd7a7", "#d8ecff", "#ffc6ff"];
+const UPGRADE_CATALOG: UpgradeOption[] = [
+  {
+    id: "vital",
+    title: "Vital Sigil",
+    description: "+24 max HP and instant heal.",
+  },
+  {
+    id: "capacitor",
+    title: "Conduit Capacitor",
+    description: "+22 max energy and regen boost.",
+  },
+  {
+    id: "edge",
+    title: "Edge Temper",
+    description: "Slash damage and reach increase.",
+  },
+  {
+    id: "flux",
+    title: "Flux Lens",
+    description: "Shot damage and projectile speed increase.",
+  },
+  {
+    id: "phase",
+    title: "Phase Coil",
+    description: "Dash cooldown decreases.",
+  },
+  {
+    id: "aegis",
+    title: "Aegis Field",
+    description: "Shield drains less energy and blocks harder.",
+  },
+];
+
+function stageSublevelDuration(stage: StageConfig, sublevelIndex: number): number {
+  return stage.sublevelDurations[clamp(sublevelIndex, 0, SUBLEVEL_COUNT - 1)] ?? 75;
+}
+
+function stageProgressRatio(game: GameState, stage: StageConfig): number {
+  const duration = stageSublevelDuration(stage, game.sublevelIndex);
+  const local = clamp(game.sublevelElapsed / duration, 0, 1);
+  return clamp((game.sublevelIndex + local) / SUBLEVEL_COUNT, 0, 1);
+}
+
+function sublevelProgressRatio(game: GameState, stage: StageConfig): number {
+  const duration = stageSublevelDuration(stage, game.sublevelIndex);
+  return clamp(game.sublevelElapsed / duration, 0, 1);
+}
+
+function enemyPoolForSublevel(stage: StageConfig, sublevelIndex: number): EnemyType[] {
+  const unlockedCount = Math.min(stage.enemyPool.length, Math.max(1, sublevelIndex + 1));
+  return stage.enemyPool.slice(0, unlockedCount);
+}
+
+function weaponTierIndex(game: GameState): number {
+  return clamp(Math.floor((game.level - 1) / 2), 0, WEAPON_TIERS.length - 1);
+}
+
+function slashDamageForTier(tier: number, boss: boolean): number {
+  const base = boss ? 22 : 32;
+  return Math.round(base * (1 + tier * 0.16));
+}
+
+function shotDamageForTier(tier: number): number {
+  return Math.round(24 * (1 + tier * 0.18));
+}
+
+function shotCooldownForTier(tier: number): number {
+  return Math.max(0.17, 0.32 - tier * 0.03);
+}
+
+function upgradeChoicesForLevel(level: number): UpgradeOption[] {
+  const picks: UpgradeOption[] = [];
+  const start = (Math.max(1, level) - 1) % UPGRADE_CATALOG.length;
+  for (let i = 0; i < 3; i += 1) {
+    const option = UPGRADE_CATALOG[(start + i) % UPGRADE_CATALOG.length];
+    if (option) {
+      picks.push(option);
+    }
+  }
+  return picks;
+}
+
+function maybeOpenUpgradeMenu(game: GameState) {
+  if (game.pendingUpgradeCount <= 0 || game.mode !== "playing" || game.pendingUpgrades.length > 0) {
+    return;
+  }
+  game.pendingUpgradeCount -= 1;
+  game.pendingUpgrades = upgradeChoicesForLevel(game.level);
+  game.mode = "upgrade";
+  game.lastEvent = `Rank ${game.level} reached. Choose enhancement.`;
+}
+
+function grantExperience(game: GameState, amount: number, source: string, x?: number, y?: number) {
+  if (amount <= 0) {
+    return;
+  }
+
+  game.totalExperience += amount;
+  game.experience += amount;
+  if (typeof x === "number" && typeof y === "number") {
+    addEffect(game, "damageText", x, y, "#a9ecff", 12, 0.78, 0, -40, `+${amount} XP`);
+  }
+  while (game.experience >= game.xpToNextLevel) {
+    game.experience -= game.xpToNextLevel;
+    game.level += 1;
+    game.pendingUpgradeCount += 1;
+    game.xpToNextLevel = Math.round(game.xpToNextLevel * 1.24 + 18);
+    pushChronicle(game, `Rank ${game.level} reached from ${source}.`);
+  }
+
+  if (game.mode === "playing" && game.bossIntroTimer <= 0) {
+    maybeOpenUpgradeMenu(game);
+  }
+}
+
+function getSlashHitbox(player: Player): { x: number; y: number; w: number; h: number } {
+  const reach = 96;
+  const x = player.facing === 1 ? player.x + player.w * 0.5 : player.x - player.w * 0.5 - reach;
+  const y = player.y - player.h + 8;
+  return {
+    x,
+    y,
+    w: reach,
+    h: player.h - 4,
+  };
+}
+
+function applyUpgrade(game: GameState, option: UpgradeOption) {
+  const player = game.player;
+  if (option.id === "vital") {
+    player.maxHp += 24;
+    player.hp = clamp(player.hp + 34, 0, player.maxHp);
+  } else if (option.id === "capacitor") {
+    player.maxEnergy += 22;
+    player.energy = clamp(player.energy + 30, 0, player.maxEnergy);
+    player.energyRegenMult = clamp(player.energyRegenMult + 0.12, 1, 2);
+  } else if (option.id === "edge") {
+    player.slashPowerMult = clamp(player.slashPowerMult + 0.2, 1, 2.4);
+  } else if (option.id === "flux") {
+    player.shotPowerMult = clamp(player.shotPowerMult + 0.2, 1, 2.4);
+    player.shotSpeedMult = clamp(player.shotSpeedMult + 0.12, 1, 2.2);
+  } else if (option.id === "phase") {
+    player.dashCooldownMult = clamp(player.dashCooldownMult - 0.1, 0.45, 1);
+  } else {
+    player.shieldEfficiency = clamp(player.shieldEfficiency + 0.2, 1, 2.6);
+  }
+
+  pushChronicle(game, `Enhancement selected: ${option.title}.`);
+  game.lastEvent = `${option.title} integrated.`;
+}
+
 const STAGES: StageConfig[] = [
   {
     title: "Epoch 01 - The Wandering Spirit",
     subtitle: "Liminal cedar valleys and spectral currents.",
-    length: 1220,
+    length: 3420,
+    sublevelDurations: [72, 74, 78, 82, 96],
     skyA: "#1a2f5e",
     skyB: "#28518b",
     haze: "#5e8ec8",
@@ -300,11 +496,19 @@ const STAGES: StageConfig[] = [
     bossTitle: "Gatekeeper of the Cedar Threshold",
     bossThreatLine: "A stone sentinel seals the liminal crossing.",
     motif: "cedarGate",
+    sublevels: [
+      "Cedar Verge",
+      "Spirit Brook",
+      "Gate Ruins",
+      "Storm Approach",
+      "Akakaze Threshold",
+    ],
   },
   {
     title: "Epoch 02 - Incarnated As Jesus In Egypt",
     subtitle: "River fields, heat shimmer, and temple wards.",
-    length: 1340,
+    length: 3640,
+    sublevelDurations: [74, 78, 82, 86, 102],
     skyA: "#593327",
     skyB: "#965338",
     haze: "#d78756",
@@ -319,11 +523,19 @@ const STAGES: StageConfig[] = [
     bossTitle: "Temple Coil of Incarnate Trial",
     bossThreatLine: "The Nile temple ward hunts every oath you carry.",
     motif: "riverPillars",
+    sublevels: [
+      "River Flats",
+      "Dust Orchard",
+      "Temple Outskirts",
+      "Sun Court Walls",
+      "Serpent Sanctuary",
+    ],
   },
   {
     title: "Epoch 03 - Eastward Journey Toward Aomori",
     subtitle: "Cold passes, broken maps, and whiteout spirits.",
-    length: 1460,
+    length: 3920,
+    sublevelDurations: [78, 82, 86, 92, 108],
     skyA: "#253847",
     skyB: "#3f6688",
     haze: "#84aacd",
@@ -338,11 +550,19 @@ const STAGES: StageConfig[] = [
     bossTitle: "Whiteout Tyrant of the Eastward Pass",
     bossThreatLine: "A winter warlord blocks the final mountain route.",
     motif: "snowPass",
+    sublevels: [
+      "Windbreak Pass",
+      "Broken Waystones",
+      "Ice Switchback",
+      "Whiteout Ridge",
+      "Kuroyuki Fortress",
+    ],
   },
   {
     title: "Epoch 04 - Life In Aomori",
     subtitle: "Lush northern fields, shrine winds, storm light.",
-    length: 1280,
+    length: 3580,
+    sublevelDurations: [76, 80, 86, 92, 110],
     skyA: "#37295f",
     skyB: "#5c3f92",
     haze: "#8e75c7",
@@ -357,6 +577,13 @@ const STAGES: StageConfig[] = [
     bossTitle: "Conduit Dragon of the Northern Fields",
     bossThreatLine: "The final guardian tests whether memory can remain human.",
     motif: "shrineVillage",
+    sublevels: [
+      "Village Edge",
+      "Rice Terraces",
+      "Shrine Road",
+      "Storm Courtyard",
+      "Ryujin Gate",
+    ],
   },
 ];
 
@@ -557,19 +784,28 @@ function createPlayer(): Player {
     vx: 0,
     vy: 0,
     w: 46,
-    h: 84,
+    h: PLAYER_STAND_HEIGHT,
     facing: 1,
     onGround: true,
+    isDucking: false,
     hp: 150,
     maxHp: 150,
     energy: 100,
     maxEnergy: 100,
     invuln: 0,
+    shieldActive: false,
+    shieldBreakTimer: 0,
     slashCooldown: 0,
     slashTimer: 0,
     shotCooldown: 0,
     dashCooldown: 0,
     dashTimer: 0,
+    slashPowerMult: 1,
+    shotPowerMult: 1,
+    shotSpeedMult: 1,
+    energyRegenMult: 1,
+    dashCooldownMult: 1,
+    shieldEfficiency: 1,
     combo: 0,
     comboTimer: 0,
     score: 0,
@@ -642,9 +878,16 @@ function createMenuState(): GameState {
   return {
     mode: "menu",
     stageIndex: 0,
+    sublevelIndex: 0,
+    sublevelElapsed: 0,
     stageDistance: 0,
     totalDistance: 0,
     elapsedSec: 0,
+    totalExperience: 0,
+    experience: 0,
+    level: 1,
+    xpToNextLevel: 140,
+    pendingUpgradeCount: 0,
     relics: 0,
     threadFragments: 0,
     narrativeTitle: NARRATIVE_TITLE,
@@ -658,6 +901,7 @@ function createMenuState(): GameState {
     bossSpawned: false,
     bossDefeated: false,
     bossIntroTimer: 0,
+    pendingUpgrades: [],
     narrativeFlags: createNarrativeFlags(),
     dialogQueue: [],
     activeDialogue: null,
@@ -679,6 +923,7 @@ function createPlayingState(): GameState {
   state.mode = "playing";
   state.narrativeFlags.intro = true;
   pushChronicle(state, `Epoch 01 opened: The Wandering Spirit.`);
+  pushChronicle(state, `Lane 1/5: ${STAGES[0].sublevels[0]}.`);
   queueStageBeat(state, "intro");
   return state;
 }
@@ -770,6 +1015,39 @@ function drawPlayerFrame(
   });
 }
 
+function drawPlayerCrouchFrame(cloakShift: number, sword: boolean, hurt: boolean): HTMLCanvasElement {
+  return makeSprite(24, 30, (ctx) => {
+    const body = hurt ? "#c36f6f" : "#9f3b35";
+    const bodyDark = hurt ? "#7f3535" : "#5f211f";
+    const skin = "#f0dcc0";
+
+    ctx.fillStyle = skin;
+    ctx.fillRect(9, 6, 7, 5);
+
+    ctx.fillStyle = "#cfcbc6";
+    ctx.fillRect(8, 11, 9, 5);
+
+    ctx.fillStyle = body;
+    ctx.fillRect(7, 16, 12, 8);
+    ctx.fillStyle = bodyDark;
+    ctx.fillRect(8, 17, 10, 6);
+
+    ctx.fillStyle = "#6a2f87";
+    ctx.fillRect(17 + cloakShift, 14, 5, 9);
+
+    ctx.fillStyle = "#d9c167";
+    ctx.fillRect(8, 24, 5, 4);
+    ctx.fillRect(14, 24, 5, 4);
+
+    if (sword) {
+      ctx.fillStyle = "#e6f7ff";
+      ctx.fillRect(18, 18, 6, 2);
+      ctx.fillStyle = "#8ec2e6";
+      ctx.fillRect(20, 16, 3, 4);
+    }
+  });
+}
+
 function drawEnemyFrame(type: EnemyType, hop: number, boss: boolean): HTMLCanvasElement {
   return makeSprite(32, 32, (ctx) => {
     const palette =
@@ -843,7 +1121,7 @@ function drawEnemyFrame(type: EnemyType, hop: number, boss: boolean): HTMLCanvas
         ctx.fillRect(10, y + 9, 10, 8);
         ctx.fillStyle = palette.eye;
         ctx.fillRect(18, y + 11, 3, 2);
-        ctx.fillStyle = "rgba(245,242,235,0.3)";
+        ctx.fillStyle = "rgba(239,228,207,0.3)";
         ctx.fillRect(12, y + 5, 6, 2);
       }
       return;
@@ -938,6 +1216,7 @@ function buildSprites(): SpriteLibrary {
       drawPlayerFrame(-1, 0, false, false, false),
     ],
     jump: [drawPlayerFrame(-2, 0, false, false, false), drawPlayerFrame(-1, 1, false, false, false)],
+    crouch: [drawPlayerCrouchFrame(0, false, false), drawPlayerCrouchFrame(1, false, false)],
     slash: [drawPlayerFrame(0, 0, true, false, false), drawPlayerFrame(1, 0, true, false, false)],
     dash: [drawPlayerFrame(0, 1, false, true, false), drawPlayerFrame(0, -1, false, true, false)],
     hurt: [drawPlayerFrame(0, 0, false, false, true), drawPlayerFrame(1, 0, false, false, true)],
@@ -1048,8 +1327,14 @@ function spawnPickup(game: GameState, type: PickupType, x: number, y: number) {
 
 function spawnEnemy(game: GameState, forcedType?: EnemyType, isBoss = false) {
   const stage = STAGES[game.stageIndex];
-  const type = forcedType ?? stage.enemyPool[Math.floor(Math.random() * stage.enemyPool.length)];
+  const unlockedPool = enemyPoolForSublevel(stage, game.sublevelIndex);
+  const type = forcedType ?? unlockedPool[Math.floor(Math.random() * unlockedPool.length)];
   const template = enemyTemplate(type);
+  const sublevelScale = 1 + game.sublevelIndex * 0.18 + game.stageIndex * 0.04;
+  const hp = isBoss ? template.hp : Math.round(template.hp * sublevelScale);
+  const speed = isBoss ? template.speed : template.speed * (1 + game.sublevelIndex * 0.07);
+  const contactDamage = isBoss ? template.contactDamage : template.contactDamage + Math.floor(game.sublevelIndex * 1.2);
+  const worth = isBoss ? template.worth : Math.round(template.worth * (1 + game.sublevelIndex * 0.14));
 
   const spawnX = game.cameraX + WIDTH * 0.75 + rand(80, 220);
   const spawnY = template.flying ? rand(218, 340) : GROUND_Y;
@@ -1060,18 +1345,18 @@ function spawnEnemy(game: GameState, forcedType?: EnemyType, isBoss = false) {
     isBoss,
     x: spawnX,
     y: spawnY,
-    vx: -template.speed,
+    vx: -speed,
     vy: 0,
     w: template.w,
     h: template.h,
-    hp: template.hp,
-    maxHp: template.hp,
+    hp,
+    maxHp: hp,
     onGround: !template.flying,
     attackCooldown: isBoss ? 0.8 : rand(0.7, 1.7),
     aiTimer: rand(0.8, 1.6),
     sine: rand(0, Math.PI * 2),
-    contactDamage: template.contactDamage,
-    worth: template.worth,
+    contactDamage,
+    worth,
     hitFlash: 0,
   });
 
@@ -1084,18 +1369,24 @@ function applyDamageToPlayer(game: GameState, damage: number, sourceX: number) {
     return;
   }
 
-  player.hp = Math.max(0, player.hp - damage);
+  const shieldRatio = player.shieldActive ? clamp(0.48 - (player.shieldEfficiency - 1) * 0.16, 0.2, 0.48) : 1;
+  const actualDamage = Math.max(1, Math.round(damage * shieldRatio));
+  player.hp = Math.max(0, player.hp - actualDamage);
   player.invuln = 0.84;
   player.combo = 0;
   player.comboTimer = 0;
-  player.vx += sourceX > player.x ? -200 : 200;
-  player.vy = -340;
+  player.vx += (sourceX > player.x ? -200 : 200) * (player.shieldActive ? 0.4 : 1);
+  player.vy = player.shieldActive ? -190 : -340;
+  if (player.shieldActive) {
+    player.energy = clamp(player.energy - 10 / player.shieldEfficiency, 0, player.maxEnergy);
+    addEffect(game, "spark", player.x + (sourceX > player.x ? 26 : -26), player.y - player.h * 0.58, "#9fe7ff", 18, 0.17);
+  }
 
   game.hitStop = Math.max(game.hitStop, 0.05);
   game.screenShake = Math.max(game.screenShake, 0.3);
   addEffect(game, "burst", player.x, player.y - player.h * 0.65, "#ff9ea8", 34, 0.25);
-  addEffect(game, "damageText", player.x, player.y - player.h - 12, "#ffd2da", 12, 0.7, 0, -44, `-${damage}`);
-  game.lastEvent = `Hit taken -${damage} HP`;
+  addEffect(game, "damageText", player.x, player.y - player.h - 12, "#ffd2da", 12, 0.7, 0, -44, `-${actualDamage}`);
+  game.lastEvent = player.shieldActive ? `Shielded hit -${actualDamage} HP` : `Hit taken -${actualDamage} HP`;
 
   if (player.hp <= 0) {
     game.mode = "failed";
@@ -1143,6 +1434,8 @@ function applyDamageToEnemy(game: GameState, enemy: Enemy, damage: number): bool
   }
 
   rewardHit(game, enemy.worth);
+  const xp = enemy.isBoss ? Math.round(enemy.worth * 0.9) : Math.round(enemy.worth * 0.55);
+  grantExperience(game, xp, enemy.type, enemy.x, enemy.y - enemy.h);
   game.screenShake = Math.max(game.screenShake, enemy.isBoss ? 0.5 : 0.24);
   addEffect(game, "burst", enemy.x, enemy.y - enemy.h * 0.5, "#ffe9b8", enemy.isBoss ? 56 : 34, 0.3);
   addEffect(game, "damageText", enemy.x, enemy.y - enemy.h, "#fff4db", 14, 0.9, 0, -58, `${enemy.worth}`);
@@ -1153,27 +1446,24 @@ function applyDamageToEnemy(game: GameState, enemy: Enemy, damage: number): bool
 
 function trySlash(game: GameState) {
   const player = game.player;
-  if (game.mode !== "playing" || player.slashCooldown > 0 || player.energy < 7) {
+  if (game.mode !== "playing" || player.slashCooldown > 0 || player.energy < 7 || player.shieldActive) {
     return;
   }
+  const tier = weaponTierIndex(game);
 
   player.energy -= 7;
-  player.slashCooldown = 0.24;
+  player.slashCooldown = Math.max(0.16, 0.24 - tier * 0.015);
   player.slashTimer = 0.14;
 
-  const reach = 96;
-  const slashX = player.facing === 1 ? player.x + player.w * 0.5 : player.x - player.w * 0.5 - reach;
-  const slashY = player.y - player.h + 8;
-  const slashW = reach;
-  const slashH = player.h - 4;
+  const slashBox = getSlashHitbox(player);
 
   let hits = 0;
   const survivors: Enemy[] = [];
   for (const enemy of game.enemies) {
     const ex = enemy.x - enemy.w * 0.5;
     const ey = enemy.y - enemy.h;
-    if (rectsOverlap(slashX, slashY, slashW, slashH, ex, ey, enemy.w, enemy.h)) {
-      const damage = enemy.isBoss ? 22 : 32;
+    if (rectsOverlap(slashBox.x, slashBox.y, slashBox.w, slashBox.h, ex, ey, enemy.w, enemy.h)) {
+      const damage = Math.round(slashDamageForTier(tier, enemy.isBoss) * player.slashPowerMult);
       const dead = applyDamageToEnemy(game, enemy, damage);
       hits += 1;
       if (!dead) {
@@ -1186,7 +1476,7 @@ function trySlash(game: GameState) {
   game.enemies = survivors;
 
   const arcX = player.facing === 1 ? player.x + 46 : player.x - 46;
-  addEffect(game, "trail", arcX, player.y - 42, "#ffe49a", 48, 0.14, player.facing * 20, 0);
+  addEffect(game, "trail", arcX, player.y - 42, SHOT_COLORS[tier], 48, 0.14, player.facing * 20, 0);
   if (hits === 0) {
     game.lastEvent = "Spirit blade cuts only wind.";
   }
@@ -1194,27 +1484,40 @@ function trySlash(game: GameState) {
 
 function tryShoot(game: GameState) {
   const player = game.player;
-  if (game.mode !== "playing" || player.shotCooldown > 0 || player.energy < 12) {
+  if (game.mode !== "playing" || player.shotCooldown > 0 || player.energy < 12 || player.shieldActive) {
     return;
   }
+  const tier = weaponTierIndex(game);
 
   player.energy -= 12;
-  player.shotCooldown = 0.32;
+  player.shotCooldown = shotCooldownForTier(tier);
 
   const dir = player.facing;
-  spawnProjectile(game, "player", player.x + dir * 30, player.y - 42, dir * 590, 0, 24, "#9ee8ff", 7, 1.55);
-  addEffect(game, "spark", player.x + dir * 28, player.y - 42, "#b8f3ff", 14, 0.14);
+  const color = SHOT_COLORS[tier];
+  spawnProjectile(
+    game,
+    "player",
+    player.x + dir * 30,
+    player.y - 42,
+    dir * (590 + tier * 18) * player.shotSpeedMult,
+    0,
+    Math.round(shotDamageForTier(tier) * player.shotPowerMult),
+    color,
+    7,
+    1.55,
+  );
+  addEffect(game, "spark", player.x + dir * 28, player.y - 42, color, 14, 0.14);
   game.lastEvent = "Conduit shot released.";
 }
 
 function tryDash(game: GameState) {
   const player = game.player;
-  if (game.mode !== "playing" || player.dashCooldown > 0 || player.energy < 18) {
+  if (game.mode !== "playing" || player.dashCooldown > 0 || player.energy < 18 || player.isDucking) {
     return;
   }
 
   player.energy -= 18;
-  player.dashCooldown = 1.1;
+  player.dashCooldown = 1.1 * player.dashCooldownMult;
   player.dashTimer = 0.2;
   player.invuln = Math.max(player.invuln, 0.3);
   player.vx = player.facing * PLAYER_DASH_SPEED;
@@ -1225,6 +1528,8 @@ function tryDash(game: GameState) {
 
 function advanceToNextStage(game: GameState) {
   game.stageIndex += 1;
+  game.sublevelIndex = 0;
+  game.sublevelElapsed = 0;
   game.stageDistance = 0;
   game.mode = "playing";
   game.enemies = [];
@@ -1235,6 +1540,7 @@ function advanceToNextStage(game: GameState) {
   game.bossSpawned = false;
   game.bossDefeated = false;
   game.bossIntroTimer = 0;
+  game.pendingUpgrades = [];
   game.narrativeFlags = createNarrativeFlags();
   game.narrativeFlags.intro = true;
   game.dialogQueue = [];
@@ -1248,6 +1554,10 @@ function advanceToNextStage(game: GameState) {
   player.y = GROUND_Y;
   player.vx = 0;
   player.vy = 0;
+  player.h = PLAYER_STAND_HEIGHT;
+  player.isDucking = false;
+  player.shieldActive = false;
+  player.shieldBreakTimer = 0;
   player.onGround = true;
   player.hp = clamp(player.hp + 36, 0, player.maxHp);
   player.energy = clamp(player.energy + 30, 0, player.maxEnergy);
@@ -1256,12 +1566,14 @@ function advanceToNextStage(game: GameState) {
   player.comboTimer = 0;
 
   pushChronicle(game, `Epoch ${String(game.stageIndex + 1).padStart(2, "0")} opened: ${STAGES[game.stageIndex].title}.`);
+  pushChronicle(game, `Lane 1/5: ${STAGES[game.stageIndex].sublevels[0]}.`);
   queueStageBeat(game, "intro");
   game.lastEvent = `Entering ${STAGES[game.stageIndex].title}.`;
 }
 
 function updateEnemyAI(game: GameState, enemy: Enemy, dt: number) {
   const player = game.player;
+  const paceScale = 0.72 + Math.min(0.26, game.sublevelIndex * 0.065);
   enemy.aiTimer -= dt;
   enemy.attackCooldown -= dt;
   enemy.hitFlash = Math.max(0, enemy.hitFlash - dt);
@@ -1269,28 +1581,40 @@ function updateEnemyAI(game: GameState, enemy: Enemy, dt: number) {
   if (enemy.type === "deer") {
     const charge = enemy.aiTimer > 0;
     const base = 120 + game.stageIndex * 10;
-    enemy.vx = -(charge ? base + 110 : base);
+    enemy.vx = -(charge ? base + 110 : base) * paceScale;
     if (enemy.aiTimer <= 0 && enemy.x > player.x + 140) {
       enemy.aiTimer = rand(0.9, 1.4);
     }
   } else if (enemy.type === "boar") {
-    enemy.vx = -(92 + game.stageIndex * 9);
+    enemy.vx = -(92 + game.stageIndex * 9) * paceScale;
   } else if (enemy.type === "monkey") {
-    enemy.vx = -(112 + game.stageIndex * 7);
+    enemy.vx = -(112 + game.stageIndex * 7) * paceScale;
     if (enemy.onGround && enemy.aiTimer <= 0) {
       enemy.vy = -rand(470, 560);
       enemy.onGround = false;
       enemy.aiTimer = rand(0.9, 1.5);
     }
   } else if (enemy.type === "wraith") {
-    enemy.vx = -(106 + game.stageIndex * 8);
+    enemy.vx = -(106 + game.stageIndex * 8) * paceScale;
     enemy.y += Math.sin(game.elapsedSec * 5 + enemy.sine) * 72 * dt;
     if (enemy.attackCooldown <= 0 && Math.abs(enemy.x - player.x) < 330) {
       const dx = player.x - enemy.x;
       const dy = player.y - 42 - enemy.y;
       const len = Math.hypot(dx, dy) || 1;
-      spawnProjectile(game, "enemy", enemy.x, enemy.y, (dx / len) * 240, (dy / len) * 240, 10, "#ffadca", 5, 2.4);
-      enemy.attackCooldown = rand(2.1, 3.1);
+      const speed = 240 + game.sublevelIndex * 14;
+      spawnProjectile(
+        game,
+        "enemy",
+        enemy.x,
+        enemy.y,
+        (dx / len) * speed + rand(-46, 46),
+        (dy / len) * speed + rand(-52, 52),
+        10 + Math.floor(game.sublevelIndex * 0.5),
+        "#ffadca",
+        5,
+        2.4,
+      );
+      enemy.attackCooldown = rand(1.9, 3.2);
     }
   } else if (enemy.type === "guardian") {
     const anchor = game.cameraX + WIDTH * 0.68;
@@ -1298,8 +1622,19 @@ function updateEnemyAI(game: GameState, enemy: Enemy, dt: number) {
     enemy.vx = drift * 92;
     if (enemy.attackCooldown <= 0) {
       const dir = player.x < enemy.x ? -1 : 1;
-      spawnProjectile(game, "enemy", enemy.x + dir * 24, enemy.y - 58, dir * 300, -20, 15, "#ffd39d", 7, 2.1);
-      enemy.attackCooldown = 1.35;
+      spawnProjectile(
+        game,
+        "enemy",
+        enemy.x + dir * 24,
+        enemy.y - 58,
+        dir * rand(250, 350),
+        rand(-78, 42),
+        15 + Math.floor(game.sublevelIndex * 0.7),
+        "#ffd39d",
+        7,
+        2.1,
+      );
+      enemy.attackCooldown = rand(1.1, 1.55);
     }
   } else if (enemy.type === "serpent") {
     const anchor = game.cameraX + WIDTH * 0.7;
@@ -1309,9 +1644,20 @@ function updateEnemyAI(game: GameState, enemy: Enemy, dt: number) {
     if (enemy.attackCooldown <= 0) {
       const spread = [-0.24, 0, 0.24];
       for (const off of spread) {
-        spawnProjectile(game, "enemy", enemy.x - 8, enemy.y, -268, off * 280, 13, "#ffd7aa", 6, 2.5);
+        spawnProjectile(
+          game,
+          "enemy",
+          enemy.x - 8,
+          enemy.y,
+          -rand(244, 306),
+          (off + rand(-0.09, 0.09)) * rand(250, 330),
+          13 + Math.floor(game.sublevelIndex * 0.8),
+          "#ffd7aa",
+          6,
+          2.5,
+        );
       }
-      enemy.attackCooldown = 1.62;
+      enemy.attackCooldown = rand(1.4, 1.85);
     }
   } else if (enemy.type === "oni") {
     if (enemy.aiTimer <= 0) {
@@ -1321,8 +1667,19 @@ function updateEnemyAI(game: GameState, enemy: Enemy, dt: number) {
       enemy.vx = -144;
     }
     if (enemy.attackCooldown <= 0) {
-      spawnProjectile(game, "enemy", enemy.x - 28, enemy.y - 60, -218, -84, 16, "#ff9aa8", 7, 2.4);
-      enemy.attackCooldown = 1.9;
+      spawnProjectile(
+        game,
+        "enemy",
+        enemy.x - 28,
+        enemy.y - 60,
+        -rand(186, 274),
+        -rand(34, 150),
+        16 + Math.floor(game.sublevelIndex * 0.9),
+        "#ff9aa8",
+        7,
+        2.4,
+      );
+      enemy.attackCooldown = rand(1.65, 2.15);
     }
   } else if (enemy.type === "dragon") {
     const anchor = game.cameraX + WIDTH * 0.74;
@@ -1332,9 +1689,20 @@ function updateEnemyAI(game: GameState, enemy: Enemy, dt: number) {
     if (enemy.attackCooldown <= 0) {
       const spread = [-0.3, -0.1, 0.1, 0.3];
       for (const off of spread) {
-        spawnProjectile(game, "enemy", enemy.x - 22, enemy.y - 10, -312, off * 260, 15, "#ffc27e", 7, 2.4);
+        spawnProjectile(
+          game,
+          "enemy",
+          enemy.x - 22,
+          enemy.y - 10,
+          -rand(284, 338),
+          (off + rand(-0.12, 0.12)) * rand(210, 300),
+          15 + Math.floor(game.sublevelIndex * 1.1),
+          "#ffc27e",
+          7,
+          2.4,
+        );
       }
-      enemy.attackCooldown = 1.45;
+      enemy.attackCooldown = rand(1.2, 1.6);
     }
   }
 
@@ -1354,9 +1722,17 @@ function updateEnemyAI(game: GameState, enemy: Enemy, dt: number) {
   enemy.x += enemy.vx * dt;
 }
 
-function updatePlaying(game: GameState, dt: number, keys: Set<string>, jumpJustPressed: boolean) {
+function updatePlaying(
+  game: GameState,
+  dt: number,
+  keys: Set<string>,
+  jumpJustPressed: boolean,
+  duckDown: boolean,
+  shieldDown: boolean,
+) {
   const stage = STAGES[game.stageIndex];
   const player = game.player;
+  const weaponTier = weaponTierIndex(game);
 
   game.elapsedSec += dt;
   game.screenShake = Math.max(0, game.screenShake - dt * 1.8);
@@ -1366,16 +1742,39 @@ function updatePlaying(game: GameState, dt: number, keys: Set<string>, jumpJustP
   player.dashCooldown = Math.max(0, player.dashCooldown - dt);
   player.slashTimer = Math.max(0, player.slashTimer - dt);
   player.dashTimer = Math.max(0, player.dashTimer - dt);
+  player.shieldBreakTimer = Math.max(0, player.shieldBreakTimer - dt);
   player.comboTimer = Math.max(0, player.comboTimer - dt);
   if (player.comboTimer <= 0) {
     player.combo = 0;
   }
 
-  player.energy = clamp(player.energy + dt * 15, 0, player.maxEnergy);
+  player.energy = clamp(player.energy + dt * 15 * player.energyRegenMult, 0, player.maxEnergy);
+
+  const wantsDuck = duckDown && player.onGround && player.dashTimer <= 0;
+  if (wantsDuck !== player.isDucking) {
+    player.isDucking = wantsDuck;
+    player.h = wantsDuck ? PLAYER_DUCK_HEIGHT : PLAYER_STAND_HEIGHT;
+    if (wantsDuck) {
+      player.vx = 0;
+      game.lastEvent = "Ducking under incoming fire.";
+    }
+  }
+
+  const wantsShield = shieldDown && player.shieldBreakTimer <= 0 && player.energy > 0;
+  player.shieldActive = wantsShield && player.dashTimer <= 0;
+  if (player.shieldActive) {
+    const drain = (22 * dt) / player.shieldEfficiency;
+    player.energy = clamp(player.energy - drain, 0, player.maxEnergy);
+    if (player.energy <= 0) {
+      player.shieldActive = false;
+      player.shieldBreakTimer = 0.8;
+      game.lastEvent = "Shield overextended. Recharge required.";
+    }
+  }
 
   const left = keys.has(CONTROL_CODES.left);
   const right = keys.has(CONTROL_CODES.right);
-  const move = (right ? 1 : 0) - (left ? 1 : 0);
+  const move = player.isDucking ? 0 : (right ? 1 : 0) - (left ? 1 : 0);
 
   if (move !== 0) {
     player.facing = move > 0 ? 1 : -1;
@@ -1387,10 +1786,11 @@ function updatePlaying(game: GameState, dt: number, keys: Set<string>, jumpJustP
       addEffect(game, "trail", player.x - player.facing * 22, player.y - 44, "#c6ecff", 26, 0.16, -player.facing * 60, 0);
     }
   } else {
-    player.vx = move * PLAYER_MOVE_SPEED;
+    const shieldSlow = player.shieldActive ? 0.58 : 1;
+    player.vx = move * PLAYER_MOVE_SPEED * shieldSlow;
   }
 
-  if (jumpJustPressed && player.onGround) {
+  if (jumpJustPressed && player.onGround && !player.isDucking) {
     player.vy = -PLAYER_JUMP_SPEED;
     player.onGround = false;
     addEffect(game, "spark", player.x, player.y - 8, "#d7ecff", 14, 0.14, 0, -70);
@@ -1398,7 +1798,7 @@ function updatePlaying(game: GameState, dt: number, keys: Set<string>, jumpJustP
 
   player.vy += GRAVITY * dt;
 
-  const baseForward = AUTO_SCROLL_SPEED + Math.max(0, move) * 58 + Math.min(76, player.combo * 3.4);
+  const baseForward = AUTO_SCROLL_SPEED + Math.max(0, move) * 24 + Math.min(32, player.combo * 1.8);
   player.x += (player.vx + baseForward) * dt;
   player.x = clamp(player.x, 80, stage.length + 260);
 
@@ -1412,26 +1812,55 @@ function updatePlaying(game: GameState, dt: number, keys: Set<string>, jumpJustP
   const targetCamera = player.x - 220;
   game.cameraX = lerp(game.cameraX, targetCamera, 0.12);
 
-  game.stageDistance = clamp(player.x - 220, 0, stage.length);
+  game.sublevelElapsed += dt;
+  const currentSublevelDuration = stageSublevelDuration(stage, game.sublevelIndex);
+  if (game.sublevelIndex < BOSS_SUBLEVEL_INDEX && game.sublevelElapsed >= currentSublevelDuration) {
+    game.sublevelIndex += 1;
+    game.sublevelElapsed = 0;
+    const label = stage.sublevels[game.sublevelIndex];
+    pushChronicle(game, `Lane ${game.sublevelIndex + 1}/5: ${label}.`);
+    game.lastEvent = `Lane ${game.sublevelIndex + 1} reached: ${label}.`;
+    queueDialogue(game, [
+      {
+        speaker: "Keeper",
+        text: `Sublevel ${game.sublevelIndex + 1} opens: ${label}. Pressure is rising.`,
+        tone: "myth",
+        holdSec: 2.4,
+      },
+    ]);
+  }
+
+  game.stageDistance = stage.length * stageProgressRatio(game, stage);
   game.totalDistance += baseForward * dt;
 
-  if (!game.narrativeFlags.midpoint && game.stageDistance >= stage.length * 0.45) {
+  if (!game.narrativeFlags.midpoint && stageProgressRatio(game, stage) >= 0.45) {
     game.narrativeFlags.midpoint = true;
     pushChronicle(game, `Midpoint crossed in ${stage.title}.`);
     queueStageBeat(game, "midpoint");
   }
 
   if (!game.bossSpawned) {
-    game.spawnTimer -= dt;
-    if (game.spawnTimer <= 0) {
-      spawnEnemy(game);
-      const pressure = clamp(game.stageDistance / stage.length, 0, 1);
-      game.spawnTimer = rand(0.72, 1.62) - pressure * 0.42;
-    }
-
-    if (game.stageDistance >= stage.length) {
+    if (game.sublevelIndex < BOSS_SUBLEVEL_INDEX) {
+      game.spawnTimer -= dt;
+      if (game.spawnTimer <= 0) {
+        spawnEnemy(game);
+        const stagePressure = stageProgressRatio(game, stage);
+        const levelPressure = game.sublevelIndex / BOSS_SUBLEVEL_INDEX;
+        game.spawnTimer = rand(1.15, 2.3) - stagePressure * 0.18 - levelPressure * 0.22;
+      }
+    } else if (game.sublevelElapsed < BOSS_LANE_MIN_SEC) {
+      game.spawnTimer -= dt;
+      if (game.spawnTimer <= 0) {
+        spawnEnemy(game);
+        if (Math.random() < 0.24) {
+          spawnEnemy(game, stage.enemyPool[stage.enemyPool.length - 1]);
+        }
+        game.spawnTimer = rand(1.1, 2.2);
+      }
+    } else {
       game.bossSpawned = true;
       game.bossIntroTimer = 1.5;
+      game.enemies = game.enemies.filter((enemy) => enemy.isBoss);
       spawnEnemy(game, stage.bossType, true);
       if (!game.narrativeFlags.boss) {
         game.narrativeFlags.boss = true;
@@ -1497,9 +1926,27 @@ function updatePlaying(game: GameState, dt: number, keys: Set<string>, jumpJustP
       }
       game.enemies = nextEnemies;
     } else if (!pauseCombat && projectile.owner === "enemy") {
+      const slashBox = getSlashHitbox(player);
+      const canDeflect = player.slashTimer > 0;
+      if (
+        canDeflect &&
+        circleRectOverlap(projectile.x, projectile.y, projectile.r, slashBox.x, slashBox.y, slashBox.w, slashBox.h)
+      ) {
+        projectile.owner = "player";
+        projectile.vx = player.facing * Math.max(420, Math.abs(projectile.vx) + 140) * player.shotSpeedMult;
+        projectile.vy = projectile.vy * 0.45 + rand(-72, 72);
+        projectile.color = SHOT_COLORS[weaponTier];
+        projectile.damage = Math.round(projectile.damage * (1.2 + weaponTier * 0.12) * player.shotPowerMult);
+        projectile.ttl = Math.max(projectile.ttl, 1.2);
+        addEffect(game, "spark", projectile.x, projectile.y, "#fff0b8", 18, 0.14);
+        game.lastEvent = "Projectile deflected.";
+      }
       const px = player.x - player.w * 0.5;
       const py = player.y - player.h;
-      if (circleRectOverlap(projectile.x, projectile.y, projectile.r, px, py, player.w, player.h)) {
+      if (
+        projectile.owner === "enemy" &&
+        circleRectOverlap(projectile.x, projectile.y, projectile.r, px, py, player.w, player.h)
+      ) {
         applyDamageToPlayer(game, projectile.damage, projectile.x);
         consumed = true;
       }
@@ -1536,13 +1983,16 @@ function updatePlaying(game: GameState, dt: number, keys: Set<string>, jumpJustP
     if (circleRectOverlap(pickup.x, pickup.y, pickup.r, px, py, player.w, player.h)) {
       if (pickup.type === "health") {
         player.hp = clamp(player.hp + 24, 0, player.maxHp);
+        grantExperience(game, 18, "health relic", pickup.x, pickup.y - 8);
         game.lastEvent = "Herbal relic recovered.";
       } else if (pickup.type === "energy") {
         player.energy = clamp(player.energy + 28, 0, player.maxEnergy);
+        grantExperience(game, 16, "conduit charge", pickup.x, pickup.y - 8);
         game.lastEvent = "Conduit charge restored.";
       } else {
         game.relics += 1;
         player.score += 150;
+        grantExperience(game, 60, "rare relic", pickup.x, pickup.y - 8);
         game.lastEvent = "Rare relic fragment secured.";
         pushChronicle(game, `Relic ${game.relics} recovered in ${stage.title}.`);
         if (game.relics % 2 === 1) {
@@ -1692,6 +2142,40 @@ function drawStageMotif(ctx: CanvasRenderingContext2D, game: GameState, stage: S
   }
 }
 
+function drawSublevelAtmosphere(ctx: CanvasRenderingContext2D, game: GameState, stage: StageConfig) {
+  const lv = game.sublevelIndex;
+
+  if (lv >= 1) {
+    const alpha = 0.05 + lv * 0.015;
+    ctx.fillStyle = `rgba(239,228,207,${alpha})`;
+    ctx.fillRect(0, 154, WIDTH, 24);
+  }
+
+  if (lv >= 2) {
+    for (let i = 0; i < 24; i += 1) {
+      const x = (i * 47 + game.cameraX * 0.6) % (WIDTH + 50);
+      const y = 170 + ((i * 29) % 130);
+      ctx.fillStyle = "rgba(232,212,77,0.16)";
+      ctx.fillRect(x, y, 2, 2);
+    }
+  }
+
+  if (lv >= 3) {
+    for (let i = 0; i < 9; i += 1) {
+      const x = ((i * 122) - (game.cameraX * 0.35)) % (WIDTH + 90);
+      ctx.fillStyle = "rgba(255,120,140,0.14)";
+      ctx.fillRect(x, GROUND_Y - 72, 20, 4);
+      ctx.fillStyle = stage.accent;
+      ctx.fillRect(x + 7, GROUND_Y - 68, 6, 3);
+    }
+  }
+
+  if (lv === BOSS_SUBLEVEL_INDEX) {
+    ctx.fillStyle = "rgba(8, 6, 24, 0.24)";
+    ctx.fillRect(0, 120, WIDTH, HEIGHT - 120);
+  }
+}
+
 function drawBackground(ctx: CanvasRenderingContext2D, game: GameState) {
   const stage = STAGES[game.stageIndex];
 
@@ -1712,7 +2196,7 @@ function drawBackground(ctx: CanvasRenderingContext2D, game: GameState) {
   for (let i = -3; i < 26; i += 1) {
     const x = i * 68 - (horizonShift % 68);
     const glow = 8 + ((i * 13) % 4) * 3;
-    ctx.fillStyle = "rgba(245,242,235,0.08)";
+    ctx.fillStyle = "rgba(239,228,207,0.08)";
     ctx.fillRect(x + 24, 180 + ((i * 7) % 3) * 2, glow, 2);
   }
 
@@ -1742,6 +2226,7 @@ function drawBackground(ctx: CanvasRenderingContext2D, game: GameState) {
   }
 
   drawStageMotif(ctx, game, stage);
+  drawSublevelAtmosphere(ctx, game, stage);
 
   ctx.fillStyle = "rgba(255,255,255,0.08)";
   for (let i = 0; i < 6; i += 1) {
@@ -1750,7 +2235,7 @@ function drawBackground(ctx: CanvasRenderingContext2D, game: GameState) {
   }
 
   const fogAlpha = stage.title.includes("Egypt") ? 0.12 : stage.title.includes("Eastward") ? 0.09 : 0.06;
-  ctx.fillStyle = `rgba(245,242,235,${fogAlpha})`;
+  ctx.fillStyle = `rgba(239,228,207,${fogAlpha})`;
   ctx.fillRect(0, 118, WIDTH, 60);
 }
 
@@ -1760,6 +2245,8 @@ function drawPlayer(ctx: CanvasRenderingContext2D, game: GameState, sprites: Spr
   let frames: HTMLCanvasElement[];
   if (player.invuln > 0.12) {
     frames = sprites.player.hurt;
+  } else if (player.isDucking && player.onGround && player.slashTimer <= 0) {
+    frames = sprites.player.crouch;
   } else if (player.slashTimer > 0) {
     frames = sprites.player.slash;
   } else if (player.dashTimer > 0) {
@@ -1783,14 +2270,28 @@ function drawPlayer(ctx: CanvasRenderingContext2D, game: GameState, sprites: Spr
     drawSprite(ctx, sprite, left, top, player.w, player.h, player.facing === -1, 1);
   }
 
+  if (player.shieldActive) {
+    ctx.strokeStyle = "rgba(159,231,255,0.88)";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.ellipse(player.x, player.y - player.h * 0.56, 32, 38, 0, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.fillStyle = "rgba(159,231,255,0.2)";
+    ctx.beginPath();
+    ctx.ellipse(player.x, player.y - player.h * 0.56, 30, 36, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
   if (player.slashTimer > 0) {
     ctx.strokeStyle = "#ffe39d";
     ctx.lineWidth = 4;
     ctx.beginPath();
+    const slashCenterY = player.y - Math.min(42, player.h * 0.55);
     if (player.facing === 1) {
-      ctx.arc(player.x + 42, player.y - 42, 34, -0.9, 0.85);
+      ctx.arc(player.x + 42, slashCenterY, 34, -0.9, 0.85);
     } else {
-      ctx.arc(player.x - 42, player.y - 42, 34, 2.3, 4.05);
+      ctx.arc(player.x - 42, slashCenterY, 34, 2.3, 4.05);
     }
     ctx.stroke();
   }
@@ -1811,7 +2312,7 @@ function drawEnemy(ctx: CanvasRenderingContext2D, game: GameState, enemy: Enemy,
   }
 
   if (enemy.isBoss) {
-    ctx.fillStyle = "#f5f2eb";
+    ctx.fillStyle = "#efe4cf";
     ctx.font = "700 11px 'Courier New', monospace";
     ctx.textAlign = "center";
     const bossTag = STAGES[game.stageIndex].bossName.split(" ")[0] ?? "BOSS";
@@ -1848,7 +2349,7 @@ function drawPickup(ctx: CanvasRenderingContext2D, pickup: Pickup) {
   ctx.fillRect(left, top, pickup.r * 2, pickup.r * 2);
   ctx.fillStyle = palette.b;
   ctx.fillRect(left + 3, top + 3, pickup.r * 2 - 6, pickup.r * 2 - 6);
-  ctx.fillStyle = "#f5f2eb";
+  ctx.fillStyle = "#efe4cf";
   ctx.font = "700 9px 'Courier New', monospace";
   ctx.textAlign = "center";
   ctx.fillText(palette.t, pickup.x, pickup.y + 3);
@@ -1896,6 +2397,8 @@ function drawEffect(ctx: CanvasRenderingContext2D, effect: Effect) {
 function drawHud(ctx: CanvasRenderingContext2D, game: GameState) {
   const stage = STAGES[game.stageIndex];
   const player = game.player;
+  const sublevelLabel = stage.sublevels[game.sublevelIndex] ?? "Unknown";
+  const tierName = WEAPON_TIERS[weaponTierIndex(game)];
 
   ctx.fillStyle = "rgba(8, 13, 34, 0.9)";
   ctx.fillRect(0, 0, WIDTH, 92);
@@ -1904,7 +2407,7 @@ function drawHud(ctx: CanvasRenderingContext2D, game: GameState) {
   ctx.textAlign = "left";
   ctx.fillText("CANON BLADE // 16-BIT MYTH ACTION", 18, 24);
 
-  ctx.fillStyle = "#f5f2eb";
+  ctx.fillStyle = "#efe4cf";
   ctx.font = "700 12px 'Courier New', monospace";
   ctx.fillText(stage.title.toUpperCase(), 18, 45);
   ctx.fillStyle = "#cad8ff";
@@ -1917,10 +2420,13 @@ function drawHud(ctx: CanvasRenderingContext2D, game: GameState) {
   ctx.fillRect(18, 72, Math.floor(402 * ratio), 10);
   ctx.strokeStyle = "#6074b6";
   ctx.strokeRect(18, 72, 402, 10);
-  ctx.fillStyle = "#f5f2eb";
+  ctx.fillStyle = "#efe4cf";
   ctx.fillText(`DIST ${Math.floor(game.stageDistance)}/${stage.length}`, 430, 81);
+  ctx.fillText(`LANE ${game.sublevelIndex + 1}/5 ${sublevelLabel.toUpperCase()}`, 430, 63);
   ctx.fillText(`THREAD ${game.threadFragments}/4`, 640, 45);
-  ctx.fillText(`CHRONICLE ${game.chronicle.length}`, 640, 63);
+  ctx.fillText(`RANK ${game.level}`, 640, 63);
+  ctx.fillText(`XP ${Math.floor(game.experience)}/${game.xpToNextLevel}`, 760, 63);
+  ctx.fillText(`TOTAL ${Math.floor(game.totalExperience)}`, 760, 45);
 
   ctx.fillStyle = "#0b1534";
   ctx.fillRect(0, HEIGHT - 72, WIDTH, 72);
@@ -1939,7 +2445,7 @@ function drawHud(ctx: CanvasRenderingContext2D, game: GameState) {
   ctx.strokeStyle = "#6b80bc";
   ctx.strokeRect(18, HEIGHT - 39, 210, 10);
 
-  ctx.fillStyle = "#f5f2eb";
+  ctx.fillStyle = "#efe4cf";
   ctx.font = "700 11px 'Courier New', monospace";
   ctx.fillText(`HP ${Math.ceil(player.hp)}`, 236, HEIGHT - 48);
   ctx.fillText(`EN ${Math.ceil(player.energy)}`, 236, HEIGHT - 30);
@@ -1947,18 +2453,23 @@ function drawHud(ctx: CanvasRenderingContext2D, game: GameState) {
   ctx.fillText(`SCORE ${player.score}`, 362, HEIGHT - 48);
   ctx.fillText(`COMBO ${player.combo}`, 362, HEIGHT - 30);
   ctx.fillText(`RELIC ${game.relics}`, 502, HEIGHT - 48);
-  ctx.fillText(`ENEMY ${game.enemies.length}`, 502, HEIGHT - 30);
+  ctx.fillText(`WEAPON ${tierName.toUpperCase()}`, 502, HEIGHT - 30);
 
   ctx.fillText(`SLASH ${Math.ceil(player.slashCooldown * 10) / 10}`, 642, HEIGHT - 48);
   ctx.fillText(`SHOT ${Math.ceil(player.shotCooldown * 10) / 10}`, 642, HEIGHT - 30);
   ctx.fillText(`DASH ${Math.ceil(player.dashCooldown * 10) / 10}`, 794, HEIGHT - 48);
-  ctx.fillText(`TIME ${Math.floor(game.elapsedSec)}s`, 794, HEIGHT - 30);
+  const shieldText = player.shieldActive
+    ? "ACTIVE"
+    : player.shieldBreakTimer > 0
+      ? `BREAK ${player.shieldBreakTimer.toFixed(1)}`
+      : "READY";
+  ctx.fillText(`SHIELD ${shieldText}`, 794, HEIGHT - 30);
 
   ctx.fillStyle = "rgba(10, 18, 44, 0.86)";
   ctx.fillRect(18, 97, WIDTH - 36, 22);
   ctx.strokeStyle = "rgba(112, 133, 206, 0.85)";
   ctx.strokeRect(18, 97, WIDTH - 36, 22);
-  ctx.fillStyle = "#e8d44d";
+  ctx.fillStyle = "#c6a25a";
   ctx.fillText(game.lastEvent.slice(0, 118).toUpperCase(), 26, 111);
 
   const boss = game.enemies.find((enemy) => enemy.isBoss);
@@ -1974,7 +2485,7 @@ function drawHud(ctx: CanvasRenderingContext2D, game: GameState) {
     ctx.strokeStyle = "#ebadba";
     ctx.strokeRect(barX, 124, barW, 16);
 
-    ctx.fillStyle = "#f5f2eb";
+    ctx.fillStyle = "#efe4cf";
     ctx.font = "700 11px 'Courier New', monospace";
     ctx.textAlign = "center";
     ctx.fillText(`${stage.bossName.toUpperCase()} ${Math.ceil(boss.hp)} HP`, WIDTH / 2, 136);
@@ -1994,7 +2505,7 @@ function drawOverlay(ctx: CanvasRenderingContext2D, title: string, lines: string
   ctx.fillStyle = "#09142f";
   ctx.fillRect(124, 94, WIDTH - 248, HEIGHT - 188);
 
-  ctx.fillStyle = "#f5f2eb";
+  ctx.fillStyle = "#efe4cf";
   ctx.textAlign = "center";
   ctx.font = "700 34px 'Courier New', monospace";
   ctx.fillText(title.toUpperCase(), WIDTH / 2, 168);
@@ -2012,6 +2523,53 @@ function drawOverlay(ctx: CanvasRenderingContext2D, title: string, lines: string
   ctx.fillStyle = "#ffebc4";
   ctx.font = "700 13px 'Courier New', monospace";
   ctx.fillText(footer.toUpperCase(), WIDTH / 2, HEIGHT - 88);
+}
+
+function drawUpgradeOverlay(ctx: CanvasRenderingContext2D, game: GameState) {
+  const stage = STAGES[game.stageIndex];
+  const options = game.pendingUpgrades;
+  ctx.fillStyle = "rgba(3, 8, 26, 0.92)";
+  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+  ctx.fillStyle = "rgba(21, 37, 82, 0.96)";
+  ctx.fillRect(106, 74, WIDTH - 212, HEIGHT - 148);
+  ctx.fillStyle = "rgba(8, 14, 38, 0.96)";
+  ctx.fillRect(116, 84, WIDTH - 232, HEIGHT - 168);
+
+  ctx.fillStyle = stage.accent;
+  ctx.font = "700 30px 'Courier New', monospace";
+  ctx.textAlign = "center";
+  ctx.fillText("ENHANCEMENT CHOICE", WIDTH / 2, 142);
+
+  ctx.fillStyle = "#cad8ff";
+  ctx.font = "700 12px 'Courier New', monospace";
+  ctx.fillText(`RANK ${game.level}  //  PICK 1, 2, OR 3`, WIDTH / 2, 169);
+
+  options.forEach((option, index) => {
+    const x = 146;
+    const y = 196 + index * 86;
+    const w = WIDTH - 292;
+    const h = 70;
+
+    ctx.fillStyle = "rgba(11, 23, 60, 0.95)";
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = index === 0 ? "#c6a25a" : "rgba(120, 142, 214, 0.85)";
+    ctx.strokeRect(x, y, w, h);
+
+    ctx.fillStyle = "#c6a25a";
+    ctx.font = "700 13px 'Courier New', monospace";
+    ctx.textAlign = "left";
+    ctx.fillText(`${index + 1}. ${option.title.toUpperCase()}`, x + 14, y + 24);
+
+    ctx.fillStyle = "#efe4cf";
+    ctx.font = "700 12px 'Courier New', monospace";
+    ctx.fillText(option.description.toUpperCase(), x + 14, y + 48);
+  });
+
+  ctx.fillStyle = "#b8c9ff";
+  ctx.font = "700 10px 'Courier New', monospace";
+  ctx.textAlign = "center";
+  ctx.fillText("ENTER PICKS OPTION 1  //  KEEP MOVING NORTH", WIDTH / 2, HEIGHT - 84);
 }
 
 function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
@@ -2041,7 +2599,7 @@ function dialogueToneColor(tone: DialogueLine["tone"]): string {
     return "#ffadad";
   }
   if (tone === "myth") {
-    return "#e8d44d";
+    return "#c6a25a";
   }
   return "#b6d8ff";
 }
@@ -2052,10 +2610,10 @@ function drawDialoguePanel(ctx: CanvasRenderingContext2D, game: GameState) {
     return;
   }
 
-  const panelX = 24;
-  const panelY = HEIGHT - 170;
-  const panelW = WIDTH - 48;
-  const panelH = 88;
+  const panelW = 356;
+  const panelH = 82;
+  const panelX = WIDTH - panelW - 16;
+  const panelY = game.enemies.some((enemy) => enemy.isBoss) ? 162 : 126;
 
   ctx.fillStyle = "rgba(7, 12, 31, 0.9)";
   ctx.fillRect(panelX, panelY, panelW, panelH);
@@ -2075,17 +2633,17 @@ function drawDialoguePanel(ctx: CanvasRenderingContext2D, game: GameState) {
   ctx.font = "700 12px 'Courier New', monospace";
   ctx.fillText(line.speaker.toUpperCase(), panelX + 68, panelY + 25);
 
-  ctx.fillStyle = "#f5f2eb";
-  ctx.font = "700 12px 'Courier New', monospace";
-  const wrapped = wrapText(ctx, line.text, panelW - 88);
+  ctx.fillStyle = "#efe4cf";
+  ctx.font = "700 11px 'Courier New', monospace";
+  const wrapped = wrapText(ctx, line.text, panelW - 84).slice(0, 2);
   wrapped.forEach((part, index) => {
-    ctx.fillText(part.toUpperCase(), panelX + 68, panelY + 46 + index * 16);
+    ctx.fillText(part.toUpperCase(), panelX + 68, panelY + 45 + index * 15);
   });
 
   ctx.fillStyle = "rgba(184, 201, 255, 0.9)";
-  ctx.font = "700 10px 'Courier New', monospace";
+  ctx.font = "700 9px 'Courier New', monospace";
   ctx.fillText(
-    `${game.narrativeTitle} ${game.threadFragments}/4  //  ENTER TO SKIP DIALOGUE`,
+    `ENTER TO SKIP // ${game.narrativeTitle} ${game.threadFragments}/4`,
     panelX + 12,
     panelY + panelH - 10,
   );
@@ -2102,6 +2660,14 @@ function toTextState(game: GameState): string {
     stage: {
       index: game.stageIndex,
       title: stage.title,
+      sublevel: {
+        index: game.sublevelIndex,
+        level: game.sublevelIndex + 1,
+        title: stage.sublevels[game.sublevelIndex],
+        elapsedSec: Number(game.sublevelElapsed.toFixed(1)),
+        durationSec: stageSublevelDuration(stage, game.sublevelIndex),
+        progress: Number(sublevelProgressRatio(game, stage).toFixed(3)),
+      },
       distance: Number(game.stageDistance.toFixed(1)),
       length: stage.length,
       ratio: Number((game.stageDistance / stage.length).toFixed(3)),
@@ -2109,6 +2675,10 @@ function toTextState(game: GameState): string {
       elapsedSec: Number(game.elapsedSec.toFixed(1)),
       bossSpawned: game.bossSpawned,
       bossIntroSec: Number(game.bossIntroTimer.toFixed(2)),
+      pendingUpgrades: game.pendingUpgrades.map((option) => ({
+        id: option.id,
+        title: option.title,
+      })),
     },
     narrative: {
       title: game.narrativeTitle,
@@ -2140,6 +2710,13 @@ function toTextState(game: GameState): string {
       maxEnergy: game.player.maxEnergy,
       facing: game.player.facing,
       onGround: game.player.onGround,
+      isDucking: game.player.isDucking,
+      shield: {
+        active: game.player.shieldActive,
+        breakSec: Number(game.player.shieldBreakTimer.toFixed(2)),
+        efficiency: Number(game.player.shieldEfficiency.toFixed(2)),
+      },
+      weaponTier: WEAPON_TIERS[weaponTierIndex(game)],
       invuln: Number(game.player.invuln.toFixed(2)),
       cooldowns: {
         slash: Number(game.player.slashCooldown.toFixed(2)),
@@ -2151,6 +2728,11 @@ function toTextState(game: GameState): string {
         comboTimer: Number(game.player.comboTimer.toFixed(2)),
         score: game.player.score,
         relics: game.relics,
+        level: game.level,
+        experience: game.experience,
+        totalExperience: game.totalExperience,
+        xpToNextLevel: game.xpToNextLevel,
+        pendingUpgradeCount: game.pendingUpgradeCount,
       },
     },
     world: {
@@ -2241,18 +2823,20 @@ export function CanonGameCanvas() {
       const game = gameRef.current;
 
       const jumpDown = keysRef.current.has(CONTROL_CODES.jump);
+      const duckDown = keysRef.current.has(CONTROL_CODES.duck);
+      const shieldDown = keysRef.current.has(CONTROL_CODES.shield);
       const slashDown = keysRef.current.has(CONTROL_CODES.slash);
       const shotDown = keysRef.current.has(CONTROL_CODES.shot);
       const dashDown = keysRef.current.has(CONTROL_CODES.dash);
 
       if (game.mode === "playing") {
-        if (slashDown && !slashHeld) {
+        if (slashDown && !slashHeld && !shieldDown) {
           trySlash(game);
         }
-        if (shotDown && !shotHeld) {
+        if (shotDown && !shotHeld && !shieldDown) {
           tryShoot(game);
         }
-        if (dashDown && !dashHeld) {
+        if (dashDown && !dashHeld && !shieldDown) {
           tryDash(game);
         }
 
@@ -2270,11 +2854,13 @@ export function CanonGameCanvas() {
           }
           game.effects = effectSurvivors;
         } else {
-          updatePlaying(game, dt, keysRef.current, jumpDown && !upHeld);
+          updatePlaying(game, dt, keysRef.current, jumpDown && !upHeld, duckDown, shieldDown);
         }
       }
 
-      updateDialogue(game, dt);
+      if (game.mode !== "upgrade") {
+        updateDialogue(game, dt);
+      }
 
       upHeld = jumpDown;
       slashHeld = slashDown;
@@ -2343,12 +2929,15 @@ export function CanonGameCanvas() {
           "Canon Blade",
           [
             "16-bit mythological side-scrolling action through four canon epochs.",
-            "Lush environments, detailed sprites, and flashy combat mechanics.",
-            "Named characters speak across each epoch and bind the Memory Thread arc.",
-            "Move: Left/Right | Jump: Up | Slash: B | Shot: Space | Dash: A",
+            "Each epoch has five long sublevels; each lane runs 1-2 minutes before shift.",
+            "Gain XP from kills and relics to level up and unlock enhancement picks.",
+            "Move: W/A/S/D (W jump, S duck)  //  Actions: Arrow keys",
+            "Arrow Left slash (deflect), Arrow Up shot, Arrow Right dash, Arrow Down shield",
           ],
           "Press Enter to Start // F Fullscreen",
         );
+      } else if (game.mode === "upgrade") {
+        drawUpgradeOverlay(ctx, game);
       } else if (game.mode === "stageClear") {
         const chronicleLine = game.chronicle[game.chronicle.length - 1] ?? "The memory thread remains active.";
         drawOverlay(
@@ -2424,6 +3013,28 @@ export function CanonGameCanvas() {
       keysRef.current.add(code);
 
       const game = gameRef.current;
+      if (game.mode === "upgrade") {
+        const pickFromCode =
+          code === "Digit1" || code === "Numpad1"
+            ? 0
+            : code === "Digit2" || code === "Numpad2"
+              ? 1
+              : code === "Digit3" || code === "Numpad3"
+                ? 2
+                : code === CONTROL_CODES.start
+                  ? 0
+                  : -1;
+        if (pickFromCode >= 0) {
+          const option = game.pendingUpgrades[pickFromCode];
+          if (option) {
+            applyUpgrade(game, option);
+            game.pendingUpgrades = [];
+            game.mode = "playing";
+            maybeOpenUpgradeMenu(game);
+          }
+        }
+        return;
+      }
       if (code === CONTROL_CODES.start && game.mode === "menu") {
         startGame();
       }
@@ -2506,7 +3117,7 @@ export function CanonGameCanvas() {
       ref={canvasRef}
       width={WIDTH}
       height={HEIGHT}
-      className="w-full h-auto border border-[#2D4A3E]/40 bg-[#081220] shadow-[0_22px_90px_rgba(0,0,0,0.55)]"
+      className="w-full h-auto border border-[#EFE4CF]/40 bg-[#070B14] shadow-[0_22px_90px_rgba(0,0,0,0.55)]"
       style={{ imageRendering: "pixelated" }}
       aria-label="Canon Blade myth-action game canvas"
     />

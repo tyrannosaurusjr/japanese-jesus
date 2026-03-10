@@ -27,6 +27,7 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 export default function ConduitPage() {
+  const shingoVillageMapUrl = "https://www.google.com/maps/search/?api=1&query=40.654194,141.138889";
   const conduitStructuredData = {
     "@context": "https://schema.org",
     "@graph": [
@@ -81,9 +82,8 @@ export default function ConduitPage() {
         <p className="label text-[#D6B56E] mb-6">Conduit</p>
         <h1
           className="text-5xl md:text-7xl text-[#EFE4CF] leading-none mb-8"
-          style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
         >
-          Shingo is small.<br />The seam is not.
+          Shingo Village is small.<br />The Japanese Jesus seam is not.
         </h1>
         <p className="label text-[#D6B56E]/85 mb-8">Shingo Village, Aomori Prefecture</p>
         <div className="w-16 h-px bg-[#C44A32]" />
@@ -114,13 +114,11 @@ export default function ConduitPage() {
             <p className="label text-[#D6B56E] mb-4">Why Visit</p>
             <h2
               className="text-3xl md:text-4xl text-[#EFE4CF] mb-5 leading-tight"
-              style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
             >
-              The legend is the hook.<br />The landscape is the payoff.
+              The Japanese Jesus legend is the hook.<br />Shingo Village is the payoff.
             </h2>
             <p
               className="text-[#EFE4CF]/65 text-base leading-relaxed"
-              style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
             >
               Even if you don&apos;t buy the legend for a second, Shingo offers something useful to
               an actual traveler: a strange local story, a recognizable place tied to that story,
@@ -138,7 +136,6 @@ export default function ConduitPage() {
                 <p
                   key={item}
                   className="text-[#EFE4CF]/62 text-sm leading-relaxed"
-                  style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
                 >
                   {item}
                 </p>
@@ -163,8 +160,7 @@ export default function ConduitPage() {
                 <div>
                   <p className="label text-[#EFE4CF]/40 mb-1">Primary Node · The Shingo Conduit</p>
                   <p
-                    className="text-2xl md:text-3xl text-[#C44A32] font-mono"
-                    style={{ fontFamily: "monospace", letterSpacing: "0.05em" }}
+                    className="font-mono tracking-[0.05em] text-2xl md:text-3xl text-[#C44A32]"
                   >
                     40.65419° N, 141.13889° E
                   </p>
@@ -175,13 +171,11 @@ export default function ConduitPage() {
               <p className="label text-[#D6B56E] mb-3">Population &amp; Scale</p>
               <p
                 className="text-[#EFE4CF] text-lg mb-4"
-                style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
               >
                 Official public sources place Shingo at just under 2,000 residents.
               </p>
               <p
                 className="text-[#EFE4CF]/62 text-sm leading-relaxed"
-                style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
               >
                 In civic terms, that is a small rural population. In canon terms, it reads like a
                 boundary condition: the node appears to hold below the threshold where anonymity
@@ -204,12 +198,12 @@ export default function ConduitPage() {
             <div className="flex flex-wrap items-center justify-between gap-3 mt-3 px-1">
               <p className="label text-[#EFE4CF]/35">Live map view · 40.65419° N, 141.13889° E</p>
               <a
-                href="https://maps.app.goo.gl/o64urkHXE2Rhp7Lu9"
+                href={shingoVillageMapUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="label inline-block border border-[#C44A32]/50 text-[#C44A32] px-4 py-2 hover:bg-[#C44A32] hover:text-[#EFE4CF] transition-all duration-300"
               >
-                Open In Google Maps ↗
+                Open Shingo Village in Google Maps ↗
               </a>
             </div>
           </div>
@@ -244,7 +238,6 @@ export default function ConduitPage() {
                   <p className="label text-[#D6B56E] mb-2">{note.label}</p>
                   <h2
                     className="text-xl md:text-2xl text-[#EFE4CF] mb-3"
-                    style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
                   >
                     {note.title}
                   </h2>
@@ -253,13 +246,11 @@ export default function ConduitPage() {
                 <div className="p-6">
                   <p
                     className="text-[#EFE4CF]/65 text-sm leading-relaxed mb-4"
-                    style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
                   >
                     {note.body}
                   </p>
                   <p
                     className="text-[#EFE4CF]/50 text-sm leading-relaxed"
-                    style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
                   >
                     {note.sections[0]?.body[0]}
                   </p>
@@ -292,7 +283,6 @@ export default function ConduitPage() {
         <blockquote className="border-l-2 border-[#C44A32] pl-6">
           <p
             className="text-xl md:text-3xl text-[#EFE4CF] leading-relaxed"
-            style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
           >
             The village stays ordinary on purpose. The conduit does not need spectacle to stay
             active.

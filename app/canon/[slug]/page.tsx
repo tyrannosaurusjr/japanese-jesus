@@ -104,29 +104,29 @@ export default async function CanonSpokePage({
   };
 
   return (
-    <main className="min-h-screen bg-[#0D1B2A]">
+    <main className="min-h-screen bg-[#070B14]">
       <Nav />
       <StructuredData id="canon-epoch-structured-data" data={canonicalEpochStructuredData} />
 
       <section className="pt-40 pb-16 px-6 md:px-10 max-w-4xl mx-auto">
         <Link
           href="/canon"
-          className="label text-[#F5F2EB]/40 hover:text-[#F5F2EB] transition-colors duration-300"
+          className="label text-[#EFE4CF]/40 hover:text-[#EFE4CF] transition-colors duration-300"
         >
           Canon
         </Link>
-        <p className="label text-[#E8D44D] mt-6 mb-4">{epoch.step}</p>
+        <p className="label text-[#D6B56E] mt-6 mb-4">{epoch.step}</p>
         <h1
-          className="text-5xl md:text-7xl text-[#F5F2EB] leading-none mb-8"
+          className="text-5xl md:text-7xl text-[#EFE4CF] leading-none mb-8"
           style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
         >
           {epoch.title}
         </h1>
-        <div className="w-16 h-px bg-[#C0392B]" />
+        <div className="w-16 h-px bg-[#C44A32]" />
       </section>
 
       <section className="px-6 md:px-10 pb-16 max-w-4xl mx-auto">
-        <div className="relative aspect-[16/9] overflow-hidden border border-[#2D4A3E]/30">
+        <div className="relative aspect-[16/9] overflow-hidden border border-[#EFE4CF]/30">
           <Image
             src={epoch.image}
             alt={epoch.imageAlt}
@@ -139,13 +139,13 @@ export default async function CanonSpokePage({
 
       <section className="px-6 md:px-10 pb-24 max-w-3xl mx-auto">
         <p
-          className="text-[#F5F2EB]/70 text-lg leading-relaxed mb-8"
+          className="text-[#EFE4CF]/70 text-lg leading-relaxed mb-8"
           style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
         >
           {epoch.summary}
         </p>
         <div
-          className="space-y-6 text-[#F5F2EB]/78 text-base leading-relaxed"
+          className="space-y-6 text-[#EFE4CF]/78 text-base leading-relaxed"
           style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
         >
           {epoch.body.map((paragraph) => (
@@ -160,24 +160,24 @@ export default async function CanonSpokePage({
       </section>
 
       <section className="px-6 md:px-10 pb-24 max-w-4xl mx-auto">
-        <p className="label text-[#E8D44D] mb-6">Series Articles</p>
+        <p className="label text-[#D6B56E] mb-6">Series Articles</p>
         {liveSeries.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-[#2D4A3E]/20">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-[#EFE4CF]/20">
             {liveSeries.map((liveArticle) => (
               <Link
                 key={liveArticle.slug}
                 href={`/canon/${epoch.slug}/${liveArticle.slug}`}
-                className="bg-[#0D1B2A] border border-[#2D4A3E]/30 p-6 hover:border-[#C0392B]/60 transition-colors duration-300"
+                className="bg-[#070B14] border border-[#EFE4CF]/30 p-6 hover:border-[#C44A32]/60 transition-colors duration-300"
               >
-                <p className="label text-[#F5F2EB]/35 mb-2">Live Article</p>
+                <p className="label text-[#EFE4CF]/35 mb-2">Live Article</p>
                 <h2
-                  className="text-xl text-[#F5F2EB] mb-3"
+                  className="text-xl text-[#EFE4CF] mb-3"
                   style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
                 >
                   {liveArticle.title}
                 </h2>
                 <p
-                  className="text-[#F5F2EB]/62 text-sm leading-relaxed"
+                  className="text-[#EFE4CF]/62 text-sm leading-relaxed"
                   style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
                 >
                   {liveArticle.dek}
@@ -186,9 +186,9 @@ export default async function CanonSpokePage({
             ))}
           </div>
         ) : (
-          <div className="bg-[#0D1B2A] border border-[#2D4A3E]/30 p-6">
+          <div className="bg-[#070B14] border border-[#EFE4CF]/30 p-6">
             <p
-              className="text-[#F5F2EB]/62 text-sm leading-relaxed"
+              className="text-[#EFE4CF]/62 text-sm leading-relaxed"
               style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
             >
               No public long-form entries are live for this epoch yet.

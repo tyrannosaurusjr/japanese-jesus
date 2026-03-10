@@ -229,7 +229,7 @@ export default async function CanonEntryPage({
   };
 
   return (
-    <main className="min-h-screen bg-[#0D1B2A]">
+    <main className="min-h-screen bg-[#070B14]">
       <Nav />
       <StructuredData id="canon-article-structured-data" data={articleStructuredData} />
       <StructuredData id="canon-article-breadcrumb-structured-data" data={articleBreadcrumbStructuredData} />
@@ -237,19 +237,19 @@ export default async function CanonEntryPage({
       <section className="pt-40 pb-16 px-6 md:px-10 max-w-5xl mx-auto">
         <Link
           href={`/canon/${epoch.slug}`}
-          className="label text-[#F5F2EB]/40 hover:text-[#F5F2EB] transition-colors duration-300"
+          className="label text-[#EFE4CF]/40 hover:text-[#EFE4CF] transition-colors duration-300"
         >
           {epoch.title}
         </Link>
-        <p className="label text-[#E8D44D] mt-6 mb-4">{epoch.step}</p>
+        <p className="label text-[#D6B56E] mt-6 mb-4">{epoch.step}</p>
         <h1
-          className="text-5xl md:text-7xl text-[#F5F2EB] leading-none mb-6"
+          className="text-5xl md:text-7xl text-[#EFE4CF] leading-none mb-6"
           style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
         >
           {article.title}
         </h1>
         <p
-          className="text-[#F5F2EB]/70 text-lg leading-relaxed max-w-3xl"
+          className="text-[#EFE4CF]/70 text-lg leading-relaxed max-w-3xl"
           style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
         >
           {article.dek}
@@ -257,7 +257,7 @@ export default async function CanonEntryPage({
       </section>
 
       <section className="px-6 md:px-10 pb-16 max-w-5xl mx-auto">
-        <div className="relative aspect-[16/9] overflow-hidden border border-[#2D4A3E]/30">
+        <div className="relative aspect-[16/9] overflow-hidden border border-[#EFE4CF]/30">
           <Image
             src={epoch.image}
             alt={epoch.imageAlt}
@@ -270,7 +270,7 @@ export default async function CanonEntryPage({
 
       <article className="px-6 md:px-10 pb-24 max-w-3xl mx-auto">
         <div
-          className="space-y-6 text-[#F5F2EB]/78 text-base leading-relaxed"
+          className="space-y-6 text-[#EFE4CF]/78 text-base leading-relaxed"
           style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
         >
           {article.body.map((paragraph) => (
@@ -280,53 +280,53 @@ export default async function CanonEntryPage({
       </article>
 
       <section className="px-6 md:px-10 pb-24 max-w-3xl mx-auto">
-        <p className="label text-[#E8D44D] mb-6">Outbound References</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-[#2D4A3E]/20">
+        <p className="label text-[#D6B56E] mb-6">Outbound References</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-[#EFE4CF]/20">
           {references.map((reference) => (
             <a
               key={reference.href}
               href={reference.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-[#0D1B2A] border border-[#2D4A3E]/30 p-6 hover:border-[#C0392B]/60 transition-colors duration-300"
+              className="bg-[#070B14] border border-[#EFE4CF]/30 p-6 hover:border-[#C44A32]/60 transition-colors duration-300"
             >
-              <p className="label text-[#E8D44D] mb-2">{reference.label}</p>
+              <p className="label text-[#D6B56E] mb-2">{reference.label}</p>
               <p
-                className="text-[#F5F2EB]/68 text-sm leading-relaxed mb-4"
+                className="text-[#EFE4CF]/68 text-sm leading-relaxed mb-4"
                 style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
               >
                 {reference.note}
               </p>
-              <p className="label text-[#F5F2EB]/40">Open Source</p>
+              <p className="label text-[#EFE4CF]/40">Open Source</p>
             </a>
           ))}
         </div>
       </section>
 
       <section className="px-6 md:px-10 pb-24 max-w-5xl mx-auto">
-        <p className="label text-[#E8D44D] mb-6">Series Navigation</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-[#2D4A3E]/20">
+        <p className="label text-[#D6B56E] mb-6">Series Navigation</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-[#EFE4CF]/20">
           {series.map((item) => (
             <Link
               key={item.slug}
               href={`/canon/${epoch.slug}/${item.slug}`}
-              className={`bg-[#0D1B2A] border p-6 transition-colors duration-300 ${
+              className={`bg-[#070B14] border p-6 transition-colors duration-300 ${
                 item.slug === article.slug
-                  ? "border-[#C0392B]/70"
-                  : "border-[#2D4A3E]/30 hover:border-[#C0392B]/60"
+                  ? "border-[#C44A32]/70"
+                  : "border-[#EFE4CF]/30 hover:border-[#C44A32]/60"
               }`}
             >
-              <p className="label text-[#F5F2EB]/35 mb-2">
+              <p className="label text-[#EFE4CF]/35 mb-2">
                 {item.slug === article.slug ? "Current Article" : "Series Article"}
               </p>
               <h2
-                className="text-xl text-[#F5F2EB] mb-3"
+                className="text-xl text-[#EFE4CF] mb-3"
                 style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 900 }}
               >
                 {item.title}
               </h2>
               <p
-                className="text-[#F5F2EB]/62 text-sm leading-relaxed"
+                className="text-[#EFE4CF]/62 text-sm leading-relaxed"
                 style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
               >
                 {item.dek}

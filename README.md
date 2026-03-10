@@ -115,6 +115,27 @@ Poster-specific route notes for `POST /api/printful/japanese-jesus-poster`:
 - `PRINTFUL_POSTER_PROOF_PATH` is a smaller preview image generated from the same crop so you can inspect composition quickly.
 - Copy [.env.local.example](/Users/mkultraman/Desktop/Japanese%20Jesus/.env.local.example) to `.env.local`, then run `npm run export:printful-poster` to generate both the full export and proof image, and `npm run check:printful-poster` before calling the poster API route.
 
+Optional environment variables for Impact affiliate conversion tracking (shop checkout):
+
+- `IMPACT_CONVERSIONS_ENABLED` (`true` by default)
+- `IMPACT_ACCOUNT_SID`
+- `IMPACT_AUTH_TOKEN`
+- `IMPACT_CAMPAIGN_ID`
+- `IMPACT_ACTION_TRACKER_ID`
+- `IMPACT_EVENT_TYPE_CODE` (optional alternative to `IMPACT_ACTION_TRACKER_ID`)
+
+Behavior notes:
+
+- The client captures affiliate click IDs from URL params (`irclickid`, `im_ref`, `impact_click_id`, `clickid`) into a first-party cookie.
+- Hidden ARG routes (`/the-gate`, `/axis`, `/thin-place`) are excluded from this capture behavior.
+
+Optional environment variable for Google Analytics (GA4):
+
+- `NEXT_PUBLIC_GA_MEASUREMENT_ID` (example: `G-XXXXXXXXXX`)
+
+When set, the site loads GA4 tracking via `gtag.js` and sends route-level page view events on client navigation.
+- On paid shop webhook events, the server sends a conversion to Impact when both click ID and Impact env config are present.
+
 ## Assets
 
 Several committed visuals are placeholder SVGs. The intended production experience also references audio and image assets that are not currently present in `public/`.

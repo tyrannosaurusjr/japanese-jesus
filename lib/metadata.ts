@@ -5,11 +5,12 @@ const siteUrl = rawSiteUrl.endsWith("/") ? rawSiteUrl.slice(0, -1) : rawSiteUrl;
 export const SITE_URL = siteUrl;
 
 const SITE_NAME = "Japanese Jesus";
-const DEFAULT_IMAGE = "/images/og/home-sigil.jpg";
-const DEFAULT_IMAGE_ALT = "The Japanese Jesus sigil centered in a gray field";
-const DEFAULT_IMAGE_WIDTH = 1200;
-const DEFAULT_IMAGE_HEIGHT = 630;
+const DEFAULT_IMAGE = "/images/home-hero-original.jpg";
+const DEFAULT_IMAGE_ALT = "The Japanese Jesus portal in Shingo beneath a charged sky";
+const DEFAULT_IMAGE_WIDTH = 2656;
+const DEFAULT_IMAGE_HEIGHT = 1492;
 const OG_IMAGE_VERSION = "20260309";
+const ENFORCE_SITEWIDE_PREVIEW_IMAGE = true;
 
 interface BuildPageMetadataInput {
   title: string;
@@ -73,31 +74,35 @@ export function buildPageMetadata({
   path,
   canonical,
   keywords,
-  image = DEFAULT_IMAGE,
+  image,
   imageWidth,
   imageHeight,
-  imageAlt = DEFAULT_IMAGE_ALT,
+  imageAlt,
   robots,
 }: BuildPageMetadataInput): Metadata {
   const cleanDescription = toDescription(description);
   const normalizedPath = normalizePath(path);
   const canonicalPath = normalizePath(canonical ?? normalizedPath);
-  const imageUrl = toAbsoluteUrl(withOgImageVersion(image));
-  const resolvedImageWidth =
-    imageWidth ?? (image === DEFAULT_IMAGE ? DEFAULT_IMAGE_WIDTH : undefined);
-  const resolvedImageHeight =
-    imageHeight ?? (image === DEFAULT_IMAGE ? DEFAULT_IMAGE_HEIGHT : undefined);
+  const resolvedImagePath = ENFORCE_SITEWIDE_PREVIEW_IMAGE ? DEFAULT_IMAGE : (image ?? DEFAULT_IMAGE);
+  const resolvedImageAlt = ENFORCE_SITEWIDE_PREVIEW_IMAGE ? DEFAULT_IMAGE_ALT : (imageAlt ?? DEFAULT_IMAGE_ALT);
+  const imageUrl = toAbsoluteUrl(withOgImageVersion(resolvedImagePath));
+  const resolvedImageWidth = ENFORCE_SITEWIDE_PREVIEW_IMAGE
+    ? DEFAULT_IMAGE_WIDTH
+    : (imageWidth ?? (resolvedImagePath === DEFAULT_IMAGE ? DEFAULT_IMAGE_WIDTH : undefined));
+  const resolvedImageHeight = ENFORCE_SITEWIDE_PREVIEW_IMAGE
+    ? DEFAULT_IMAGE_HEIGHT
+    : (imageHeight ?? (resolvedImagePath === DEFAULT_IMAGE ? DEFAULT_IMAGE_HEIGHT : undefined));
 
   const openGraphImage = {
     url: imageUrl,
-    alt: imageAlt,
+    alt: resolvedImageAlt,
     ...(resolvedImageWidth ? { width: resolvedImageWidth } : {}),
     ...(resolvedImageHeight ? { height: resolvedImageHeight } : {}),
   };
 
   const twitterImage = {
     url: imageUrl,
-    alt: imageAlt,
+    alt: resolvedImageAlt,
   };
 
   return {
